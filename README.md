@@ -1,16 +1,6 @@
 # About
 
-It is a GUI client for mysql databases. It use only GTK+.
-You don't need GNOME to use it.
-
-With gmysqlcc, you can :
-
- * manage your server list
- * Execute all SQL queries you want
- * dump queries, tables, databases and servers ...
- * ... Look to the features in TODO file
-
-To simplify, do do all what you want on your mysql database server.
+It is a simple editor in GTK+ with GtkSourceView.
 
 # Installation
 
@@ -18,18 +8,18 @@ Installation of gmysqlcc from source
 
 ## Download from site
 
-To download gmysqlcc from site, go to download section.
-https://github.com/thepozer/gmysqlcc
+To download simpleedit from site, go to download section.
+https://github.com/thepozer/simpleedit
 
 ## Download from Git
 
-To download gmysqlcc via git, type these commands in a terminal :
+To download simpleedit via git, type these commands in a terminal :
 
-    $ git clone https://github.com/thepozer/gmysqlcc.git
+    $ git clone https://github.com/thepozer/simpleedit.git
 
 ## Compile and Install 
 
-If you have got source from git, you need to do some steps before in gmysqlcc directory :
+If you have got source from git, you need to do some steps before in simpleedit directory :
 
     $ autoreconf -i
 
@@ -42,7 +32,7 @@ Now it's generics configure's steps :
     $ ./configure
     $ make
 
-To install gmysqlcc, you need to be root. Just type : 
+To install simpleedit, you need to be root. Just type : 
 
     $ make install
 
