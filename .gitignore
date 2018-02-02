@@ -1,6 +1,7 @@
 # http://www.gnu.org/software/automake
 
 Makefile.in
+Makefile
 /ar-lib
 /mdate-sh
 /py-compile
@@ -9,6 +10,7 @@ Makefile.in
 
 # http://www.gnu.org/software/autoconf
 
+.deps
 /m4
 /autom4te.cache
 /autoscan.log
@@ -16,7 +18,8 @@ Makefile.in
 /aclocal.m4
 /compile
 /config.guess
-/config.h.in
+/config.log
+/config.status
 /config.sub
 /configure
 /configure.scan
@@ -32,3 +35,8 @@ Makefile.in
 # http://www.gnu.org/software/texinfo
 
 /texinfo.tex
+
+# Compile
+
+*.o
+simplEdit
