@@ -1,6 +1,8 @@
 # About
 
-It is a simple editor in GTK+ with GtkSourceView.
+Another small/simple editor based on GtkSourceView.
+
+It try to make accessible every features of GtkSourceView.
 
 # Installation
 
@@ -8,18 +10,18 @@ Installation of gmysqlcc from source
 
 ## Download from site
 
-To download simpleedit from site, go to download section.
-https://github.com/thepozer/simpleedit
+To download simplEdit from site, go to download section.
+https://github.com/thepozer/simplEdit
 
 ## Download from Git
 
-To download simpleedit via git, type these commands in a terminal :
+To download simplEdit via git, type these commands in a terminal :
 
-    $ git clone https://github.com/thepozer/simpleedit.git
+    $ git clone https://github.com/thepozer/simplEdit.git
 
 ## Compile and Install 
 
-If you have got source from git, you need to do some steps before in simpleedit directory :
+If you have got source from git, you need to do some steps before in simplEdit directory :
 
     $ autoreconf -i
 
