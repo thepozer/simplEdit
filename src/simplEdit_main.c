@@ -4,9 +4,9 @@
 #include "simplEdit_window.h"
 
 GtkApplication * GpApp = NULL;
-GtkBuilder * GpBuilder = NULL;
 
 int main (int argc, char *argv []) {
+	GtkBuilder * pBuilder = NULL;
 	GError * pErr = NULL;
 	gchar * pcFilename = NULL;
 	guint iRet = 0;
@@ -14,10 +14,10 @@ int main (int argc, char *argv []) {
 	gtk_init(&argc, &argv);
 	GpApp = gtk_application_new("net.thepozer.simpledit", 0);
 	
-	GpBuilder = gtk_builder_new();
+	pBuilder = gtk_builder_new();
 	
 	pcFilename =  g_build_filename(".", "simplEdit.glade", NULL);
-	iRet = gtk_builder_add_from_file(GpBuilder, pcFilename, &pErr);
+	iRet = gtk_builder_add_from_file(pBuilder, pcFilename, &pErr);
 	g_free(pcFilename);
 	if (pErr) {
 		gint iCode = pErr->code;
@@ -26,7 +26,7 @@ int main (int argc, char *argv []) {
 		return iCode;
 	}
 
-	simplEdit_window_init(GpBuilder);
+	simplEdit_window_init(pBuilder);
 	
 	gtk_main();
 

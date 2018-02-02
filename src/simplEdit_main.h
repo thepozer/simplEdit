@@ -6,15 +6,9 @@
 
 #include <gtksourceview/gtksource.h>
 
-typedef struct {
-	GtkBuilder *builder;
-	gpointer user_data;
-} SGlobalData;
-
 #ifndef __SIMPLEDIT_MAIN_PART__
 
 extern GtkApplication * gpApp;
-extern GtkBuilder * gpBuilder;
 
 #endif /* __SIMPLEDIT_MAIN_PART__ */
 
