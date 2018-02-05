@@ -26,16 +26,30 @@ void simplEdit_window_init(GtkBuilder * pBuilder) {
 
 }
 
+void smpldt_clbk_menu_file (GtkMenuItem *menuitem, gpointer user_data) {
+	GtkWidget * pMenuItem = NULL;
+        gboolean bModified = FALSE;
+        
+        bModified = gtk_text_buffer_get_modified(GTK_TEXT_BUFFER(gblData.pTxtBuff));
+        
+	pMenuItem = GTK_WIDGET(gtk_builder_get_object(gblData.pBuilder, "menuFileSave"));
+	gtk_widget_set_sensitive(pMenuItem, bModified && (gblData.pcFilename != NULL));
+
+	pMenuItem = GTK_WIDGET(gtk_builder_get_object(gblData.pBuilder, "menuFileSaveAs"));
+	gtk_widget_set_sensitive(pMenuItem, bModified);
+}
+
 void smpldt_clbk_menu_file_new (GtkMenuItem *menuitem, gpointer user_data) {
         gtk_window_set_title(GTK_WINDOW(gblData.pWndEdit), "simplEdit");
 	gtk_text_buffer_set_text(gblData.pTxtBuff, "", 0);
+        gtk_text_buffer_set_modified(gblData.pTxtBuff, FALSE);
         g_free(gblData.pcFilename);
         g_free(gblData.pcFiletitle);
         gblData.pcFilename = NULL;
         gblData.pcFiletitle = NULL;
 }
 
-void smpldt_clbk_menu_file_open (GtkMenuItem *menuitem, gpointer user_data) {
+void smpldt_clbk_menu_file_open (GtkMenuItem *menuitem, gpointer user_data) { 
         GtkWidget * pDlgFile;
         gint iResult;
 
@@ -73,7 +87,9 @@ void smpldt_clbk_menu_file_open (GtkMenuItem *menuitem, gpointer user_data) {
                                 }
 //g_print("smpldt_clbk_menu_file_open - pcContent : \n%s\n", pcContent);
                                 
-                                gtk_text_buffer_set_text(gblData.pTxtBuff, pcContent, -1);                                
+                                gtk_text_buffer_set_text(gblData.pTxtBuff, pcContent, -1);
+                                gtk_text_buffer_set_modified(gblData.pTxtBuff, FALSE);
+
                                 g_free(pcContent);
                                 
                                 pcTitle = g_strdup_printf("simplEdit - %s", gblData.pcFiletitle);
@@ -87,9 +103,80 @@ void smpldt_clbk_menu_file_open (GtkMenuItem *menuitem, gpointer user_data) {
 }
 
 void smpldt_clbk_menu_file_save (GtkMenuItem *menuitem, gpointer user_data) {
+        GtkTextIter sIterStart, sIterEnd;
+        GFile * pFile = g_file_new_for_path(gblData.pcFilename);
+        GString *pStrContent = NULL;
+        GError * pErr = NULL;
+        gchar * pcContent = NULL;
+        gsize sContent;
+        
+        gtk_text_buffer_get_start_iter(gblData.pTxtBuff, &sIterStart);
+        gtk_text_buffer_get_end_iter(gblData.pTxtBuff, &sIterEnd);
+        pcContent = gtk_text_buffer_get_text(gblData.pTxtBuff, &sIterStart, &sIterEnd, TRUE);
+        pStrContent = g_string_new(pcContent);
+        g_free(pcContent);
+        
+g_print("smpldt_clbk_menu_file_save - pcFilename : '%s'\n", gblData.pcFilename);
+g_print("smpldt_clbk_menu_file_save - pcContent : \n%s\n", pStrContent->str);
+        if (!g_file_replace_contents(pFile, pStrContent->str, pStrContent->len, NULL, FALSE, G_FILE_CREATE_NONE, NULL, NULL, &pErr)) {
+                if (pErr) {
+                        g_printerr("smpldt_clbk_menu_file_save - Error (%i) : '%s'\n", pErr->code, pErr->message);
+                        g_error_free (pErr);
+                }
+        }
+        
+        g_object_unref(pFile);
 }
 
 void smpldt_clbk_menu_file_saveas (GtkMenuItem *menuitem, gpointer user_data) {
+        GtkWidget * pDlgFile;
+        gint iResult;
+
+        pDlgFile = gtk_file_chooser_dialog_new (
+                "Open File", GTK_WINDOW(gblData.pWndEdit),
+                GTK_FILE_CHOOSER_ACTION_OPEN,
+                "_Cancel", GTK_RESPONSE_CANCEL,
+                "_Open", GTK_RESPONSE_ACCEPT,
+                NULL);
+
+        iResult = gtk_dialog_run (GTK_DIALOG (pDlgFile));
+//g_print("smpldt_clbk_menu_file_open - iResult : %i\n", iResult);
+        if (iResult == GTK_RESPONSE_ACCEPT) {
+                smpldt_clbk_menu_file_new(menuitem, user_data);
+                
+                GtkFileChooser * pChooser = GTK_FILE_CHOOSER (pDlgFile);
+                gblData.pcFilename = gtk_file_chooser_get_filename (pChooser);
+//g_print("smpldt_clbk_menu_file_open - pcFilename : '%s'\n", gblData.pcFilename);
+                
+                GFile * pFile = g_file_new_for_path(gblData.pcFilename);
+                GError * pErr = NULL;
+                gchar * pcContent = NULL;
+                gchar * pcTitle = NULL;
+                
+                if (pFile) {
+                        gblData.pcFiletitle = g_file_get_basename(pFile);
+//g_print("smpldt_clbk_menu_file_open - pcFiletitle : '%s'\n", gblData.pcFiletitle);
+                        if (g_file_load_contents (pFile, NULL, &pcContent, NULL, NULL, &pErr)) {
+//g_print("smpldt_clbk_menu_file_open - pcContent : \n%s\n", pcContent);
+                                
+                                gtk_text_buffer_set_text(gblData.pTxtBuff, pcContent, -1);                                
+                                g_free(pcContent);
+                                
+                                pcTitle = g_strdup_printf("simplEdit - %s", gblData.pcFiletitle);
+                                gtk_window_set_title(GTK_WINDOW(gblData.pWndEdit), pcTitle);
+                                g_free(pcTitle);
+                        } else if (pErr) {
+                                g_printerr("smpldt_clbk_menu_file_open - Error (%i) : '%s'\n", pErr->code, pErr->message);
+                                g_error_free (pErr);
+                                g_free(gblData.pcFilename);
+                                gblData.pcFilename = NULL;
+                                return;
+                        }
+                        g_object_unref(pFile);
+                }
+        }
+
+        gtk_widget_destroy (pDlgFile);
 }
 
 void smpldt_clbk_menu_file_quit (GtkMenuItem *menuitem, gpointer user_data) {
