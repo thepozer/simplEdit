@@ -1,6 +1,7 @@
 #include "simplEdit_content.h"
 
 void simplEdit_content_load_cb_async (GObject *source_object, GAsyncResult *res, gpointer user_data);
+void simplEdit_content_save_cb_async (GObject *source_object, GAsyncResult *res, gpointer user_data);
 
 gboolean simplEdit_content_init(SEditorData * pEditData, GtkBuilder * pBuilder) {
 	pEditData->pBuilder = pBuilder;
@@ -88,6 +89,24 @@ gboolean simplEdit_content_load(SEditorData * pEditData, const gchar * pcFilenam
 	return TRUE;
 }
 
+void simplEdit_content_save_cb_async (GObject *source_object, GAsyncResult *res, gpointer user_data) {
+	SEditorData * pEditData = (SEditorData *)user_data;
+	GtkSourceFileSaver * pSrcFileSaver = GTK_SOURCE_FILE_SAVER(source_object);
+	GError * pErr = NULL;
+	gboolean success = FALSE;
+
+	success = gtk_source_file_saver_save_finish(pSrcFileSaver, res, &pErr);
+
+	if (!success) {
+		GtkWidget * pDlgMsg = gtk_message_dialog_new(GTK_WINDOW(pEditData->pWndEdit), GTK_DIALOG_DESTROY_WITH_PARENT,
+										 GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
+										 "Error writing '%s' : (%i) %s",
+										 pEditData->pcFilename, pErr->code, pErr->message);
+		gtk_dialog_run (GTK_DIALOG (pDlgMsg));
+		gtk_widget_destroy (pDlgMsg);
+	}
+}
+
 gboolean simplEdit_content_save(SEditorData * pEditData, const gchar * pcFilename) {
 	GtkTextIter sIterStart, sIterEnd;
 	GFile * pFile = NULL;
@@ -98,35 +117,23 @@ gboolean simplEdit_content_save(SEditorData * pEditData, const gchar * pcFilenam
 
 	if (pcFilename) {
 		pFile = g_file_new_for_path(pcFilename);
+		if (!pFile) {
+			return FALSE;
+		}
+		
+		gtk_source_file_set_location(pEditData->pSrcFile, pFile);
 		
 		g_free(pEditData->pcFilename);
 		pEditData->pcFilename = g_strdup(pcFilename);
 		
 		g_free(pEditData->pcFiletitle);
 		pEditData->pcFiletitle = g_file_get_basename(pFile);
-	} else {
-		pFile = g_file_new_for_path(pEditData->pcFilename);
 	}
 	
-	if (pFile) {
-		gtk_text_buffer_get_start_iter(pEditData->pTxtBuff, &sIterStart);
-		gtk_text_buffer_get_end_iter(pEditData->pTxtBuff, &sIterEnd);
-		pcContent = gtk_text_buffer_get_text(pEditData->pTxtBuff, &sIterStart, &sIterEnd, TRUE);
-		sContent = strlen(pcContent);
-
-//g_print("simplEdit_content_save - pcContent : \n%s\n", pcContent);
-		if (!g_file_replace_contents(pFile, pcContent, sContent, NULL, FALSE, G_FILE_CREATE_NONE, NULL, NULL, &pErr)) {
-			if (pErr) {
-				g_printerr("simplEdit_content_save - Error (%i) : '%s'\n", pErr->code, pErr->message);
-				g_error_free (pErr);
-			} else {
-				bReturnValue = TRUE;
-			}
-		}
-
-		g_free(pcContent);
-		g_object_unref(pFile);
-	}
+	GtkSourceFileSaver * pSrcFileSaver = NULL;
+	pSrcFileSaver = gtk_source_file_saver_new(GTK_SOURCE_BUFFER(pEditData->pTxtBuff), pEditData->pSrcFile);
 	
-	return bReturnValue;
+	gtk_source_file_saver_save_async(pSrcFileSaver, G_PRIORITY_DEFAULT, NULL, NULL, NULL, NULL, simplEdit_content_save_cb_async, (gpointer)pEditData);
+
+	return TRUE;
 }
