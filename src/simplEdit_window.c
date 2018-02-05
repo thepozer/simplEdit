@@ -3,21 +3,18 @@
 
 GtkWidget * pWndEdit = NULL;
 
-SEditorData gblData = {NULL, NULL, NULL, NULL, NULL, NULL, TRUE} ;
+SEditorData gblData = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, TRUE} ;
 
 void simplEdit_window_updateTitle(SEditorData * pEditData);
 
 void simplEdit_window_init(GtkBuilder * pBuilder) {
-	gblData.pBuilder = pBuilder;
-	
-	gblData.pWndEdit = GTK_WIDGET(gtk_builder_get_object(gblData.pBuilder, "wndSimplEdit"));
-	gblData.pSrcView = GTK_SOURCE_VIEW(gtk_builder_get_object(gblData.pBuilder, "srcView"));
-	gblData.pTxtBuff = gtk_text_view_get_buffer(GTK_TEXT_VIEW(gblData.pSrcView));
+	simplEdit_content_init(&gblData, pBuilder);
 	
 	gtk_builder_connect_signals(gblData.pBuilder, &gblData);
 
 	gtk_widget_show_all(gblData.pWndEdit);
-
+	
+	simplEdit_window_updateTitle(&gblData);
 }
 
 void simplEdit_window_updateTitle(SEditorData * pEditData) {
