@@ -187,7 +187,7 @@ void smpldt_clbk_menu_search_replace (GtkMenuItem *menuitem, gpointer user_data)
 
 void smpldt_clbk_menu_about (GtkMenuItem *menuitem, gpointer user_data) {
 	const gchar * pcAuthors[] = {
-		"Didier prolhac <dev@thepozer.net>",
+		PACKAGE_BUGREPORT,
 		NULL
 	};
 	
@@ -197,8 +197,8 @@ void smpldt_clbk_menu_about (GtkMenuItem *menuitem, gpointer user_data) {
 		"copyright", "(c) 2018 Didier Prolhac",
 		"license", "MIT",
 		"license-type", GTK_LICENSE_MIT_X11,
-		"program-name", "simplEdit",
-		"version", "0.0.1",
+		"program-name", PACKAGE_NAME,
+		"version", PACKAGE_VERSION,
 		"website", "https://github.com/thepozer/simplEdit",
 		"website-label", "github simplEdit",
 		NULL);
