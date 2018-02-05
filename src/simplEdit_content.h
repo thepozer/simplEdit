@@ -11,11 +11,13 @@ typedef struct {
 	GtkWidget     * pWndEdit;
 	GtkSourceView * pSrcView;
 	GtkTextBuffer * pTxtBuff;
+	GtkSourceFile * pSrcFile;
 	gchar * pcFilename;
 	gchar * pcFiletitle;
 	gboolean bWritable;
 } SEditorData;
 
+gboolean simplEdit_content_init(SEditorData * pEditData, GtkBuilder * pBuilder);
 gboolean simplEdit_content_reset(SEditorData * pEditData);
 gboolean simplEdit_content_load(SEditorData * pEditData, const gchar * pcFilename);
 gboolean simplEdit_content_save(SEditorData * pEditData, const gchar * pcFilename);

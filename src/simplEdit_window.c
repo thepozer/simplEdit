@@ -3,21 +3,18 @@
 
 GtkWidget * pWndEdit = NULL;
 
-SEditorData gblData = {NULL, NULL, NULL, NULL, NULL, NULL, TRUE} ;
+SEditorData gblData = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, TRUE} ;
 
 void simplEdit_window_updateTitle(SEditorData * pEditData);
 
 void simplEdit_window_init(GtkBuilder * pBuilder) {
-	gblData.pBuilder = pBuilder;
-	
-	gblData.pWndEdit = GTK_WIDGET(gtk_builder_get_object(gblData.pBuilder, "wndSimplEdit"));
-	gblData.pSrcView = GTK_SOURCE_VIEW(gtk_builder_get_object(gblData.pBuilder, "srcView"));
-	gblData.pTxtBuff = gtk_text_view_get_buffer(GTK_TEXT_VIEW(gblData.pSrcView));
+	simplEdit_content_init(&gblData, pBuilder);
 	
 	gtk_builder_connect_signals(gblData.pBuilder, &gblData);
 
 	gtk_widget_show_all(gblData.pWndEdit);
-
+	
+	simplEdit_window_updateTitle(&gblData);
 }
 
 void simplEdit_window_updateTitle(SEditorData * pEditData) {
@@ -190,7 +187,7 @@ void smpldt_clbk_menu_search_replace (GtkMenuItem *menuitem, gpointer user_data)
 
 void smpldt_clbk_menu_about (GtkMenuItem *menuitem, gpointer user_data) {
 	const gchar * pcAuthors[] = {
-		"Didier prolhac <dev@thepozer.net>",
+		PACKAGE_BUGREPORT,
 		NULL
 	};
 	
@@ -200,8 +197,8 @@ void smpldt_clbk_menu_about (GtkMenuItem *menuitem, gpointer user_data) {
 		"copyright", "(c) 2018 Didier Prolhac",
 		"license", "MIT",
 		"license-type", GTK_LICENSE_MIT_X11,
-		"program-name", "simplEdit",
-		"version", "0.0.1",
+		"program-name", PACKAGE_NAME,
+		"version", PACKAGE_VERSION,
 		"website", "https://github.com/thepozer/simplEdit",
 		"website-label", "github simplEdit",
 		NULL);
