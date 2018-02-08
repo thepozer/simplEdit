@@ -9,7 +9,7 @@ void simplEdit_window_updateTitle(SEditorData * pEditData);
 GtkWidget * simplEdit_window_extraWidget(SEditorData * pEditData);
 
 void simplEdit_window_init(GtkBuilder * pBuilder) {
-	simplEdit_content_init(&gblData, pBuilder);
+	simplEdit_content_init_old(&gblData, pBuilder);
 	
 	gtk_builder_connect_signals(gblData.pBuilder, &gblData);
 
@@ -89,8 +89,8 @@ void smpldt_clbk_menu_file_save (GtkMenuItem *menuitem, gpointer user_data) {
 }
 
 GtkWidget * simplEdit_window_extraWidget(SEditorData * pEditData) {
-	
 	GtkWidget * pHBox, * pLabel, * pLstEncoding, * pLstEndOfLines, * pLstCompress;
+	GtkCellRenderer * pCellRndr = NULL;
 	GtkListStore * pLstModelEOL;
 	GtkTreeIter iter, * pIterSelEOL;
 	GtkSourceNewlineType typeEOL;
@@ -116,21 +116,24 @@ GtkWidget * simplEdit_window_extraWidget(SEditorData * pEditData) {
 	typeEOL = gtk_source_file_get_newline_type(pEditData->pSrcFile);
 	pLstModelEOL = gtk_list_store_new (2, G_TYPE_INT, G_TYPE_STRING);
 	gtk_list_store_append (pLstModelEOL, &iter);
-	gtk_list_store_set (pLstModelEOL, &iter, G_TYPE_INT, GTK_SOURCE_NEWLINE_TYPE_LF,   G_TYPE_STRING, "Unix (\\n)", -1);
+	gtk_list_store_set (pLstModelEOL, &iter, 0, GTK_SOURCE_NEWLINE_TYPE_LF,   1, "Unix (\\n)", -1);
 	if (typeEOL == GTK_SOURCE_NEWLINE_TYPE_LF) {
 		pIterSelEOL = gtk_tree_iter_copy(&iter);
 	}
 	gtk_list_store_append (pLstModelEOL, &iter);
-	gtk_list_store_set (pLstModelEOL, &iter, G_TYPE_INT, GTK_SOURCE_NEWLINE_TYPE_CR_LF, G_TYPE_STRING, "Windows (\\r\\n)", -1);
+	gtk_list_store_set (pLstModelEOL, &iter, 0, GTK_SOURCE_NEWLINE_TYPE_CR_LF, 1, "Windows (\\r\\n)", -1);
 	if (typeEOL == GTK_SOURCE_NEWLINE_TYPE_LF) {
 		pIterSelEOL = gtk_tree_iter_copy(&iter);
 	}
 	gtk_list_store_append (pLstModelEOL, &iter);
-	gtk_list_store_set (pLstModelEOL, &iter, G_TYPE_INT, GTK_SOURCE_NEWLINE_TYPE_CR,   G_TYPE_STRING, "Mac (\\r)", -1);
+	gtk_list_store_set (pLstModelEOL, &iter, 0, GTK_SOURCE_NEWLINE_TYPE_CR,   1, "Mac (\\r)", -1);
 	if (typeEOL == GTK_SOURCE_NEWLINE_TYPE_LF) {
 		pIterSelEOL = gtk_tree_iter_copy(&iter);
 	}
 	pLstEndOfLines = gtk_combo_box_new_with_model(GTK_TREE_MODEL(pLstModelEOL));
+ 	pCellRndr = gtk_cell_renderer_text_new ();
+	gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (pLstEndOfLines), pCellRndr, FALSE);
+	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (pLstEndOfLines), pCellRndr, "text", 1, NULL);
 	gtk_combo_box_set_active_iter(GTK_COMBO_BOX(pLstModelEOL), pIterSelEOL);
 	gtk_widget_show(pLstEndOfLines);
 	gtk_box_pack_start(GTK_BOX(pHBox), pLstEndOfLines, TRUE, TRUE, 1);

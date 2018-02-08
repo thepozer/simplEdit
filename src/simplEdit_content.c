@@ -1,9 +1,119 @@
 #include "simplEdit_content.h"
 
+struct _SimpleditContent {
+	GObject parent_instance;
+
+	/* Other members, including private data. */
+	GtkBuilder    * pBuilder;
+	GtkWidget     * pWndEdit;
+	GtkSourceView * pSrcView;
+	GtkTextBuffer * pTxtBuff;
+	GtkSourceFile * pSrcFile;
+	gchar * pcFilename;
+	gchar * pcFiletitle;
+	gboolean bWritable;
+};
+
+G_DEFINE_TYPE (SimpleditContent, simpledit_content, G_TYPE_OBJECT) ;
+
+enum
+{
+  PROP_BUILDER = 1,
+  PROP_WINDOW,
+  PROP_SOURCEVIEW,
+  PROP_TEXTBUFFER,
+  PROP_SOURCEFILE,
+  PROP_FILENAME,
+  PROP_FILETITLE,
+  PROP_WRITABLE,
+  N_PROPERTIES
+};
+
+static GParamSpec * arObjectProperties[N_PROPERTIES] = { NULL, };
+
+static void simpledit_content_set_property (GObject * object, guint property_id, const GValue * value, GParamSpec * pspec) {
+	SimpleditContent *self = SIMPLEDIT_CONTENT(object);
+  
+
+	switch (property_id) {
+		case PROP_BUILDER:
+			self->pBuilder = GTK_BUILDER(g_value_get_object(value));
+			break;
+		default:
+			/* We don't have any other property... */
+			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+			break;
+	}
+}
+
+static void simpledit_content_get_property (GObject * object, guint property_id, GValue * value, GParamSpec *pspec) {
+	SimpleditContent *self = SIMPLEDIT_CONTENT(object);
+
+	switch (property_id) {
+		default:
+			/* We don't have any other property... */
+			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+			break;
+	}
+}
+
+static void simpledit_content_class_init (SimpleditContentClass *klass) {
+	GObjectClass * pObjectClass = G_OBJECT_CLASS (klass);
+
+	pObjectClass->set_property = simpledit_content_set_property;
+	pObjectClass->get_property = simpledit_content_get_property;
+
+	arObjectProperties[PROP_BUILDER]    = g_param_spec_object("builder", "Builder", "Builder of the application.", 
+										GTK_TYPE_BUILDER, G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
+									
+	arObjectProperties[PROP_WINDOW]     = g_param_spec_object("window", "Window", "Window of the application.", 
+										GTK_TYPE_WINDOW, G_PARAM_READABLE);
+
+	arObjectProperties[PROP_SOURCEVIEW] = g_param_spec_object("sourceview", "sourceview", "sourceview of the application.", 
+										GTK_SOURCE_TYPE_VIEW, G_PARAM_READABLE);
+	arObjectProperties[PROP_TEXTBUFFER] = g_param_spec_object("textbuffer", "textbuffer", "textbuffer of the sourceview.", 
+										GTK_TYPE_TEXT_BUFFER, G_PARAM_READABLE);
+	arObjectProperties[PROP_SOURCEFILE] = g_param_spec_object("sourcefile", "sourcefile", "sourcefile of the application.", 
+										GTK_SOURCE_TYPE_FILE, G_PARAM_READABLE);
+	
+	arObjectProperties[PROP_FILENAME]   = g_param_spec_string("filename", "Filename", "File name of the application.", 
+										NULL, G_PARAM_READWRITE);
+	arObjectProperties[PROP_FILETITLE]  = g_param_spec_string("filetitle", "Filetitle", "File Title of the application.", 
+										NULL, G_PARAM_READABLE);
+
+	arObjectProperties[PROP_WRITABLE]   = g_param_spec_boolean ("writable", "Writable", "TextView is writable.", 
+										TRUE, G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+
+	g_object_class_install_properties (pObjectClass, N_PROPERTIES, arObjectProperties);
+	
+}
+
+static void simpledit_content_init (SimpleditContent *self) {
+  /* initialize all public and private members to reasonable default values.
+   * They are all automatically initialized to 0 to begin with. */
+   
+	self->pWndEdit = GTK_WIDGET(gtk_builder_get_object(self->pBuilder, "wndSimplEdit"));
+	self->pSrcView = GTK_SOURCE_VIEW(gtk_builder_get_object(self->pBuilder, "srcView"));
+	self->pTxtBuff = gtk_text_view_get_buffer(GTK_TEXT_VIEW(self->pSrcView));
+
+	self->pSrcFile = gtk_source_file_new();
+	gtk_source_file_set_location(self->pSrcFile, NULL);
+	
+	gtk_text_buffer_set_text(self->pTxtBuff, "", 0);
+	gtk_text_buffer_set_modified(self->pTxtBuff, FALSE);
+
+}
+
+
+SimpleditContent * simpledit_content_new (GtkBuilder * pBuilder) {
+	return SIMPLEDIT_CONTENT(g_object_new (SIMPLEDIT_TYPE_CONTENT, "builder", pBuilder, NULL));
+}
+
+
 void simplEdit_content_load_cb_async (GObject *source_object, GAsyncResult *res, gpointer user_data);
 void simplEdit_content_save_cb_async (GObject *source_object, GAsyncResult *res, gpointer user_data);
 
-gboolean simplEdit_content_init(SEditorData * pEditData, GtkBuilder * pBuilder) {
+gboolean simplEdit_content_init_old(SEditorData * pEditData, GtkBuilder * pBuilder) {
 	pEditData->pBuilder = pBuilder;
 	
 	pEditData->pWndEdit = GTK_WIDGET(gtk_builder_get_object(pEditData->pBuilder, "wndSimplEdit"));
