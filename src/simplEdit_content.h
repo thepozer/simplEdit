@@ -19,7 +19,18 @@ G_DECLARE_FINAL_TYPE (SimpleditContent, simpledit_content, SIMPLEDIT, CONTENT, G
 /*
  * Method definitions.
  */
-//SimpleditContent * simpledit_content_new (void);
+SimpleditContent * simpledit_content_new (GtkBuilder * pBuilder);
+
+gboolean simpledit_content_update_title(SimpleditContent * pEditData);
+GtkWidget * simpledit_content_get_widget(SimpleditContent * pEditData, const gchar * sWidgetId);
+
+gboolean simpledit_content_have_filename(SimpleditContent * pEditData);
+gboolean simpledit_content_is_modified(SimpleditContent * pEditData);
+
+gboolean simpledit_content_reset(SimpleditContent * pEditData);
+gboolean simpledit_content_load(SimpleditContent * pEditData, const gchar * pcFilename);
+gboolean simpledit_content_save(SimpleditContent * pEditData, const gchar * pcFilename);
+
 
 G_END_DECLS
 
@@ -34,10 +45,5 @@ typedef struct {
 	gchar * pcFiletitle;
 	gboolean bWritable;
 } SEditorData;
-
-gboolean simplEdit_content_init_old(SEditorData * pEditData, GtkBuilder * pBuilder);
-gboolean simplEdit_content_reset(SEditorData * pEditData);
-gboolean simplEdit_content_load(SEditorData * pEditData, const gchar * pcFilename);
-gboolean simplEdit_content_save(SEditorData * pEditData, const gchar * pcFilename);
 
 #endif /* __SIMPLEDIT_CONTENT_H__ */

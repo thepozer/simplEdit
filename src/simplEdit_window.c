@@ -4,87 +4,80 @@
 GtkWidget * pWndEdit = NULL;
 
 SEditorData gblData = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, TRUE} ;
+SimpleditContent * pEditData = NULL;
 
-void simplEdit_window_updateTitle(SEditorData * pEditData);
 GtkWidget * simplEdit_window_extraWidget(SEditorData * pEditData);
 
 void simplEdit_window_init(GtkBuilder * pBuilder) {
-	simplEdit_content_init_old(&gblData, pBuilder);
+	pEditData = simpledit_content_new(pBuilder);
 	
-	gtk_builder_connect_signals(gblData.pBuilder, &gblData);
-
-	gtk_widget_show_all(gblData.pWndEdit);
-	
-	simplEdit_window_updateTitle(&gblData);
+	simpledit_content_update_title(pEditData);
 }
-
-void simplEdit_window_updateTitle(SEditorData * pEditData) {
-	if (pEditData->pcFiletitle != NULL) {
-		gchar * pcTitle = g_strdup_printf("simplEdit - %s", pEditData->pcFiletitle);
-		gtk_window_set_title(GTK_WINDOW(pEditData->pWndEdit), pcTitle);
-		g_free(pcTitle);
-	} else {
-		gtk_window_set_title(GTK_WINDOW(pEditData->pWndEdit), "simplEdit");
-	}
-}
-
 
 void smpldt_clbk_menu_file (GtkMenuItem *menuitem, gpointer user_data) {
 	GtkWidget * pMenuItem = NULL;
-	gboolean bModified = FALSE;
+	gboolean bModified, bHaveFilename;
 	
-	bModified = gtk_text_buffer_get_modified(GTK_TEXT_BUFFER(gblData.pTxtBuff));
+	bModified = simpledit_content_is_modified(pEditData);
+	bHaveFilename = simpledit_content_have_filename(pEditData);
 	
-	pMenuItem = GTK_WIDGET(gtk_builder_get_object(gblData.pBuilder, "menuFileSave"));
-	gtk_widget_set_sensitive(pMenuItem, bModified && (gblData.pcFilename != NULL));
+	pMenuItem = simpledit_content_get_widget(pEditData, "menuFileSave");
+	gtk_widget_set_sensitive(pMenuItem, bModified && bHaveFilename);
 
-	pMenuItem = GTK_WIDGET(gtk_builder_get_object(gblData.pBuilder, "menuFileSaveAs"));
+	pMenuItem = simpledit_content_get_widget(pEditData, "menuFileSaveAs");
 	gtk_widget_set_sensitive(pMenuItem, bModified);
 	
-	pMenuItem = GTK_WIDGET(gtk_builder_get_object(gblData.pBuilder, "menuFileReturnToSaved"));
-	gtk_widget_set_sensitive(pMenuItem, bModified && (gblData.pcFilename != NULL));
-
+	pMenuItem = simpledit_content_get_widget(pEditData, "menuFileReturnToSaved");
+	gtk_widget_set_sensitive(pMenuItem, bModified && bHaveFilename);
 }
 
 void smpldt_clbk_menu_file_new (GtkMenuItem *menuitem, gpointer user_data) {
-	simplEdit_content_reset(&gblData);
-	simplEdit_window_updateTitle(&gblData);
+	simpledit_content_reset(pEditData);
+	simpledit_content_update_title(pEditData);
 }
 
 void smpldt_clbk_menu_file_open (GtkMenuItem *menuitem, gpointer user_data) { 
-	GtkWidget * pDlgFile;
+	GtkWidget * pDlgFile, * pWndEdit;
+	gchar * pcFilename;
 	gint iResult;
 
+	g_object_get(pEditData, "window", &pWndEdit, "filename", &pcFilename, NULL);
+
 	pDlgFile = gtk_file_chooser_dialog_new (
-		"Open File", GTK_WINDOW(gblData.pWndEdit),
+		"Open File", GTK_WINDOW(pWndEdit),
 		GTK_FILE_CHOOSER_ACTION_OPEN,
 		"_Cancel", GTK_RESPONSE_CANCEL,
 		"_Open", GTK_RESPONSE_ACCEPT,
 		NULL);
 
-	if (gblData.pcFilename) {
-		gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(pDlgFile), gblData.pcFilename);
+	if (pcFilename) {
+		gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(pDlgFile), pcFilename);
 	}
 	
 	iResult = gtk_dialog_run (GTK_DIALOG (pDlgFile));
 //g_print("smpldt_clbk_menu_file_open - iResult : %i\n", iResult);
 	if (iResult == GTK_RESPONSE_ACCEPT) {
-		simplEdit_content_reset(&gblData);
+		simpledit_content_reset(pEditData);
 		
 		GtkFileChooser * pChooser = GTK_FILE_CHOOSER (pDlgFile);
-		gchar * pcFilename = gtk_file_chooser_get_filename (pChooser);
-//g_print("smpldt_clbk_menu_file_open - pcFilename : '%s'\n", pcFilename);
+		gchar * pcNewFilename = gtk_file_chooser_get_filename (pChooser);
+//g_print("smpldt_clbk_menu_file_open - pcNewFilename : '%s'\n", pcNewFilename);
 		
-		if (simplEdit_content_load(&gblData, pcFilename)) {
-			simplEdit_window_updateTitle(&gblData);
+		if (simpledit_content_load(pEditData, pcNewFilename)) {
+			simpledit_content_update_title(pEditData);
 		}
+		
+		g_free(pcNewFilename);
 	}
 	gtk_widget_destroy (pDlgFile);
+	
+	g_object_unref(pWndEdit);
+	g_free(pcFilename);
 }
 
 void smpldt_clbk_menu_file_save (GtkMenuItem *menuitem, gpointer user_data) {
-	if (gblData.pcFilename != NULL) {
-		simplEdit_content_save(&gblData, NULL);
+	if (simpledit_content_have_filename(pEditData)) {
+		simpledit_content_save(pEditData, NULL);
 	}
 }
 
@@ -152,47 +145,53 @@ GtkWidget * simplEdit_window_extraWidget(SEditorData * pEditData) {
 }
 
 void smpldt_clbk_menu_file_saveas (GtkMenuItem *menuitem, gpointer user_data) {
-	GtkWidget * pDlgFile;
+	GtkWidget * pDlgFile, * pWndEdit;
+	gchar * pcFilename;
 	gint iResult;
 
+	g_object_get(pEditData, "window", &pWndEdit, "filename", &pcFilename, NULL);
+
 	pDlgFile = gtk_file_chooser_dialog_new (
-			"Open File", GTK_WINDOW(gblData.pWndEdit),
+			"Open File", GTK_WINDOW(pWndEdit),
 			GTK_FILE_CHOOSER_ACTION_SAVE,
 			"_Cancel", GTK_RESPONSE_CANCEL,
 			"_Save", GTK_RESPONSE_ACCEPT,
 			NULL);
 	
 	if (gblData.pcFilename) {
-		gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(pDlgFile), gblData.pcFilename);
+		gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(pDlgFile), pcFilename);
 	} else {
 		gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(pDlgFile), "New file");
 	}
 	
-	GtkWidget * pHBox = simplEdit_window_extraWidget(&gblData);
+	//GtkWidget * pHBox = simplEdit_window_extraWidget(&gblData);
 	
-	gtk_file_chooser_set_extra_widget(GTK_FILE_CHOOSER(pDlgFile), pHBox);
+	//gtk_file_chooser_set_extra_widget(GTK_FILE_CHOOSER(pDlgFile), pHBox);
 	
 	iResult = gtk_dialog_run (GTK_DIALOG (pDlgFile));
 //g_print("smpldt_clbk_menu_file_saveas - iResult : %i\n", iResult);
 	if (iResult == GTK_RESPONSE_ACCEPT) {
 		GtkFileChooser * pChooser = GTK_FILE_CHOOSER (pDlgFile);
-		gchar * pcFilename = NULL;
+		gchar * pcNewFilename = NULL;
 		
-		pcFilename = gtk_file_chooser_get_filename (pChooser);
+		pcNewFilename = gtk_file_chooser_get_filename (pChooser);
 		
-		if (simplEdit_content_save(&gblData, pcFilename)) {
-			simplEdit_window_updateTitle(&gblData);
+		if (simpledit_content_save(pEditData, pcNewFilename)) {
+			simpledit_content_update_title(pEditData);
 		}
 		
-		g_free(pcFilename);
+		g_free(pcNewFilename);
 	}
 
 	gtk_widget_destroy (pDlgFile);
+	
+	g_object_unref(pWndEdit);
+	g_free(pcFilename);
 }
 
 void smpldt_clbk_menu_file_returntosaved (GtkMenuItem *menuitem, gpointer user_data) { 
-	if (gblData.pcFilename != NULL) {
-		simplEdit_content_load(&gblData, NULL);
+	if (simpledit_content_have_filename(pEditData)) {
+		simpledit_content_load(pEditData, NULL);
 	}
 }
 
@@ -202,47 +201,79 @@ void smpldt_clbk_menu_file_quit (GtkMenuItem *menuitem, gpointer user_data) {
 
 
 void smpldt_clbk_menu_edit (GtkMenuItem *menuitem, gpointer user_data) {
+	GtkTextBuffer * pTxtBuff;
 	GtkWidget * pMenuItem = NULL;
 
-	pMenuItem = GTK_WIDGET(gtk_builder_get_object(gblData.pBuilder, "menuEditUndo"));
-	gtk_widget_set_sensitive(pMenuItem, gtk_source_buffer_can_undo(GTK_SOURCE_BUFFER(gblData.pTxtBuff)));
+	g_object_get(pEditData, "textbuffer", &pTxtBuff, NULL);
 
-	pMenuItem = GTK_WIDGET(gtk_builder_get_object(gblData.pBuilder, "menuEditRedo"));
-	gtk_widget_set_sensitive(GTK_WIDGET(pMenuItem), gtk_source_buffer_can_redo(GTK_SOURCE_BUFFER(gblData.pTxtBuff)));
+	pMenuItem = simpledit_content_get_widget(pEditData, "menuEditUndo");
+	gtk_widget_set_sensitive(pMenuItem, gtk_source_buffer_can_undo(GTK_SOURCE_BUFFER(pTxtBuff)));
+
+	pMenuItem = simpledit_content_get_widget(pEditData, "menuEditRedo");
+	gtk_widget_set_sensitive(GTK_WIDGET(pMenuItem), gtk_source_buffer_can_redo(GTK_SOURCE_BUFFER(pTxtBuff)));
 	
-	pMenuItem = GTK_WIDGET(gtk_builder_get_object(gblData.pBuilder, "menuEditCut"));
-	gtk_widget_set_sensitive(GTK_WIDGET(pMenuItem), gtk_text_buffer_get_has_selection(gblData.pTxtBuff));
-	pMenuItem = GTK_WIDGET(gtk_builder_get_object(gblData.pBuilder, "menuEditCopy"));
-	gtk_widget_set_sensitive(GTK_WIDGET(pMenuItem), gtk_text_buffer_get_has_selection(gblData.pTxtBuff));
+	pMenuItem = simpledit_content_get_widget(pEditData, "menuEditCut");
+	gtk_widget_set_sensitive(GTK_WIDGET(pMenuItem), gtk_text_buffer_get_has_selection(pTxtBuff));
+	pMenuItem = simpledit_content_get_widget(pEditData, "menuEditCopy");
+	gtk_widget_set_sensitive(GTK_WIDGET(pMenuItem), gtk_text_buffer_get_has_selection(pTxtBuff));
+	
+	g_object_unref(pTxtBuff);
 }
 
 void smpldt_clbk_menu_edit_undo (GtkMenuItem *menuitem, gpointer user_data) {
-	gtk_source_buffer_undo(GTK_SOURCE_BUFFER(gblData.pTxtBuff));
+	GtkSourceBuffer * pTxtBuff;
+
+	g_object_get(pEditData, "textbuffer", &pTxtBuff, NULL);
+	gtk_source_buffer_undo(pTxtBuff);
+	
+	g_object_unref(pTxtBuff);
 }
 
 void smpldt_clbk_menu_edit_redo (GtkMenuItem *menuitem, gpointer user_data) {
-	gtk_source_buffer_redo(GTK_SOURCE_BUFFER(gblData.pTxtBuff));
+	GtkSourceBuffer * pTxtBuff;
+
+	g_object_get(pEditData, "textbuffer", &pTxtBuff, NULL);
+	gtk_source_buffer_redo(pTxtBuff);
+
+	g_object_unref(pTxtBuff);
 }
 
 void smpldt_clbk_menu_edit_cut (GtkMenuItem *menuitem, gpointer user_data) {
 	GtkClipboard * pClipboard = NULL;
+	GtkTextBuffer * pTxtBuff;
+	gboolean bWritable;
+
+	g_object_get(pEditData, "textbuffer", &pTxtBuff, "writable", &bWritable, NULL);
 	
 	pClipboard = gtk_clipboard_get(gdk_atom_intern ("CLIPBOARD", FALSE));
-	gtk_text_buffer_cut_clipboard(gblData.pTxtBuff, pClipboard, gblData.bWritable);
+	gtk_text_buffer_cut_clipboard(pTxtBuff, pClipboard, bWritable);
+
+	g_object_unref(pTxtBuff);
 }
 
 void smpldt_clbk_menu_edit_copy (GtkMenuItem *menuitem, gpointer user_data) {
 	GtkClipboard * pClipboard = NULL;
+	GtkTextBuffer * pTxtBuff;
+
+	g_object_get(pEditData, "textbuffer", &pTxtBuff, NULL);
 	
 	pClipboard = gtk_clipboard_get(gdk_atom_intern ("CLIPBOARD", FALSE));
-	gtk_text_buffer_copy_clipboard(gblData.pTxtBuff, pClipboard);
+	gtk_text_buffer_copy_clipboard(pTxtBuff, pClipboard);
+
+	g_object_unref(pTxtBuff);
 }
 
 void smpldt_clbk_menu_edit_paste (GtkMenuItem *menuitem, gpointer user_data) {
 	GtkClipboard * pClipboard = NULL;
+	GtkTextBuffer * pTxtBuff;
+	gboolean bWritable;
+
+	g_object_get(pEditData, "textbuffer", &pTxtBuff, "writable", &bWritable, NULL);
 	
 	pClipboard = gtk_clipboard_get(gdk_atom_intern ("CLIPBOARD", FALSE));
-	gtk_text_buffer_paste_clipboard(gblData.pTxtBuff, pClipboard, NULL, gblData.bWritable);
+	gtk_text_buffer_paste_clipboard(pTxtBuff, pClipboard, NULL, bWritable);
+
+	g_object_unref(pTxtBuff);
 }
 
 
@@ -254,10 +285,13 @@ void smpldt_clbk_menu_search_replace (GtkMenuItem *menuitem, gpointer user_data)
 
 
 void smpldt_clbk_menu_about (GtkMenuItem *menuitem, gpointer user_data) {
+	GtkWidget * pWndEdit;
 	const gchar * pcAuthors[] = {
 		PACKAGE_BUGREPORT,
 		NULL
 	};
+	
+	g_object_get(pEditData, "window", &pWndEdit, NULL);
 	
 	gtk_show_about_dialog (GTK_WINDOW(pWndEdit),
 		"authors", pcAuthors,
@@ -270,4 +304,6 @@ void smpldt_clbk_menu_about (GtkMenuItem *menuitem, gpointer user_data) {
 		"website", "https://github.com/thepozer/simplEdit",
 		"website-label", "github simplEdit",
 		NULL);
+
+	g_object_unref(pWndEdit);
 }
