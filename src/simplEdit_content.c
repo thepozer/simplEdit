@@ -31,6 +31,9 @@ enum
 
 static GParamSpec * arObjectProperties[N_PROPERTIES] = { NULL, };
 
+void simpledit_content_load_cb_async (GObject *source_object, GAsyncResult *res, gpointer user_data);
+void simpledit_content_save_cb_async (GObject *source_object, GAsyncResult *res, gpointer user_data);
+
 static void simpledit_content_set_property (GObject * object, guint property_id, const GValue * value, GParamSpec * pspec) {
 	SimpleditContent *self = SIMPLEDIT_CONTENT(object);
   
@@ -123,14 +126,17 @@ static void simpledit_content_init (SimpleditContent *self) {
   /* initialize all public and private members to reasonable default values.
    * They are all automatically initialized to 0 to begin with. */
 	
-	if (self->pBuilder) {
-		self->pWndEdit = GTK_WIDGET(gtk_builder_get_object(self->pBuilder, "wndSimplEdit"));
-		self->pSrcView = GTK_SOURCE_VIEW(gtk_builder_get_object(self->pBuilder, "srcView"));
-		self->pTxtBuff = gtk_text_view_get_buffer(GTK_TEXT_VIEW(self->pSrcView));
-	}
-	
 	self->pSrcFile = gtk_source_file_new();
 	gtk_source_file_set_location(self->pSrcFile, NULL);
+}
+
+
+SimpleditContent * simpledit_content_new (GtkBuilder * pBuilder) {
+	SimpleditContent *self = SIMPLEDIT_CONTENT(g_object_new (SIMPLEDIT_TYPE_CONTENT, "builder", pBuilder, NULL));
+
+    self->pWndEdit = GTK_WIDGET(gtk_builder_get_object(self->pBuilder, "wndSimplEdit"));
+    self->pSrcView = GTK_SOURCE_VIEW(gtk_builder_get_object(self->pBuilder, "srcView"));
+    self->pTxtBuff = gtk_text_view_get_buffer(GTK_TEXT_VIEW(self->pSrcView));
 	
 	gtk_text_buffer_set_text(self->pTxtBuff, "", 0);
 	gtk_text_buffer_set_modified(self->pTxtBuff, FALSE);
@@ -138,11 +144,8 @@ static void simpledit_content_init (SimpleditContent *self) {
 	gtk_builder_connect_signals(self->pBuilder, self);
 
 	gtk_widget_show_all(self->pWndEdit);
-}
-
-
-SimpleditContent * simpledit_content_new (GtkBuilder * pBuilder) {
-	return SIMPLEDIT_CONTENT(g_object_new (SIMPLEDIT_TYPE_CONTENT, "builder", pBuilder, NULL));
+    
+    return self;
 }
 
 gboolean simpledit_content_update_title(SimpleditContent * pEditData) {
@@ -188,9 +191,75 @@ gboolean simpledit_content_reset(SimpleditContent * pEditData) {
 	return TRUE;
 }
 
+gboolean simpledit_content_set_filename(SimpleditContent * pEditData, const gchar * pcFilename) {
+	GFile * pFile = NULL;
+    
+	if (pcFilename) {
+		pFile = g_file_new_for_path(pcFilename);
+		if (!pFile) {
+			return FALSE;
+		}
+		
+		gtk_source_file_set_location(pEditData->pSrcFile, pFile);
+        if (gtk_source_file_is_local(pEditData->pSrcFile)) {
+            gtk_source_file_check_file_on_disk(pEditData->pSrcFile);
+        }
+		
+		g_free(pEditData->pcFilename);
+		pEditData->pcFilename = g_strdup(pcFilename);
+		
+		g_free(pEditData->pcFiletitle);
+		pEditData->pcFiletitle = g_file_get_basename(pFile);
+		
+		g_object_unref(pFile);
+        
+        return TRUE;
+	}
+    
+    return FALSE;
+}
 
-void simpledit_content_load_cb_async (GObject *source_object, GAsyncResult *res, gpointer user_data);
-void simpledit_content_save_cb_async (GObject *source_object, GAsyncResult *res, gpointer user_data);
+gboolean simpledit_content_select_name(SimpleditContent * pEditData, GtkFileChooserAction action) {
+    GtkWidget * pDlgFile = NULL;
+    gint iResult = 0;
+    gboolean bSelectName = FALSE;
+    
+    if (action == GTK_FILE_CHOOSER_ACTION_OPEN) {
+        pDlgFile = gtk_file_chooser_dialog_new ("Open File", GTK_WINDOW(pEditData->pWndEdit), GTK_FILE_CHOOSER_ACTION_OPEN, 
+                    "_Cancel", GTK_RESPONSE_CANCEL, "_Open", GTK_RESPONSE_ACCEPT, NULL);
+    } else if (action == GTK_FILE_CHOOSER_ACTION_SAVE) {
+        pDlgFile = gtk_file_chooser_dialog_new ("Save File", GTK_WINDOW(pEditData->pWndEdit), GTK_FILE_CHOOSER_ACTION_SAVE,
+                    "_Cancel", GTK_RESPONSE_CANCEL, "_Save", GTK_RESPONSE_ACCEPT, NULL);
+    }
+    
+    if (pDlgFile) {
+        if (pEditData->pcFilename) {
+            gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(pDlgFile), pEditData->pcFilename);
+        } else if (action == GTK_FILE_CHOOSER_ACTION_SAVE) {
+            gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(pDlgFile), "New file");
+        }
+	
+        //GtkWidget * pHBox = simplEdit_window_extraWidget(pEditData);
+        
+        //gtk_file_chooser_set_extra_widget(GTK_FILE_CHOOSER(pDlgFile), pHBox);
+        
+        iResult = gtk_dialog_run (GTK_DIALOG (pDlgFile));
+
+        if (iResult == GTK_RESPONSE_ACCEPT) {
+            GtkFileChooser * pChooser = GTK_FILE_CHOOSER (pDlgFile);
+            gchar * pcNewFilename = gtk_file_chooser_get_filename (pChooser);
+		
+            simpledit_content_set_filename(pEditData, pcNewFilename);
+            
+            g_free(pcNewFilename);
+            bSelectName = TRUE;
+        }
+
+        gtk_widget_destroy (pDlgFile);
+    }
+    
+    return bSelectName;
+}
 
 void simpledit_content_load_cb_async (GObject *source_object, GAsyncResult *res, gpointer user_data) {
 	SimpleditContent * pEditData = SIMPLEDIT_CONTENT(user_data);
@@ -211,28 +280,7 @@ void simpledit_content_load_cb_async (GObject *source_object, GAsyncResult *res,
 }
 
 
-gboolean simpledit_content_load(SimpleditContent * pEditData, const gchar * pcFilename) {
-	GFile * pFile = NULL;
-	GError * pErr = NULL;
-	gchar * pcContent = NULL;
-	
-	if (pcFilename) {
-		pFile = g_file_new_for_path(pcFilename);
-		if (!pFile) {
-			return FALSE;
-		}
-		
-		gtk_source_file_set_location(pEditData->pSrcFile, pFile);
-		
-		g_free(pEditData->pcFilename);
-		pEditData->pcFilename = g_strdup(pcFilename);
-		
-		g_free(pEditData->pcFiletitle);
-		pEditData->pcFiletitle = g_file_get_basename(pFile);
-		
-		g_object_unref(pFile);
-	}
-	
+gboolean simpledit_content_load(SimpleditContent * pEditData) {
 	GtkSourceFileLoader * pSrcFileLoader = NULL;
 	pSrcFileLoader = gtk_source_file_loader_new(GTK_SOURCE_BUFFER(pEditData->pTxtBuff), pEditData->pSrcFile);
 	
@@ -259,29 +307,7 @@ void simpledit_content_save_cb_async (GObject *source_object, GAsyncResult *res,
 	}
 }
 
-gboolean simpledit_content_save(SimpleditContent * pEditData, const gchar * pcFilename) {
-	GtkTextIter sIterStart, sIterEnd;
-	GFile * pFile = NULL;
-	GError * pErr = NULL;
-	gchar * pcContent = NULL;
-	gsize sContent;
-	gboolean bReturnValue = FALSE;
-
-	if (pcFilename) {
-		pFile = g_file_new_for_path(pcFilename);
-		if (!pFile) {
-			return FALSE;
-		}
-		
-		gtk_source_file_set_location(pEditData->pSrcFile, pFile);
-		
-		g_free(pEditData->pcFilename);
-		pEditData->pcFilename = g_strdup(pcFilename);
-		
-		g_free(pEditData->pcFiletitle);
-		pEditData->pcFiletitle = g_file_get_basename(pFile);
-	}
-	
+gboolean simpledit_content_save(SimpleditContent * pEditData) {
 	GtkSourceFileSaver * pSrcFileSaver = NULL;
 	pSrcFileSaver = gtk_source_file_saver_new(GTK_SOURCE_BUFFER(pEditData->pTxtBuff), pEditData->pSrcFile);
 	

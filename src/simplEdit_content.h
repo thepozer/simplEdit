@@ -27,23 +27,14 @@ GtkWidget * simpledit_content_get_widget(SimpleditContent * pEditData, const gch
 gboolean simpledit_content_have_filename(SimpleditContent * pEditData);
 gboolean simpledit_content_is_modified(SimpleditContent * pEditData);
 
+gboolean simpledit_content_set_filename(SimpleditContent * pEditData, const gchar * pcFilename);
+gboolean simpledit_content_select_name(SimpleditContent * pEditData, GtkFileChooserAction action);
+
 gboolean simpledit_content_reset(SimpleditContent * pEditData);
-gboolean simpledit_content_load(SimpleditContent * pEditData, const gchar * pcFilename);
-gboolean simpledit_content_save(SimpleditContent * pEditData, const gchar * pcFilename);
+gboolean simpledit_content_load(SimpleditContent * pEditData);
+gboolean simpledit_content_save(SimpleditContent * pEditData);
 
 
 G_END_DECLS
-
-
-typedef struct {
-	GtkBuilder    * pBuilder;
-	GtkWidget     * pWndEdit;
-	GtkSourceView * pSrcView;
-	GtkTextBuffer * pTxtBuff;
-	GtkSourceFile * pSrcFile;
-	gchar * pcFilename;
-	gchar * pcFiletitle;
-	gboolean bWritable;
-} SEditorData;
 
 #endif /* __SIMPLEDIT_CONTENT_H__ */

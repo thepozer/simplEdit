@@ -3,10 +3,9 @@
 
 GtkWidget * pWndEdit = NULL;
 
-SEditorData gblData = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, TRUE} ;
 SimpleditContent * pEditData = NULL;
 
-GtkWidget * simplEdit_window_extraWidget(SEditorData * pEditData);
+GtkWidget * simplEdit_window_extraWidget(SimpleditContent * pEditData);
 
 void simplEdit_window_init(GtkBuilder * pBuilder) {
 	pEditData = simpledit_content_new(pBuilder);
@@ -37,51 +36,20 @@ void smpldt_clbk_menu_file_new (GtkMenuItem *menuitem, gpointer user_data) {
 }
 
 void smpldt_clbk_menu_file_open (GtkMenuItem *menuitem, gpointer user_data) { 
-	GtkWidget * pDlgFile, * pWndEdit;
-	gchar * pcFilename;
-	gint iResult;
-
-	g_object_get(pEditData, "window", &pWndEdit, "filename", &pcFilename, NULL);
-
-	pDlgFile = gtk_file_chooser_dialog_new (
-		"Open File", GTK_WINDOW(pWndEdit),
-		GTK_FILE_CHOOSER_ACTION_OPEN,
-		"_Cancel", GTK_RESPONSE_CANCEL,
-		"_Open", GTK_RESPONSE_ACCEPT,
-		NULL);
-
-	if (pcFilename) {
-		gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(pDlgFile), pcFilename);
-	}
-	
-	iResult = gtk_dialog_run (GTK_DIALOG (pDlgFile));
-//g_print("smpldt_clbk_menu_file_open - iResult : %i\n", iResult);
-	if (iResult == GTK_RESPONSE_ACCEPT) {
-		simpledit_content_reset(pEditData);
-		
-		GtkFileChooser * pChooser = GTK_FILE_CHOOSER (pDlgFile);
-		gchar * pcNewFilename = gtk_file_chooser_get_filename (pChooser);
-//g_print("smpldt_clbk_menu_file_open - pcNewFilename : '%s'\n", pcNewFilename);
-		
-		if (simpledit_content_load(pEditData, pcNewFilename)) {
+	if (simpledit_content_select_name(pEditData, GTK_FILE_CHOOSER_ACTION_OPEN)) {
+		if (simpledit_content_load(pEditData)) {
 			simpledit_content_update_title(pEditData);
 		}
-		
-		g_free(pcNewFilename);
 	}
-	gtk_widget_destroy (pDlgFile);
-	
-	g_object_unref(pWndEdit);
-	g_free(pcFilename);
 }
 
 void smpldt_clbk_menu_file_save (GtkMenuItem *menuitem, gpointer user_data) {
 	if (simpledit_content_have_filename(pEditData)) {
-		simpledit_content_save(pEditData, NULL);
+		simpledit_content_save(pEditData);
 	}
 }
 
-GtkWidget * simplEdit_window_extraWidget(SEditorData * pEditData) {
+GtkWidget * simplEdit_window_extraWidget(SimpleditContent * pEditData) {
 	GtkWidget * pHBox, * pLabel, * pLstEncoding, * pLstEndOfLines, * pLstCompress;
 	GtkCellRenderer * pCellRndr = NULL;
 	GtkListStore * pLstModelEOL;
@@ -106,7 +74,7 @@ GtkWidget * simplEdit_window_extraWidget(SEditorData * pEditData) {
 	gtk_widget_show(pLabel);
 	gtk_box_pack_start(GTK_BOX(pHBox), pLabel, TRUE, TRUE, 1);
 	
-	typeEOL = gtk_source_file_get_newline_type(pEditData->pSrcFile);
+	//typeEOL = gtk_source_file_get_newline_type(pEditData->pSrcFile);
 	pLstModelEOL = gtk_list_store_new (2, G_TYPE_INT, G_TYPE_STRING);
 	gtk_list_store_append (pLstModelEOL, &iter);
 	gtk_list_store_set (pLstModelEOL, &iter, 0, GTK_SOURCE_NEWLINE_TYPE_LF,   1, "Unix (\\n)", -1);
@@ -145,53 +113,16 @@ GtkWidget * simplEdit_window_extraWidget(SEditorData * pEditData) {
 }
 
 void smpldt_clbk_menu_file_saveas (GtkMenuItem *menuitem, gpointer user_data) {
-	GtkWidget * pDlgFile, * pWndEdit;
-	gchar * pcFilename;
-	gint iResult;
-
-	g_object_get(pEditData, "window", &pWndEdit, "filename", &pcFilename, NULL);
-
-	pDlgFile = gtk_file_chooser_dialog_new (
-			"Open File", GTK_WINDOW(pWndEdit),
-			GTK_FILE_CHOOSER_ACTION_SAVE,
-			"_Cancel", GTK_RESPONSE_CANCEL,
-			"_Save", GTK_RESPONSE_ACCEPT,
-			NULL);
-	
-	if (gblData.pcFilename) {
-		gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(pDlgFile), pcFilename);
-	} else {
-		gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(pDlgFile), "New file");
-	}
-	
-	//GtkWidget * pHBox = simplEdit_window_extraWidget(&gblData);
-	
-	//gtk_file_chooser_set_extra_widget(GTK_FILE_CHOOSER(pDlgFile), pHBox);
-	
-	iResult = gtk_dialog_run (GTK_DIALOG (pDlgFile));
-//g_print("smpldt_clbk_menu_file_saveas - iResult : %i\n", iResult);
-	if (iResult == GTK_RESPONSE_ACCEPT) {
-		GtkFileChooser * pChooser = GTK_FILE_CHOOSER (pDlgFile);
-		gchar * pcNewFilename = NULL;
-		
-		pcNewFilename = gtk_file_chooser_get_filename (pChooser);
-		
-		if (simpledit_content_save(pEditData, pcNewFilename)) {
+	if (simpledit_content_select_name(pEditData, GTK_FILE_CHOOSER_ACTION_SAVE)) {
+		if (simpledit_content_save(pEditData)) {
 			simpledit_content_update_title(pEditData);
 		}
-		
-		g_free(pcNewFilename);
 	}
-
-	gtk_widget_destroy (pDlgFile);
-	
-	g_object_unref(pWndEdit);
-	g_free(pcFilename);
 }
 
 void smpldt_clbk_menu_file_returntosaved (GtkMenuItem *menuitem, gpointer user_data) { 
 	if (simpledit_content_have_filename(pEditData)) {
-		simpledit_content_load(pEditData, NULL);
+		simpledit_content_load(pEditData);
 	}
 }
 
