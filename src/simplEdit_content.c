@@ -31,12 +31,13 @@ enum
 
 static GParamSpec * arObjectProperties[N_PROPERTIES] = { NULL, };
 
+GtkWidget * simpledit_content_extra_widget(SimpleditContent * pEditData);
+
 void simpledit_content_load_cb_async (GObject *source_object, GAsyncResult *res, gpointer user_data);
 void simpledit_content_save_cb_async (GObject *source_object, GAsyncResult *res, gpointer user_data);
 
 static void simpledit_content_set_property (GObject * object, guint property_id, const GValue * value, GParamSpec * pspec) {
 	SimpleditContent *self = SIMPLEDIT_CONTENT(object);
-  
 
 	switch (property_id) {
 		case PROP_BUILDER:
@@ -219,6 +220,91 @@ gboolean simpledit_content_set_filename(SimpleditContent * pEditData, const gcha
     return FALSE;
 }
 
+GtkWidget * simpledit_content_extra_widget(SimpleditContent * pEditData) {
+	GtkWidget * pHBox, * pLabel, * pLstEncoding, * pLstEndOfLines, * pLstCompress;
+	GtkCellRenderer * pCellRndr = NULL;
+	GtkListStore * pLstModelEOL, *pLstModelCompress;
+	GtkTreeIter iter, * pIterSel;
+    const GtkSourceEncoding * pEncod = NULL;
+	GtkSourceNewlineType eTypeEOL;
+    GtkSourceCompressionType eCompType;
+	
+    pEncod = gtk_source_file_get_encoding(pEditData->pSrcFile);
+    if (!pEncod) {
+        pEncod = gtk_source_encoding_get_utf8();
+    }
+    eTypeEOL = gtk_source_file_get_newline_type(pEditData->pSrcFile);
+    eCompType = gtk_source_file_get_compression_type(pEditData->pSrcFile);
+    g_print("Encoding : %s(%s)\n", gtk_source_encoding_get_name(pEncod), gtk_source_encoding_get_charset(pEncod));
+    g_print("EOL : %d\n", eTypeEOL);
+    g_print("Compress : %d\n", eCompType);
+    
+    
+	pHBox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
+	gtk_widget_show(pHBox);
+	
+	pLabel = gtk_label_new("Encoding :");
+	gtk_widget_show(pLabel);
+	gtk_box_pack_start(GTK_BOX(pHBox), pLabel, TRUE, TRUE, 1);
+
+	pLstEncoding = gtk_combo_box_text_new();
+	gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(pLstEncoding), "utf-8", "UTF-8");
+	gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(pLstEncoding), "iso8859-1", "ISO8859-1 - latin1");
+	gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(pLstEncoding), "iso8859-15", "ISO8859-15 - Latin9");
+	gtk_widget_show(pLstEncoding);
+	gtk_box_pack_start(GTK_BOX(pHBox), pLstEncoding, TRUE, TRUE, 1);
+
+	pLabel = gtk_label_new("End of line :");
+	gtk_widget_show(pLabel);
+	gtk_box_pack_start(GTK_BOX(pHBox), pLabel, TRUE, TRUE, 1);
+	
+	pLstModelEOL = gtk_list_store_new (2, G_TYPE_INT, G_TYPE_STRING);
+	gtk_list_store_insert_with_values (pLstModelEOL, &iter, -1, 0, GTK_SOURCE_NEWLINE_TYPE_LF,   1, "Unix (\\n)", -1);
+	if (eTypeEOL == GTK_SOURCE_NEWLINE_TYPE_LF) {
+		pIterSel = gtk_tree_iter_copy(&iter);
+	}
+	gtk_list_store_insert_with_values (pLstModelEOL, &iter, -1, 0, GTK_SOURCE_NEWLINE_TYPE_CR_LF, 1, "Windows (\\r\\n)", -1);
+	if (eTypeEOL == GTK_SOURCE_NEWLINE_TYPE_CR_LF) {
+		pIterSel = gtk_tree_iter_copy(&iter);
+	}
+	gtk_list_store_insert_with_values (pLstModelEOL, &iter, -1, 0, GTK_SOURCE_NEWLINE_TYPE_CR,   1, "Mac (\\r)", -1);
+	if (eTypeEOL == GTK_SOURCE_NEWLINE_TYPE_CR) {
+		pIterSel = gtk_tree_iter_copy(&iter);
+	}
+	pLstEndOfLines = gtk_combo_box_new_with_model(GTK_TREE_MODEL(pLstModelEOL));
+ 	pCellRndr = gtk_cell_renderer_text_new ();
+	gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (pLstEndOfLines), pCellRndr, FALSE);
+	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (pLstEndOfLines), pCellRndr, "text", 1, NULL);
+	gtk_combo_box_set_active_iter(GTK_COMBO_BOX(pLstEndOfLines), pIterSel);
+	gtk_widget_show(pLstEndOfLines);
+	gtk_box_pack_start(GTK_BOX(pHBox), pLstEndOfLines, TRUE, TRUE, 1);
+	gtk_tree_iter_free(pIterSel);
+
+	pLabel = gtk_label_new("Compression :");
+	gtk_widget_show(pLabel);
+	gtk_box_pack_start(GTK_BOX(pHBox), pLabel, TRUE, TRUE, 1);
+
+	pLstModelCompress = gtk_list_store_new (2, G_TYPE_INT, G_TYPE_STRING);
+    gtk_list_store_insert_with_values(pLstModelCompress, &iter, -1, 0, GTK_SOURCE_COMPRESSION_TYPE_NONE, 1, "None", -1);
+	if (eCompType == GTK_SOURCE_COMPRESSION_TYPE_NONE) {
+		pIterSel = gtk_tree_iter_copy(&iter);
+	}
+    gtk_list_store_insert_with_values(pLstModelCompress, &iter, -1, 0, GTK_SOURCE_COMPRESSION_TYPE_GZIP, 1, "Gzip (.gz)", -1);
+	if (eCompType == GTK_SOURCE_COMPRESSION_TYPE_GZIP) {
+		pIterSel = gtk_tree_iter_copy(&iter);
+	}
+	pLstCompress = gtk_combo_box_new_with_model(GTK_TREE_MODEL(pLstModelCompress));
+ 	pCellRndr = gtk_cell_renderer_text_new ();
+	gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (pLstCompress), pCellRndr, FALSE);
+	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (pLstCompress), pCellRndr, "text", 1, NULL);
+	gtk_combo_box_set_active_iter(GTK_COMBO_BOX(pLstCompress), pIterSel);
+	gtk_widget_show(pLstCompress);
+	gtk_box_pack_start(GTK_BOX(pHBox), pLstCompress, TRUE, TRUE, 1);
+	gtk_tree_iter_free(pIterSel);
+    
+	return pHBox;
+}
+
 gboolean simpledit_content_select_name(SimpleditContent * pEditData, GtkFileChooserAction action) {
     GtkWidget * pDlgFile = NULL;
     gint iResult = 0;
@@ -239,9 +325,9 @@ gboolean simpledit_content_select_name(SimpleditContent * pEditData, GtkFileChoo
             gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(pDlgFile), "New file");
         }
 	
-        //GtkWidget * pHBox = simplEdit_window_extraWidget(pEditData);
+        GtkWidget * pHBox = simpledit_content_extra_widget(pEditData);
         
-        //gtk_file_chooser_set_extra_widget(GTK_FILE_CHOOSER(pDlgFile), pHBox);
+        gtk_file_chooser_set_extra_widget(GTK_FILE_CHOOSER(pDlgFile), pHBox);
         
         iResult = gtk_dialog_run (GTK_DIALOG (pDlgFile));
 
