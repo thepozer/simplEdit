@@ -4,8 +4,7 @@ struct _SimpleditContent {
 	GObject parent_instance;
 
 	/* Read/Write Data */
-	GtkBuilder    * pBuilder;
-	GtkWidget     * pWndEdit;
+	GtkWidget     * pWindow;
 	GtkSourceView * pSrcView;
 	GtkTextBuffer * pTxtBuff;
 	GtkSourceFile * pSrcFile;
@@ -23,8 +22,7 @@ G_DEFINE_TYPE (SimpleditContent, simpledit_content, G_TYPE_OBJECT) ;
 
 enum
 {
-  PROP_BUILDER = 1,
-  PROP_WINDOW,
+  PROP_WINDOW = 1,
   PROP_SOURCEVIEW,
   PROP_TEXTBUFFER,
   PROP_SOURCEFILE,
@@ -45,8 +43,11 @@ static void simpledit_content_set_property (GObject * object, guint property_id,
 	SimpleditContent *self = SIMPLEDIT_CONTENT(object);
 
 	switch (property_id) {
-		case PROP_BUILDER:
-			self->pBuilder = GTK_BUILDER(g_value_get_object(value));
+		case PROP_WINDOW:
+			self->pWindow = GTK_BUILDER(g_value_get_object(value));
+			break;
+		case PROP_SOURCEVIEW:
+			self->pSrcView = GTK_BUILDER(g_value_get_object(value));
 			break;
 		case PROP_FILENAME:
 			g_free(self->pcFilename);
@@ -66,11 +67,8 @@ static void simpledit_content_get_property (GObject * object, guint property_id,
 	SimpleditContent *self = SIMPLEDIT_CONTENT(object);
 
 	switch (property_id) {
-		case PROP_BUILDER:
-			g_value_set_object(value, self->pBuilder);
-			break;
 		case PROP_WINDOW:
-			g_value_set_object(value, self->pWndEdit);
+			g_value_set_object(value, self->pWindow);
 			break;
 		case PROP_SOURCEVIEW:
 			g_value_set_object(value, self->pSrcView);
@@ -103,21 +101,17 @@ static void simpledit_content_class_init (SimpleditContentClass *klass) {
 	pObjectClass->set_property = simpledit_content_set_property;
 	pObjectClass->get_property = simpledit_content_get_property;
 
-	arObjectProperties[PROP_BUILDER]    = g_param_spec_object("builder", "Builder", "Builder of the application.", 
-										GTK_TYPE_BUILDER, G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
-									
-	arObjectProperties[PROP_WINDOW]     = g_param_spec_object("window", "Window", "Window of the application.", 
-										GTK_TYPE_WINDOW, G_PARAM_READABLE);
-
+	arObjectProperties[PROP_WINDOW]     = g_param_spec_object("window", "window", "window of the application.", 
+										GTK_SOURCE_TYPE_VIEW, G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
 	arObjectProperties[PROP_SOURCEVIEW] = g_param_spec_object("sourceview", "sourceview", "sourceview of the application.", 
-										GTK_SOURCE_TYPE_VIEW, G_PARAM_READABLE);
+										GTK_SOURCE_TYPE_VIEW, G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
 	arObjectProperties[PROP_TEXTBUFFER] = g_param_spec_object("textbuffer", "textbuffer", "textbuffer of the sourceview.", 
 										GTK_TYPE_TEXT_BUFFER, G_PARAM_READABLE);
 	arObjectProperties[PROP_SOURCEFILE] = g_param_spec_object("sourcefile", "sourcefile", "sourcefile of the application.", 
 										GTK_SOURCE_TYPE_FILE, G_PARAM_READABLE);
 	
 	arObjectProperties[PROP_FILENAME]   = g_param_spec_string("filename", "Filename", "File name of the application.", 
-										NULL, G_PARAM_READWRITE);
+										NULL, G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
 	arObjectProperties[PROP_FILETITLE]  = g_param_spec_string("filetitle", "Filetitle", "File Title of the application.", 
 										NULL, G_PARAM_READABLE);
 
@@ -137,20 +131,15 @@ static void simpledit_content_init (SimpleditContent *self) {
 }
 
 
-SimpleditContent * simpledit_content_new (GtkBuilder * pBuilder) {
-	SimpleditContent *self = SIMPLEDIT_CONTENT(g_object_new (SIMPLEDIT_TYPE_CONTENT, "builder", pBuilder, NULL));
+SimpleditContent * simpledit_content_new (GtkWidget * pWindow, GtkSourceView * pSrcView) {
+	SimpleditContent *self = SIMPLEDIT_CONTENT(g_object_new (SIMPLEDIT_TYPE_CONTENT, 
+		"window", pWindow, "sourceview", pSrcView, NULL));
 
-    self->pWndEdit = GTK_WIDGET(gtk_builder_get_object(self->pBuilder, "wndSimplEdit"));
-    self->pSrcView = GTK_SOURCE_VIEW(gtk_builder_get_object(self->pBuilder, "srcView"));
     self->pTxtBuff = gtk_text_view_get_buffer(GTK_TEXT_VIEW(self->pSrcView));
 	
 	gtk_text_buffer_set_text(self->pTxtBuff, "", 0);
 	gtk_text_buffer_set_modified(self->pTxtBuff, FALSE);
 
-	gtk_builder_connect_signals(self->pBuilder, self);
-
-	gtk_widget_show_all(self->pWndEdit);
-    
     return self;
 }
 
@@ -159,9 +148,9 @@ gboolean simpledit_content_update_title(SimpleditContent * pEditData) {
 	
 	if (pEditData->pcFiletitle != NULL) {
 		pcTitle = g_strdup_printf("simplEdit - %s", pEditData->pcFiletitle);
-		gtk_window_set_title(GTK_WINDOW(pEditData->pWndEdit), pcTitle);
+		gtk_window_set_title(GTK_WINDOW(pEditData->pWindow), pcTitle);
 	} else {
-		gtk_window_set_title(GTK_WINDOW(pEditData->pWndEdit), "simplEdit");
+		gtk_window_set_title(GTK_WINDOW(pEditData->pWindow), "simplEdit");
 	}
 	
 	g_free(pcTitle);
@@ -170,7 +159,7 @@ gboolean simpledit_content_update_title(SimpleditContent * pEditData) {
 }
 
 GtkWidget * simpledit_content_get_widget(SimpleditContent * pEditData, const gchar * sWidgetId) {
-	return GTK_WIDGET(gtk_builder_get_object(pEditData->pBuilder, sWidgetId));
+	return NULL; //GTK_WIDGET(gtk_builder_get_object(pEditData->pBuilder, sWidgetId));
 }
 
 
@@ -365,10 +354,10 @@ gboolean simpledit_content_select_name(SimpleditContent * pEditData, GtkFileChoo
     gboolean bSelectName = FALSE;
     
     if (action == GTK_FILE_CHOOSER_ACTION_OPEN) {
-        pDlgFile = gtk_file_chooser_dialog_new ("Open File", GTK_WINDOW(pEditData->pWndEdit), GTK_FILE_CHOOSER_ACTION_OPEN, 
+        pDlgFile = gtk_file_chooser_dialog_new ("Open File", GTK_WINDOW(pEditData->pWindow), GTK_FILE_CHOOSER_ACTION_OPEN, 
                     "_Cancel", GTK_RESPONSE_CANCEL, "_Open", GTK_RESPONSE_ACCEPT, NULL);
     } else if (action == GTK_FILE_CHOOSER_ACTION_SAVE) {
-        pDlgFile = gtk_file_chooser_dialog_new ("Save File", GTK_WINDOW(pEditData->pWndEdit), GTK_FILE_CHOOSER_ACTION_SAVE,
+        pDlgFile = gtk_file_chooser_dialog_new ("Save File", GTK_WINDOW(pEditData->pWindow), GTK_FILE_CHOOSER_ACTION_SAVE,
                     "_Cancel", GTK_RESPONSE_CANCEL, "_Save", GTK_RESPONSE_ACCEPT, NULL);
 	}
     

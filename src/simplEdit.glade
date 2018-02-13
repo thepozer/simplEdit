@@ -3,20 +3,17 @@
 <interface>
   <requires lib="gtk+" version="3.18"/>
   <requires lib="gtksourceview" version="3.0"/>
-  <object class="GtkWindow" id="wndSimplEdit">
+  <template class="SimpleditAppWindow" parent="GtkApplicationWindow">
     <property name="can_focus">False</property>
-    <property name="default_width">600</property>
-    <property name="default_height">420</property>
     <property name="icon_name">accessories-text-editor</property>
     <property name="has_resize_grip">True</property>
-    <signal name="destroy" handler="smpldt_clbk_menu_file_quit" swapped="no"/>
     <child>
       <object class="GtkBox">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
         <child>
-          <object class="GtkMenuBar">
+          <object class="GtkMenuBar" id="SimpleditAppWindowMenu">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <child>
@@ -25,7 +22,7 @@
                 <property name="can_focus">False</property>
                 <property name="label" translatable="yes">_Fichier</property>
                 <property name="use_underline">True</property>
-                <signal name="activate" handler="smpldt_clbk_menu_file" object="wndSimplEdit" swapped="no"/>
+                <signal name="activate" handler="smpldt_clbk_menu_file" object="SimpleditAppWindow" swapped="no"/>
                 <child type="submenu">
                   <object class="GtkMenu">
                     <property name="visible">True</property>
@@ -37,7 +34,7 @@
                         <property name="can_focus">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
-                        <signal name="activate" handler="smpldt_clbk_menu_file_new" object="wndSimplEdit" swapped="no"/>
+                        <signal name="activate" handler="smpldt_clbk_menu_file_new" object="SimpleditAppWindow" swapped="no"/>
                         <accelerator key="n" signal="activate" modifiers="GDK_CONTROL_MASK"/>
                       </object>
                     </child>
@@ -48,7 +45,7 @@
                         <property name="can_focus">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
-                        <signal name="activate" handler="smpldt_clbk_menu_file_open" object="wndSimplEdit" swapped="no"/>
+                        <signal name="activate" handler="smpldt_clbk_menu_file_open" object="SimpleditAppWindow" swapped="no"/>
                         <accelerator key="o" signal="activate" modifiers="GDK_CONTROL_MASK"/>
                       </object>
                     </child>
@@ -65,7 +62,7 @@
                         <property name="can_focus">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
-                        <signal name="activate" handler="smpldt_clbk_menu_file_save" object="wndSimplEdit" swapped="no"/>
+                        <signal name="activate" handler="smpldt_clbk_menu_file_save" object="SimpleditAppWindow" swapped="no"/>
                         <accelerator key="s" signal="activate" modifiers="GDK_CONTROL_MASK"/>
                       </object>
                     </child>
@@ -76,7 +73,7 @@
                         <property name="can_focus">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
-                        <signal name="activate" handler="smpldt_clbk_menu_file_saveas" object="wndSimplEdit" swapped="no"/>
+                        <signal name="activate" handler="smpldt_clbk_menu_file_saveas" object="SimpleditAppWindow" swapped="no"/>
                         <accelerator key="s" signal="activate" modifiers="GDK_SHIFT_MASK | GDK_CONTROL_MASK"/>
                       </object>
                     </child>
@@ -87,7 +84,7 @@
                         <property name="can_focus">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
-                        <signal name="activate" handler="smpldt_clbk_menu_file_returntosaved" object="wndSimplEdit" swapped="no"/>
+                        <signal name="activate" handler="smpldt_clbk_menu_file_returntosaved" object="SimpleditAppWindow" swapped="no"/>
                       </object>
                     </child>
                     <child>
@@ -103,7 +100,7 @@
                         <property name="can_focus">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
-                        <signal name="activate" handler="smpldt_clbk_menu_file_quit" object="wndSimplEdit" swapped="no"/>
+                        <signal name="activate" handler="smpldt_clbk_menu_file_quit" object="SimpleditAppWindow" swapped="no"/>
                         <accelerator key="q" signal="activate" modifiers="GDK_CONTROL_MASK"/>
                       </object>
                     </child>
@@ -117,7 +114,7 @@
                 <property name="can_focus">False</property>
                 <property name="label" translatable="yes">É_dition</property>
                 <property name="use_underline">True</property>
-                <signal name="activate" handler="smpldt_clbk_menu_edit" object="wndSimplEdit" swapped="no"/>
+                <signal name="activate" handler="smpldt_clbk_menu_edit" object="SimpleditAppWindow" swapped="no"/>
                 <child type="submenu">
                   <object class="GtkMenu">
                     <property name="visible">True</property>
@@ -129,7 +126,7 @@
                         <property name="can_focus">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
-                        <signal name="activate" handler="smpldt_clbk_menu_edit_undo" object="wndSimplEdit" swapped="no"/>
+                        <signal name="activate" handler="smpldt_clbk_menu_edit_undo" object="SimpleditAppWindow" swapped="no"/>
                         <accelerator key="z" signal="activate" modifiers="GDK_CONTROL_MASK"/>
                       </object>
                     </child>
@@ -140,7 +137,7 @@
                         <property name="can_focus">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
-                        <signal name="activate" handler="smpldt_clbk_menu_edit_redo" object="wndSimplEdit" swapped="no"/>
+                        <signal name="activate" handler="smpldt_clbk_menu_edit_redo" object="SimpleditAppWindow" swapped="no"/>
                         <accelerator key="z" signal="activate" modifiers="GDK_SHIFT_MASK | GDK_CONTROL_MASK"/>
                       </object>
                     </child>
@@ -157,7 +154,7 @@
                         <property name="can_focus">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
-                        <signal name="activate" handler="smpldt_clbk_menu_edit_cut" object="wndSimplEdit" swapped="no"/>
+                        <signal name="activate" handler="smpldt_clbk_menu_edit_cut" object="SimpleditAppWindow" swapped="no"/>
                         <accelerator key="x" signal="activate" modifiers="GDK_CONTROL_MASK"/>
                       </object>
                     </child>
@@ -168,7 +165,7 @@
                         <property name="can_focus">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
-                        <signal name="activate" handler="smpldt_clbk_menu_edit_copy" object="wndSimplEdit" swapped="no"/>
+                        <signal name="activate" handler="smpldt_clbk_menu_edit_copy" object="SimpleditAppWindow" swapped="no"/>
                         <accelerator key="c" signal="activate" modifiers="GDK_CONTROL_MASK"/>
                       </object>
                     </child>
@@ -179,7 +176,7 @@
                         <property name="can_focus">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
-                        <signal name="activate" handler="smpldt_clbk_menu_edit_paste" object="wndSimplEdit" swapped="no"/>
+                        <signal name="activate" handler="smpldt_clbk_menu_edit_paste" object="SimpleditAppWindow" swapped="no"/>
                         <accelerator key="v" signal="activate" modifiers="GDK_CONTROL_MASK"/>
                       </object>
                     </child>
@@ -204,7 +201,7 @@
                         <property name="can_focus">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
-                        <signal name="activate" handler="smpldt_clbk_menu_search_find" object="wndSimplEdit" swapped="no"/>
+                        <signal name="activate" handler="smpldt_clbk_menu_search_find" object="SimpleditAppWindow" swapped="no"/>
                         <accelerator key="f" signal="activate" modifiers="GDK_CONTROL_MASK"/>
                       </object>
                     </child>
@@ -215,7 +212,7 @@
                         <property name="can_focus">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
-                        <signal name="activate" handler="smpldt_clbk_menu_search_replace" object="wndSimplEdit" swapped="no"/>
+                        <signal name="activate" handler="smpldt_clbk_menu_search_replace" object="SimpleditAppWindow" swapped="no"/>
                         <accelerator key="h" signal="activate" modifiers="GDK_CONTROL_MASK"/>
                       </object>
                     </child>
@@ -240,7 +237,7 @@
                         <property name="can_focus">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
-                        <signal name="activate" handler="smpldt_clbk_menu_about" object="wndSimplEdit" swapped="no"/>
+                        <signal name="activate" handler="smpldt_clbk_menu_about" object="SimpleditAppWindow" swapped="no"/>
                       </object>
                     </child>
                   </object>
@@ -262,7 +259,7 @@
             <property name="propagate_natural_width">True</property>
             <property name="propagate_natural_height">True</property>
             <child>
-              <object class="GtkSourceView" id="srcView">
+              <object class="GtkSourceView" id="srcView1">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="left_margin">2</property>
@@ -282,8 +279,8 @@
         </child>
       </object>
     </child>
-    <child type="titlebar">
+    <child>
       <placeholder/>
     </child>
-  </object>
+  </template>
 </interface>

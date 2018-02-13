@@ -1,11 +1,34 @@
 #include "simplEdit_window.h"
-#include "simplEdit_content.h"
+
+struct _SimpleditAppWindow
+{
+  GtkApplicationWindow parent;
+  
+  SimpleditContent * pEditData;
+};
+
+G_DEFINE_TYPE(SimpleditAppWindow, simpledit_app_window, GTK_TYPE_APPLICATION_WINDOW);
+
+static void simpledit_app_window_init (SimpleditAppWindow *pWin) {
+	gtk_widget_init_template(GTK_WIDGET(pWin));
+}
+
+static void simpledit_app_window_class_init (SimpleditAppWindowClass *pClass) {
+	 gtk_widget_class_set_template_from_resource (GTK_WIDGET_CLASS (pClass), "/net/thepozer/simpledit/simplEdit.glade");
+
+}
+
+SimpleditAppWindow * simpledit_app_window_new (SimpleditApp *pApp) {
+  return g_object_new (SIMPLEDIT_APP_WINDOW_TYPE, "application", pApp, NULL);
+}
+
+void simpledit_app_window_open (SimpleditAppWindow *pWin, GFile *pFile) {
+}
+
 
 GtkWidget * pWndEdit = NULL;
 
 SimpleditContent * pEditData = NULL;
-
-GtkWidget * simplEdit_window_extraWidget(SimpleditContent * pEditData);
 
 void simplEdit_window_init(GtkBuilder * pBuilder) {
 	pEditData = simpledit_content_new(pBuilder);
