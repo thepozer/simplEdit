@@ -6,9 +6,11 @@
 
 #include <gtksourceview/gtksource.h>
 
+#include "simplEdit.gresources.h"
+
 #ifndef __SIMPLEDIT_MAIN_PART__
 
-extern GtkApplication * gpApp;
+extern GtkApplication * GpApp;
 
 #endif /* __SIMPLEDIT_MAIN_PART__ */
 

@@ -16,9 +16,10 @@ int main (int argc, char *argv []) {
 	
 	pBuilder = gtk_builder_new();
 	
-	pcFilename =  g_build_filename(".", "simplEdit.glade", NULL);
-	iRet = gtk_builder_add_from_file(pBuilder, pcFilename, &pErr);
-	g_free(pcFilename);
+	g_resources_register(simplEdit_get_resource());
+	
+	iRet = gtk_builder_add_from_resource(pBuilder, "/net/thepozer/simpledit/simplEdit.glade", &pErr);
+
 	if (pErr) {
 		gint iCode = pErr->code;
 		g_printerr("%s\n", pErr->message);

@@ -40,3 +40,4 @@ Makefile
 
 *.o
 simplEdit
+*.gresources.[ch]
