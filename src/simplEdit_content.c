@@ -387,6 +387,28 @@ gboolean simpledit_content_select_name(SimpleditContent * pEditData, GtkFileChoo
     return bSelectName;
 }
 
+gboolean simpledit_content_update_highlight(SimpleditContent * pEditData, GtkSourceLanguage * pSrcLang) {
+	GtkSourceLanguageManager * prcLangMngr = gtk_source_language_manager_get_default();
+	GtkSourceLanguage * pCurrentSrcLang = pSrcLang;
+	gchar * pcContentType = NULL;
+	gboolean bResultUncertain = FALSE;
+	
+	if (!pCurrentSrcLang) {
+		pcContentType = g_content_type_guess (pEditData->pcFilename, NULL, 0, &bResultUncertain);
+		if (bResultUncertain) {
+			g_free (pcContentType);
+			pcContentType = NULL;
+		}
+		
+		pCurrentSrcLang = gtk_source_language_manager_guess_language (prcLangMngr, pEditData->pcFilename, pcContentType);
+		g_free (pcContentType);
+	}
+	
+	if (pCurrentSrcLang) {
+		gtk_source_buffer_set_language(GTK_SOURCE_BUFFER(pEditData->pTxtBuff), pCurrentSrcLang);
+	}
+}
+
 void simpledit_content_load_cb_async (GObject *source_object, GAsyncResult *res, gpointer user_data) {
 	SimpleditContent * pEditData = SIMPLEDIT_CONTENT(user_data);
 	GtkSourceFileLoader * pSrcFileLoader = GTK_SOURCE_FILE_LOADER(source_object);
@@ -402,6 +424,8 @@ void simpledit_content_load_cb_async (GObject *source_object, GAsyncResult *res,
 										 pEditData->pcFilename, pErr->code, pErr->message);
 		gtk_dialog_run (GTK_DIALOG (pDlgMsg));
 		gtk_widget_destroy (pDlgMsg);
+	} else {
+		simpledit_content_update_highlight(pEditData, NULL);
 	}
 }
 
@@ -430,6 +454,8 @@ void simpledit_content_save_cb_async (GObject *source_object, GAsyncResult *res,
 										 pEditData->pcFilename, pErr->code, pErr->message);
 		gtk_dialog_run (GTK_DIALOG (pDlgMsg));
 		gtk_widget_destroy (pDlgMsg);
+	} else {
+		simpledit_content_update_highlight(pEditData, NULL);
 	}
 }
 
