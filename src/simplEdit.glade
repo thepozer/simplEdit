@@ -5,6 +5,8 @@
   <requires lib="gtksourceview" version="3.0"/>
   <template class="SimpleditAppWindow" parent="GtkApplicationWindow">
     <property name="can_focus">False</property>
+    <property name="default_width">600</property>
+    <property name="default_height">400</property>
     <property name="icon_name">accessories-text-editor</property>
     <property name="has_resize_grip">True</property>
     <child>
@@ -259,7 +261,7 @@
             <property name="propagate_natural_width">True</property>
             <property name="propagate_natural_height">True</property>
             <child>
-              <object class="GtkSourceView" id="srcView1">
+              <object class="GtkSourceView" id="pSrcView">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="left_margin">2</property>
@@ -279,7 +281,7 @@
         </child>
       </object>
     </child>
-    <child>
+    <child type="titlebar">
       <placeholder/>
     </child>
   </template>
