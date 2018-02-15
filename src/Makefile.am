@@ -4,6 +4,7 @@ bin_PROGRAMS = simplEdit
 
 simplEdit_LDADD = $(SIMPLEDIT_LIBS) 
 simplEdit_SOURCES = simplEdit_main.c \
+simplEdit_app.c \
 simplEdit_window.c \
 simplEdit_content.c \
 simplEdit.gresources.h \
