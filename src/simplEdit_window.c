@@ -16,12 +16,17 @@ struct _SimpleditAppWindow
 	GtkMenuItem * menuEditRedo;
 	GtkMenuItem * menuEditCut;
 	GtkMenuItem * menuEditCopy;
+
+	GtkMenuItem * menuLanguage;
 };
 
 G_DEFINE_TYPE(SimpleditAppWindow, simpledit_app_window, GTK_TYPE_APPLICATION_WINDOW);
 
 static void simpledit_app_window_init (SimpleditAppWindow *pWin) {
 	gtk_widget_init_template(GTK_WIDGET(pWin));
+	
+	GtkMenu * pMnuLanguages = simpledit_get_language_menu();
+	gtk_menu_item_set_submenu(GTK_MENU_ITEM(pWin->menuLanguage), GTK_WIDGET(pMnuLanguages));
 }
 
 static void simpledit_app_window_class_init (SimpleditAppWindowClass *pClass) {
@@ -36,11 +41,13 @@ static void simpledit_app_window_class_init (SimpleditAppWindowClass *pClass) {
 	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, menuEditRedo);
 	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, menuEditCut);
 	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, menuEditCopy);
+	
+	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, menuLanguage);
 }
 
 SimpleditAppWindow * simpledit_app_window_new (SimpleditApp *pApp) {
 	SimpleditAppWindow * pWindow = g_object_new (SIMPLEDIT_APP_WINDOW_TYPE, "application", pApp, NULL);
-  
+	
 	pWindow->pEditData = simpledit_content_new(GTK_WINDOW(pWindow), pWindow->pSrcView);
 	
 	simpledit_content_update_title(pWindow->pEditData);
@@ -226,4 +233,74 @@ void smpldt_clbk_menu_about (GtkMenuItem *menuitem, gpointer user_data) {
 		"website", "https://github.com/thepozer/simplEdit",
 		"website-label", "github simplEdit",
 		NULL);
+}
+
+GtkMenu * simpledit_get_language_menu() {
+	GtkSourceLanguageManager * pLangMngr = NULL;
+	GtkSourceLanguage * pLang = NULL;
+	GtkWidget * pMnuMain    = NULL;
+	GtkWidget * pMnuSection = NULL;
+	GtkWidget * pMnuItem    = NULL;
+	GHashTable * pHash = NULL;
+	const gchar * const * arpcLangIds = NULL;
+	const gchar * const * arpcPtrIds  = NULL;
+	const gchar * pcCurrentId = NULL;
+	
+	pLangMngr = gtk_source_language_manager_get_default();
+	arpcLangIds = gtk_source_language_manager_get_language_ids(pLangMngr);
+	
+	pHash = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);		
+	arpcPtrIds = arpcLangIds;
+	for (pcCurrentId = *arpcPtrIds; pcCurrentId; pcCurrentId = *++arpcPtrIds) {
+		const gchar * pcSection, * pcName;
+		pLang = gtk_source_language_manager_get_language(pLangMngr, pcCurrentId);
+		
+		pcSection = gtk_source_language_get_section(pLang);
+		pcName    = gtk_source_language_get_name(pLang);
+		
+/*
+		g_print("Language id (%s) : ", pcCurrentId);
+		if (gtk_source_language_get_hidden(pLang)) {
+			g_print("hidden - ");
+		}
+		g_print("'%s/%s'\n", pcSection, pcName);
+*/
+		
+		if (!gtk_source_language_get_hidden(pLang)) {
+			pMnuSection = GTK_WIDGET(g_hash_table_lookup(pHash, pcSection));
+			
+			if (pMnuSection == NULL) {
+				pMnuSection = gtk_menu_new();
+				gtk_widget_show (pMnuSection);
+				
+				g_hash_table_insert(pHash, (gchar *)pcSection, pMnuSection);
+			}
+			
+			pMnuItem = gtk_menu_item_new_with_label(pcName);
+			gtk_widget_show (pMnuItem);
+			gtk_menu_shell_append (GTK_MENU_SHELL(pMnuSection), pMnuItem);
+		}
+		
+	}
+	
+	pMnuMain = gtk_menu_new();
+	gtk_widget_show(pMnuMain);
+	
+	GList * pListSection = g_hash_table_get_keys(pHash);
+	pListSection = g_list_sort(pListSection, g_strcmp0);
+	
+	void addSectionMenu(gpointer data, gpointer user_data) {
+		pMnuSection = GTK_WIDGET(g_hash_table_lookup(pHash, data));
+		
+		pMnuItem = gtk_menu_item_new_with_label((gchar *)data);
+		gtk_widget_show (pMnuItem);
+		gtk_menu_shell_append (GTK_MENU_SHELL(pMnuMain), pMnuItem);
+		
+		gtk_menu_item_set_submenu(GTK_MENU_ITEM(pMnuItem), pMnuSection);
+	}
+	g_list_foreach(pListSection, addSectionMenu, NULL);
+	
+	
+	g_hash_table_unref(pHash);
+	return GTK_MENU(pMnuMain);
 }
