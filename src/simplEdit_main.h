@@ -10,7 +10,6 @@
 
 #ifndef __SIMPLEDIT_MAIN_PART__
 
-extern GtkApplication * GpApp;
 
 #endif /* __SIMPLEDIT_MAIN_PART__ */
 

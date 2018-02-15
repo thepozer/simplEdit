@@ -4,7 +4,7 @@ struct _SimpleditContent {
 	GObject parent_instance;
 
 	/* Read/Write Data */
-	GtkWidget     * pWindow;
+	GtkWindow     * pWindow;
 	GtkSourceView * pSrcView;
 	GtkTextBuffer * pTxtBuff;
 	GtkSourceFile * pSrcFile;
@@ -44,10 +44,10 @@ static void simpledit_content_set_property (GObject * object, guint property_id,
 
 	switch (property_id) {
 		case PROP_WINDOW:
-			self->pWindow = GTK_BUILDER(g_value_get_object(value));
+			self->pWindow = GTK_WINDOW(g_value_get_object(value));
 			break;
 		case PROP_SOURCEVIEW:
-			self->pSrcView = GTK_BUILDER(g_value_get_object(value));
+			self->pSrcView = GTK_SOURCE_VIEW(g_value_get_object(value));
 			break;
 		case PROP_FILENAME:
 			g_free(self->pcFilename);
@@ -102,7 +102,7 @@ static void simpledit_content_class_init (SimpleditContentClass *klass) {
 	pObjectClass->get_property = simpledit_content_get_property;
 
 	arObjectProperties[PROP_WINDOW]     = g_param_spec_object("window", "window", "window of the application.", 
-										GTK_SOURCE_TYPE_VIEW, G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+										GTK_TYPE_WINDOW, G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
 	arObjectProperties[PROP_SOURCEVIEW] = g_param_spec_object("sourceview", "sourceview", "sourceview of the application.", 
 										GTK_SOURCE_TYPE_VIEW, G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
 	arObjectProperties[PROP_TEXTBUFFER] = g_param_spec_object("textbuffer", "textbuffer", "textbuffer of the sourceview.", 
@@ -131,7 +131,7 @@ static void simpledit_content_init (SimpleditContent *self) {
 }
 
 
-SimpleditContent * simpledit_content_new (GtkWidget * pWindow, GtkSourceView * pSrcView) {
+SimpleditContent * simpledit_content_new (GtkWindow * pWindow, GtkSourceView * pSrcView) {
 	SimpleditContent *self = SIMPLEDIT_CONTENT(g_object_new (SIMPLEDIT_TYPE_CONTENT, 
 		"window", pWindow, "sourceview", pSrcView, NULL));
 
@@ -156,10 +156,6 @@ gboolean simpledit_content_update_title(SimpleditContent * pEditData) {
 	g_free(pcTitle);
 	
 	return TRUE;
-}
-
-GtkWidget * simpledit_content_get_widget(SimpleditContent * pEditData, const gchar * sWidgetId) {
-	return NULL; //GTK_WIDGET(gtk_builder_get_object(pEditData->pBuilder, sWidgetId));
 }
 
 
@@ -400,7 +396,7 @@ void simpledit_content_load_cb_async (GObject *source_object, GAsyncResult *res,
 	success = gtk_source_file_loader_load_finish(pSrcFileLoader, res, &pErr);
 
 	if (!success) {
-		GtkWidget * pDlgMsg = gtk_message_dialog_new(GTK_WINDOW(pEditData->pWndEdit), GTK_DIALOG_DESTROY_WITH_PARENT,
+		GtkWidget * pDlgMsg = gtk_message_dialog_new(GTK_WINDOW(pEditData->pWindow), GTK_DIALOG_DESTROY_WITH_PARENT,
 										 GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
 										 "Error reading '%s' : (%i) %s",
 										 pEditData->pcFilename, pErr->code, pErr->message);
@@ -428,7 +424,7 @@ void simpledit_content_save_cb_async (GObject *source_object, GAsyncResult *res,
 	success = gtk_source_file_saver_save_finish(pSrcFileSaver, res, &pErr);
 
 	if (!success) {
-		GtkWidget * pDlgMsg = gtk_message_dialog_new(GTK_WINDOW(pEditData->pWndEdit), GTK_DIALOG_DESTROY_WITH_PARENT,
+		GtkWidget * pDlgMsg = gtk_message_dialog_new(GTK_WINDOW(pEditData->pWindow), GTK_DIALOG_DESTROY_WITH_PARENT,
 										 GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
 										 "Error writing '%s' : (%i) %s",
 										 pEditData->pcFilename, pErr->code, pErr->message);
