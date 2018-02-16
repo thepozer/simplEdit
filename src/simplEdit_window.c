@@ -22,10 +22,16 @@ struct _SimpleditAppWindow
 
 G_DEFINE_TYPE(SimpleditAppWindow, simpledit_app_window, GTK_TYPE_APPLICATION_WINDOW);
 
+typedef struct _sMenuLangItem {
+	SimpleditAppWindow *pWin;
+	GtkSourceLanguage * pSelLang;
+} sMenuLangItem;
+
+
 static void simpledit_app_window_init (SimpleditAppWindow *pWin) {
 	gtk_widget_init_template(GTK_WIDGET(pWin));
 	
-	GtkMenu * pMnuLanguages = simpledit_get_language_menu();
+	GtkMenu * pMnuLanguages = simpledit_app_window_get_language_menu(pWin);
 	gtk_menu_item_set_submenu(GTK_MENU_ITEM(pWin->menuLanguage), GTK_WIDGET(pMnuLanguages));
 }
 
@@ -207,6 +213,11 @@ void smpldt_clbk_menu_edit_paste (GtkMenuItem *menuitem, gpointer user_data) {
 	g_object_unref(pTxtBuff);
 }
 
+void smpldt_clbk_menu_language_item (GtkMenuItem *menuitem, gpointer user_data) {
+	sMenuLangItem * pMnuItemData = (sMenuLangItem *)user_data;
+	
+	simpledit_content_update_highlight(pMnuItemData->pWin->pEditData, pMnuItemData->pSelLang);
+}
 
 void smpldt_clbk_menu_search_find (GtkMenuItem *menuitem, gpointer user_data) {
 }
@@ -235,12 +246,13 @@ void smpldt_clbk_menu_about (GtkMenuItem *menuitem, gpointer user_data) {
 		NULL);
 }
 
-GtkMenu * simpledit_get_language_menu() {
+GtkMenu * simpledit_app_window_get_language_menu(SimpleditAppWindow *pWin) {
 	GtkSourceLanguageManager * pLangMngr = NULL;
 	GtkSourceLanguage * pLang = NULL;
 	GtkWidget * pMnuMain    = NULL;
 	GtkWidget * pMnuSection = NULL;
 	GtkWidget * pMnuItem    = NULL;
+	sMenuLangItem * pMnuItemData = NULL;
 	GHashTable * pHash = NULL;
 	const gchar * const * arpcLangIds = NULL;
 	const gchar * const * arpcPtrIds  = NULL;
@@ -258,14 +270,6 @@ GtkMenu * simpledit_get_language_menu() {
 		pcSection = gtk_source_language_get_section(pLang);
 		pcName    = gtk_source_language_get_name(pLang);
 		
-/*
-		g_print("Language id (%s) : ", pcCurrentId);
-		if (gtk_source_language_get_hidden(pLang)) {
-			g_print("hidden - ");
-		}
-		g_print("'%s/%s'\n", pcSection, pcName);
-*/
-		
 		if (!gtk_source_language_get_hidden(pLang)) {
 			pMnuSection = GTK_WIDGET(g_hash_table_lookup(pHash, pcSection));
 			
@@ -279,6 +283,11 @@ GtkMenu * simpledit_get_language_menu() {
 			pMnuItem = gtk_menu_item_new_with_label(pcName);
 			gtk_widget_show (pMnuItem);
 			gtk_menu_shell_append (GTK_MENU_SHELL(pMnuSection), pMnuItem);
+			
+			pMnuItemData = g_new0(sMenuLangItem, 1);
+			pMnuItemData->pWin = pWin;
+			pMnuItemData->pSelLang = pLang;
+			g_signal_connect (pMnuItem, "activate", G_CALLBACK (smpldt_clbk_menu_language_item), pMnuItemData);
 		}
 		
 	}
