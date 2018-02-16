@@ -25,6 +25,8 @@ gboolean simpledit_content_update_title(SimpleditContent * pEditData);
 
 GtkWidget * simpledit_content_extra_widget(SimpleditContent * pEditData);
 
+gchar * simpledit_content_get_status(SimpleditContent * pEditData);
+
 gboolean simpledit_content_have_filename(SimpleditContent * pEditData);
 gboolean simpledit_content_is_modified(SimpleditContent * pEditData);
 

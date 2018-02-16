@@ -7,6 +7,7 @@ struct _SimpleditAppWindow
 	SimpleditContent * pEditData;
 
 	GtkSourceView * pSrcView;
+	GtkStatusbar  * statusBar;
 	
 	GtkMenuItem * menuFileSave;
 	GtkMenuItem * menuFileSaveAs;
@@ -18,6 +19,8 @@ struct _SimpleditAppWindow
 	GtkMenuItem * menuEditCopy;
 
 	GtkMenuItem * menuLanguage;
+	
+	guint iSttsIdPosition;
 };
 
 G_DEFINE_TYPE(SimpleditAppWindow, simpledit_app_window, GTK_TYPE_APPLICATION_WINDOW);
@@ -27,17 +30,23 @@ typedef struct _sMenuLangItem {
 	GtkSourceLanguage * pSelLang;
 } sMenuLangItem;
 
+void smpldt_clbk_text_changed (GtkTextBuffer *textbuffer, gpointer user_data);
+void smpldt_clbk_cursor_position_changed (GtkTextBuffer *textbuffer, GParamSpec *pspec, gpointer user_data);
 
 static void simpledit_app_window_init (SimpleditAppWindow *pWin) {
 	gtk_widget_init_template(GTK_WIDGET(pWin));
 	
 	GtkMenu * pMnuLanguages = simpledit_app_window_get_language_menu(pWin);
 	gtk_menu_item_set_submenu(GTK_MENU_ITEM(pWin->menuLanguage), GTK_WIDGET(pMnuLanguages));
+	
+	pWin->iSttsIdPosition = gtk_statusbar_get_context_id (pWin->statusBar, "Cursor position");
 }
 
 static void simpledit_app_window_class_init (SimpleditAppWindowClass *pClass) {
 	gtk_widget_class_set_template_from_resource(GTK_WIDGET_CLASS(pClass), "/net/thepozer/simpledit/simplEdit.glade");
+	
 	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, pSrcView);
+	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, statusBar);
 	
 	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, menuFileSave);
 	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, menuFileSaveAs);
@@ -54,9 +63,14 @@ static void simpledit_app_window_class_init (SimpleditAppWindowClass *pClass) {
 SimpleditAppWindow * simpledit_app_window_new (SimpleditApp *pApp) {
 	SimpleditAppWindow * pWindow = g_object_new (SIMPLEDIT_APP_WINDOW_TYPE, "application", pApp, NULL);
 	
+	GtkTextBuffer * pTxtBuff = gtk_text_view_get_buffer(GTK_TEXT_VIEW(pWindow->pSrcView));
+	g_signal_connect (pTxtBuff, "changed", G_CALLBACK (smpldt_clbk_text_changed), pWindow);
+	g_signal_connect (pTxtBuff, "notify::cursor-position", G_CALLBACK (smpldt_clbk_cursor_position_changed), pWindow);
+	
 	pWindow->pEditData = simpledit_content_new(GTK_WINDOW(pWindow), pWindow->pSrcView);
 	
-	simpledit_content_update_title(pWindow->pEditData);
+	simpledit_content_update_highlight(pWindow->pEditData, NULL);
+	g_signal_emit_by_name(pTxtBuff, "changed", pWindow);
 	
 	return pWindow;
 }
@@ -71,6 +85,20 @@ void simpledit_app_window_open (SimpleditAppWindow *pWin, GFile *pFile) {
 	g_free(pcFileName);
 }
 
+void smpldt_clbk_cursor_position_changed (GtkTextBuffer *textbuffer, GParamSpec *pspec, gpointer user_data) {
+	SimpleditAppWindow * pWin = SIMPLEDIT_APP_WINDOW(user_data);
+	gchar * pcStatus = NULL;
+	
+	pcStatus = simpledit_content_get_status(pWin->pEditData);
+	gtk_statusbar_push(pWin->statusBar, pWin->iSttsIdPosition, pcStatus);
+	g_free(pcStatus);
+}
+
+void smpldt_clbk_text_changed (GtkTextBuffer *textbuffer, gpointer user_data) {
+	SimpleditAppWindow * pWin = SIMPLEDIT_APP_WINDOW(user_data);
+	
+	simpledit_content_update_title(pWin->pEditData);
+}
 
 void smpldt_clbk_menu_file (GtkMenuItem *menuitem, gpointer user_data) {
 	SimpleditAppWindow * pWin = SIMPLEDIT_APP_WINDOW(user_data);

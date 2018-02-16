@@ -12,6 +12,9 @@ struct _SimpleditContent {
 	gchar * pcFiletitle;
 	gboolean bWritable;
 	
+	GtkSourceLanguage * pSrcLang;
+	gchar * pcLanguage;
+	
 	/* Private Data */
 	GtkWidget * pLstWidgetCharset;
 	GtkWidget * pLstWidgetEndOfLines;
@@ -136,6 +139,7 @@ SimpleditContent * simpledit_content_new (GtkWindow * pWindow, GtkSourceView * p
 		"window", pWindow, "sourceview", pSrcView, NULL));
 
     self->pTxtBuff = gtk_text_view_get_buffer(GTK_TEXT_VIEW(self->pSrcView));
+    self->pSrcLang = NULL;
 	
 	gtk_text_buffer_set_text(self->pTxtBuff, "", 0);
 	gtk_text_buffer_set_modified(self->pTxtBuff, FALSE);
@@ -144,16 +148,21 @@ SimpleditContent * simpledit_content_new (GtkWindow * pWindow, GtkSourceView * p
 }
 
 gboolean simpledit_content_update_title(SimpleditContent * pEditData) {
-	gchar * pcTitle = NULL;
+	GString * pStrTitle = NULL;
+	
+	pStrTitle = g_string_new("simplEdit");
 	
 	if (pEditData->pcFiletitle != NULL) {
-		pcTitle = g_strdup_printf("simplEdit - %s", pEditData->pcFiletitle);
-		gtk_window_set_title(GTK_WINDOW(pEditData->pWindow), pcTitle);
-	} else {
-		gtk_window_set_title(GTK_WINDOW(pEditData->pWindow), "simplEdit");
+		g_string_append(pStrTitle, " - ");
+		g_string_append(pStrTitle, pEditData->pcFiletitle);
+	}	
+	
+	if (gtk_text_buffer_get_modified(GTK_TEXT_BUFFER(pEditData->pTxtBuff))) {
+		g_string_append(pStrTitle, " *");
 	}
 	
-	g_free(pcTitle);
+	gtk_window_set_title(GTK_WINDOW(pEditData->pWindow), pStrTitle->str);
+	g_string_free(pStrTitle, TRUE);
 	
 	return TRUE;
 }
@@ -165,6 +174,25 @@ gboolean simpledit_content_have_filename(SimpleditContent * pEditData) {
 
 gboolean simpledit_content_is_modified(SimpleditContent * pEditData) {
 	return gtk_text_buffer_get_modified(GTK_TEXT_BUFFER(pEditData->pTxtBuff));
+}
+
+gchar * simpledit_content_get_status(SimpleditContent * pEditData) {
+	GtkTextIter sIter;
+	GString * pStrStatus = g_string_new("");
+	gint iTotalNbLine = 0, iLine = 0, iCol = 0, iPos = 0;
+	
+	g_object_get(GTK_TEXT_BUFFER(pEditData->pTxtBuff), "cursor-position", &iPos, NULL);
+	gtk_text_buffer_get_iter_at_offset(GTK_TEXT_BUFFER(pEditData->pTxtBuff), &sIter, iPos);
+	iLine = gtk_text_iter_get_line(&sIter) + 1;
+	iCol = gtk_text_iter_get_line_offset(&sIter) + 1;
+	
+	iTotalNbLine = gtk_text_buffer_get_line_count(GTK_TEXT_BUFFER(pEditData->pTxtBuff));
+		
+	g_string_append_printf(pStrStatus, "Ligne : %d / %d \tCol : %d", iLine, iTotalNbLine, iCol);
+	
+	g_string_append_printf(pStrStatus, "\tFile type : %s", pEditData->pcLanguage);
+
+	return g_string_free(pStrStatus, FALSE);
 }
 
 gboolean simpledit_content_reset(SimpleditContent * pEditData) {
@@ -393,7 +421,7 @@ gboolean simpledit_content_update_highlight(SimpleditContent * pEditData, GtkSou
 	gchar * pcContentType = NULL;
 	gboolean bResultUncertain = FALSE;
 	
-	if (!pCurrentSrcLang) {
+	if (!pCurrentSrcLang && pEditData->pcFilename) {
 		pcContentType = g_content_type_guess (pEditData->pcFilename, NULL, 0, &bResultUncertain);
 		if (bResultUncertain) {
 			g_free (pcContentType);
@@ -404,8 +432,13 @@ gboolean simpledit_content_update_highlight(SimpleditContent * pEditData, GtkSou
 		g_free (pcContentType);
 	}
 	
-	if (pCurrentSrcLang) {
-		gtk_source_buffer_set_language(GTK_SOURCE_BUFFER(pEditData->pTxtBuff), pCurrentSrcLang);
+	pEditData->pSrcLang = pCurrentSrcLang;
+	gtk_source_buffer_set_language(GTK_SOURCE_BUFFER(pEditData->pTxtBuff), pCurrentSrcLang);
+	
+	if (pEditData->pSrcLang) {
+		pEditData->pcLanguage = gtk_source_language_get_name(pEditData->pSrcLang);
+	} else {
+		pEditData->pcLanguage = g_strdup("Text");
 	}
 }
 
@@ -425,6 +458,7 @@ void simpledit_content_load_cb_async (GObject *source_object, GAsyncResult *res,
 		gtk_dialog_run (GTK_DIALOG (pDlgMsg));
 		gtk_widget_destroy (pDlgMsg);
 	} else {
+		g_signal_emit_by_name(pEditData->pTxtBuff, "changed", pEditData->pWindow);
 		simpledit_content_update_highlight(pEditData, NULL);
 	}
 }
@@ -455,6 +489,7 @@ void simpledit_content_save_cb_async (GObject *source_object, GAsyncResult *res,
 		gtk_dialog_run (GTK_DIALOG (pDlgMsg));
 		gtk_widget_destroy (pDlgMsg);
 	} else {
+		g_signal_emit_by_name(pEditData->pTxtBuff, "changed", pEditData->pWindow);
 		simpledit_content_update_highlight(pEditData, NULL);
 	}
 }

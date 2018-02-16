@@ -1,4 +1,4 @@
-AC_INIT([simplEdit], [0.2.0], [Didier prolhac <dev@thepozer.net>])
+AC_INIT([simplEdit], [0.2.3], [Didier prolhac <dev@thepozer.net>])
 AC_CONFIG_SRCDIR([src/simplEdit_main.c])
 AM_INIT_AUTOMAKE([-Wall foreign])
 AM_SILENT_RULES([yes])
