@@ -287,7 +287,8 @@ GtkMenu * simpledit_get_language_menu() {
 	gtk_widget_show(pMnuMain);
 	
 	GList * pListSection = g_hash_table_get_keys(pHash);
-	pListSection = g_list_sort(pListSection, g_strcmp0);
+	int g_str_cmp (gconstpointer a, gconstpointer b) { return g_strcmp0(a, b); }
+	pListSection = g_list_sort(pListSection, g_str_cmp);
 	
 	void addSectionMenu(gpointer data, gpointer user_data) {
 		pMnuSection = GTK_WIDGET(g_hash_table_lookup(pHash, data));
