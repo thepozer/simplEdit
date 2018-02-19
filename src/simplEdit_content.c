@@ -13,12 +13,12 @@ struct _SimpleditContent {
 	gboolean bWritable;
 	
 	GtkSourceLanguage * pSrcLang;
-	gchar * pcLanguage;
+	const gchar * pcLanguage;
 	
 	/* Private Data */
-	GtkWidget * pLstWidgetCharset;
-	GtkWidget * pLstWidgetEndOfLines;
-	GtkWidget * pLstWidgetCompress;
+    const GtkSourceEncoding * pEncod;
+	GtkSourceNewlineType eTypeEOL;
+    GtkSourceCompressionType eCompType;
 };
 
 G_DEFINE_TYPE (SimpleditContent, simpledit_content, G_TYPE_OBJECT) ;
@@ -131,6 +131,10 @@ static void simpledit_content_init (SimpleditContent *self) {
 	
 	self->pSrcFile = gtk_source_file_new();
 	gtk_source_file_set_location(self->pSrcFile, NULL);
+	
+	self->pEncod = gtk_source_encoding_get_utf8();
+	self->eTypeEOL = GTK_SOURCE_NEWLINE_TYPE_DEFAULT;
+	self->eCompType = GTK_SOURCE_COMPRESSION_TYPE_NONE;
 }
 
 
@@ -288,26 +292,23 @@ gboolean searchIntIntoCombo (GtkTreeModel *model, GtkTreePath *path, GtkTreeIter
 }
 
 
-GtkWidget * simpledit_content_extra_widget(SimpleditContent * pEditData) {
-	GtkWidget * pHBox, * pLabel;
+gint simpledit_content_file_dialog(SimpleditContent * pEditData, GtkWidget * pDlgFile) {
+	GtkWidget  * pHBox, * pLabel, * pLstWidgetCharset, * pLstWidgetEndOfLines, * pLstWidgetCompress;
 	GtkCellRenderer * pCellRndr = NULL;
 	GtkListStore * pLstModelEOL, *pLstModelCompress, * pLstModelCharset;
 	GtkTreeIter iter, * pIterSel;
-    const GtkSourceEncoding * pEncod = NULL;
-	GtkSourceNewlineType eTypeEOL;
-    GtkSourceCompressionType eCompType;
+	GValue vRetVal = G_VALUE_INIT;
     const gchar * pSelCharset = NULL;
-    
-    pEncod = gtk_source_file_get_encoding(pEditData->pSrcFile);
-    if (!pEncod) {
-        pEncod = gtk_source_encoding_get_utf8();
-    }
-    pSelCharset = gtk_source_encoding_get_charset(pEncod);
-    eTypeEOL = gtk_source_file_get_newline_type(pEditData->pSrcFile);
-    eCompType = gtk_source_file_get_compression_type(pEditData->pSrcFile);
-//g_print("Encoding : %s (%s)\n", gtk_source_encoding_get_name(pEncod), pSelCharset);
-//g_print("EOL : %d\n", eTypeEOL);
-//g_print("Compress : %d\n", eCompType);
+	gint iResult = GTK_RESPONSE_CANCEL;
+	
+    if (!pDlgFile) {
+		return GTK_RESPONSE_CANCEL;
+	}
+
+    pSelCharset = gtk_source_encoding_get_charset(pEditData->pEncod);
+g_print("Encoding : %s (%s)\n", gtk_source_encoding_get_name(pEditData->pEncod), pSelCharset);
+g_print("EOL : %d\n", pEditData->eTypeEOL);
+g_print("Compress : %d\n", pEditData->eCompType);
     
     
 	pHBox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
@@ -321,35 +322,35 @@ GtkWidget * simpledit_content_extra_widget(SimpleditContent * pEditData) {
 	GSList * pLstAllEncod = gtk_source_encoding_get_all();
 	g_slist_foreach(pLstAllEncod, insertCharsetIntoCombo, (gpointer)pLstModelCharset);
 	g_slist_free(pLstAllEncod);
-	pEditData->pLstWidgetCharset = gtk_combo_box_new_with_model(GTK_TREE_MODEL(pLstModelCharset));
+	pLstWidgetCharset = gtk_combo_box_new_with_model(GTK_TREE_MODEL(pLstModelCharset));
  	pCellRndr = gtk_cell_renderer_text_new ();
-	gtk_cell_layout_pack_start (GTK_CELL_LAYOUT(pEditData->pLstWidgetCharset), pCellRndr, FALSE);
-	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(pEditData->pLstWidgetCharset), pCellRndr, "text", 1, NULL);
+	gtk_cell_layout_pack_start (GTK_CELL_LAYOUT(pLstWidgetCharset), pCellRndr, FALSE);
+	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(pLstWidgetCharset), pCellRndr, "text", 1, NULL);
 	
-	searchParam = (struct _searchParam){.pCombo = pEditData->pLstWidgetCharset, .txtSel = pSelCharset, .iSel = 0};
+	searchParam = (struct _searchParam){.pCombo = pLstWidgetCharset, .txtSel = pSelCharset, .iSel = 0};
 	gtk_tree_model_foreach(GTK_TREE_MODEL(pLstModelCharset), searchTextIntoCombo, &searchParam);
 	
-	gtk_widget_show(pEditData->pLstWidgetCharset);
-	gtk_box_pack_start(GTK_BOX(pHBox), pEditData->pLstWidgetCharset, TRUE, TRUE, 1);
+	gtk_widget_show(pLstWidgetCharset);
+	gtk_box_pack_start(GTK_BOX(pHBox), pLstWidgetCharset, TRUE, TRUE, 1);
 
 	pLabel = gtk_label_new("End of line :");
 	gtk_widget_show(pLabel);
 	gtk_box_pack_start(GTK_BOX(pHBox), pLabel, TRUE, TRUE, 1);
 	
 	pLstModelEOL = gtk_list_store_new (2, G_TYPE_INT, G_TYPE_STRING);
-	gtk_list_store_insert_with_values (pLstModelEOL, &iter, -1, 0, GTK_SOURCE_NEWLINE_TYPE_LF,   1, "Unix (\\n)", -1);
-	gtk_list_store_insert_with_values (pLstModelEOL, &iter, -1, 0, GTK_SOURCE_NEWLINE_TYPE_CR_LF, 1, "Windows (\\r\\n)", -1);
-	gtk_list_store_insert_with_values (pLstModelEOL, &iter, -1, 0, GTK_SOURCE_NEWLINE_TYPE_CR,   1, "Mac (\\r)", -1);
-	pEditData->pLstWidgetEndOfLines = gtk_combo_box_new_with_model(GTK_TREE_MODEL(pLstModelEOL));
+	gtk_list_store_insert_with_values (pLstModelEOL, &iter, -1, 0, GTK_SOURCE_NEWLINE_TYPE_LF,   1, "Unix (LF)", -1);
+	gtk_list_store_insert_with_values (pLstModelEOL, &iter, -1, 0, GTK_SOURCE_NEWLINE_TYPE_CR_LF, 1, "Windows (CR LF)", -1);
+	gtk_list_store_insert_with_values (pLstModelEOL, &iter, -1, 0, GTK_SOURCE_NEWLINE_TYPE_CR,   1, "Mac (CR)", -1);
+	pLstWidgetEndOfLines = gtk_combo_box_new_with_model(GTK_TREE_MODEL(pLstModelEOL));
  	pCellRndr = gtk_cell_renderer_text_new ();
-	gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (pEditData->pLstWidgetEndOfLines), pCellRndr, FALSE);
-	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (pEditData->pLstWidgetEndOfLines), pCellRndr, "text", 1, NULL);
+	gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (pLstWidgetEndOfLines), pCellRndr, FALSE);
+	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (pLstWidgetEndOfLines), pCellRndr, "text", 1, NULL);
 	
-	searchParam = (struct _searchParam){.pCombo = pEditData->pLstWidgetEndOfLines, .txtSel = NULL, .iSel = eTypeEOL};
+	searchParam = (struct _searchParam){.pCombo = pLstWidgetEndOfLines, .txtSel = NULL, .iSel = pEditData->eTypeEOL};
 	gtk_tree_model_foreach(GTK_TREE_MODEL(pLstModelEOL), searchIntIntoCombo, &searchParam);
 	
-	gtk_widget_show(pEditData->pLstWidgetEndOfLines);
-	gtk_box_pack_start(GTK_BOX(pHBox), pEditData->pLstWidgetEndOfLines, TRUE, TRUE, 1);
+	gtk_widget_show(pLstWidgetEndOfLines);
+	gtk_box_pack_start(GTK_BOX(pHBox), pLstWidgetEndOfLines, TRUE, TRUE, 1);
 
 	pLabel = gtk_label_new("Compression :");
 	gtk_widget_show(pLabel);
@@ -358,18 +359,47 @@ GtkWidget * simpledit_content_extra_widget(SimpleditContent * pEditData) {
 	pLstModelCompress = gtk_list_store_new (2, G_TYPE_INT, G_TYPE_STRING);
     gtk_list_store_insert_with_values(pLstModelCompress, &iter, -1, 0, GTK_SOURCE_COMPRESSION_TYPE_NONE, 1, "None", -1);
     gtk_list_store_insert_with_values(pLstModelCompress, &iter, -1, 0, GTK_SOURCE_COMPRESSION_TYPE_GZIP, 1, "Gzip (.gz)", -1);
-	pEditData->pLstWidgetCompress = gtk_combo_box_new_with_model(GTK_TREE_MODEL(pLstModelCompress));
+	pLstWidgetCompress = gtk_combo_box_new_with_model(GTK_TREE_MODEL(pLstModelCompress));
  	pCellRndr = gtk_cell_renderer_text_new ();
-	gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (pEditData->pLstWidgetCompress), pCellRndr, FALSE);
-	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (pEditData->pLstWidgetCompress), pCellRndr, "text", 1, NULL);
+	gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (pLstWidgetCompress), pCellRndr, FALSE);
+	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (pLstWidgetCompress), pCellRndr, "text", 1, NULL);
 
-	searchParam = (struct _searchParam){.pCombo = pEditData->pLstWidgetCompress, .txtSel = NULL, .iSel = eTypeEOL};
+	searchParam = (struct _searchParam){.pCombo = pLstWidgetCompress, .txtSel = NULL, .iSel = pEditData->eCompType};
 	gtk_tree_model_foreach(GTK_TREE_MODEL(pLstModelCompress), searchIntIntoCombo, &searchParam);
 	
-	gtk_widget_show(pEditData->pLstWidgetCompress);
-	gtk_box_pack_start(GTK_BOX(pHBox), pEditData->pLstWidgetCompress, TRUE, TRUE, 1);
+	gtk_widget_show(pLstWidgetCompress);
+	gtk_box_pack_start(GTK_BOX(pHBox), pLstWidgetCompress, TRUE, TRUE, 1);
     
-	return pHBox;
+
+	gtk_file_chooser_set_extra_widget(GTK_FILE_CHOOSER(pDlgFile), pHBox);
+	
+	iResult = gtk_dialog_run (GTK_DIALOG (pDlgFile));
+	
+	if (gtk_combo_box_get_active_iter(GTK_COMBO_BOX(pLstWidgetCharset), &iter)) {
+		gtk_tree_model_get_value(GTK_TREE_MODEL(pLstModelCharset), &iter, 0, &vRetVal);
+		pEditData->pEncod = gtk_source_encoding_get_from_charset(g_value_get_string(&vRetVal));
+		g_value_unset(&vRetVal);
+		
+		pSelCharset = gtk_source_encoding_get_charset(pEditData->pEncod);
+g_print("Selected - Encoding : %s (%s)\n", gtk_source_encoding_get_name(pEditData->pEncod), pSelCharset);
+	}
+	
+	if (gtk_combo_box_get_active_iter(GTK_COMBO_BOX(pLstWidgetEndOfLines), &iter)) {
+		gtk_tree_model_get_value(GTK_TREE_MODEL(pLstModelEOL), &iter, 0, &vRetVal);
+		pEditData->eTypeEOL = g_value_get_int(&vRetVal);
+		g_value_unset(&vRetVal);
+		
+g_print("Selected - EOL : %d\n", pEditData->eTypeEOL);
+	}
+	
+	if (gtk_combo_box_get_active_iter(GTK_COMBO_BOX(pLstWidgetCompress), &iter)) {
+		gtk_tree_model_get_value(GTK_TREE_MODEL(pLstModelCompress), &iter, 0, &vRetVal);
+		pEditData->eCompType = g_value_get_int(&vRetVal);
+		g_value_unset(&vRetVal);
+		
+g_print("Selected - Compress : %d\n", pEditData->eCompType);
+	}
+	return iResult;
 }
 
 gboolean simpledit_content_select_name(SimpleditContent * pEditData, GtkFileChooserAction action) {
@@ -391,14 +421,9 @@ gboolean simpledit_content_select_name(SimpleditContent * pEditData, GtkFileChoo
         } else if (action == GTK_FILE_CHOOSER_ACTION_SAVE) {
             gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(pDlgFile), "New file");
         }
+        
+        iResult = simpledit_content_file_dialog(pEditData, pDlgFile);
 	    
-	    if (action == GTK_FILE_CHOOSER_ACTION_SAVE) {
-			GtkWidget * pHBox = simpledit_content_extra_widget(pEditData);
-			gtk_file_chooser_set_extra_widget(GTK_FILE_CHOOSER(pDlgFile), pHBox);
-		}
-	    
-        iResult = gtk_dialog_run (GTK_DIALOG (pDlgFile));
-
         if (iResult == GTK_RESPONSE_ACCEPT) {
             GtkFileChooser * pChooser = GTK_FILE_CHOOSER (pDlgFile);
             gchar * pcNewFilename = gtk_file_chooser_get_filename (pChooser);
@@ -458,6 +483,17 @@ void simpledit_content_load_cb_async (GObject *source_object, GAsyncResult *res,
 		gtk_dialog_run (GTK_DIALOG (pDlgMsg));
 		gtk_widget_destroy (pDlgMsg);
 	} else {
+		pEditData->pEncod = gtk_source_file_get_encoding(pEditData->pSrcFile);
+		if (!pEditData->pEncod) {
+			pEditData->pEncod = gtk_source_encoding_get_utf8();
+		}
+		
+		pEditData->eTypeEOL = gtk_source_file_get_newline_type(pEditData->pSrcFile);
+		pEditData->eCompType = gtk_source_file_get_compression_type(pEditData->pSrcFile);
+g_print("load_cb_async - Encoding : %s (%s)\n", gtk_source_encoding_get_name(pEditData->pEncod), gtk_source_encoding_get_charset(pEditData->pEncod));
+g_print("load_cb_async - EOL : %d\n", pEditData->eTypeEOL);
+g_print("load_cb_async - Compress : %d\n", pEditData->eCompType);
+		
 		g_signal_emit_by_name(pEditData->pTxtBuff, "changed", pEditData->pWindow);
 		simpledit_content_update_highlight(pEditData, NULL);
 	}
@@ -466,7 +502,19 @@ void simpledit_content_load_cb_async (GObject *source_object, GAsyncResult *res,
 
 gboolean simpledit_content_load(SimpleditContent * pEditData) {
 	GtkSourceFileLoader * pSrcFileLoader = NULL;
-	pSrcFileLoader = gtk_source_file_loader_new(GTK_SOURCE_BUFFER(pEditData->pTxtBuff), pEditData->pSrcFile);
+	GFileInputStream * pInStream = NULL;
+	GError * pErr = NULL;
+	
+	pInStream = g_file_read(gtk_source_file_get_location(pEditData->pSrcFile), NULL, &pErr);
+	if (pErr) {
+		GtkWidget * pDlgMsg = gtk_message_dialog_new(GTK_WINDOW(pEditData->pWindow), GTK_DIALOG_DESTROY_WITH_PARENT,
+										 GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
+										 "Error reading (stream) '%s' : (%i) %s",
+										 pEditData->pcFilename, pErr->code, pErr->message);
+		gtk_dialog_run (GTK_DIALOG (pDlgMsg));
+		gtk_widget_destroy (pDlgMsg);
+	}
+	pSrcFileLoader = gtk_source_file_loader_new_from_stream(GTK_SOURCE_BUFFER(pEditData->pTxtBuff), pEditData->pSrcFile, G_INPUT_STREAM(pInStream));
 	
 	gtk_source_file_loader_load_async(pSrcFileLoader, G_PRIORITY_DEFAULT, NULL, NULL, NULL, NULL, simpledit_content_load_cb_async, (gpointer)pEditData);
 
@@ -489,6 +537,17 @@ void simpledit_content_save_cb_async (GObject *source_object, GAsyncResult *res,
 		gtk_dialog_run (GTK_DIALOG (pDlgMsg));
 		gtk_widget_destroy (pDlgMsg);
 	} else {
+		pEditData->pEncod = gtk_source_file_get_encoding(pEditData->pSrcFile);
+		if (!pEditData->pEncod) {
+			pEditData->pEncod = gtk_source_encoding_get_utf8();
+		}
+		
+		pEditData->eTypeEOL = gtk_source_file_get_newline_type(pEditData->pSrcFile);
+		pEditData->eCompType = gtk_source_file_get_compression_type(pEditData->pSrcFile);
+g_print("save_cb_async - Encoding : %s (%s)\n", gtk_source_encoding_get_name(pEditData->pEncod), gtk_source_encoding_get_charset(pEditData->pEncod));
+g_print("save_cb_async - EOL : %d\n", pEditData->eTypeEOL);
+g_print("save_cb_async - Compress : %d\n", pEditData->eCompType);
+		
 		g_signal_emit_by_name(pEditData->pTxtBuff, "changed", pEditData->pWindow);
 		simpledit_content_update_highlight(pEditData, NULL);
 	}
@@ -497,6 +556,10 @@ void simpledit_content_save_cb_async (GObject *source_object, GAsyncResult *res,
 gboolean simpledit_content_save(SimpleditContent * pEditData) {
 	GtkSourceFileSaver * pSrcFileSaver = NULL;
 	pSrcFileSaver = gtk_source_file_saver_new(GTK_SOURCE_BUFFER(pEditData->pTxtBuff), pEditData->pSrcFile);
+	
+	gtk_source_file_saver_set_encoding(pSrcFileSaver, pEditData->pEncod);
+	gtk_source_file_saver_set_newline_type(pSrcFileSaver, pEditData->eTypeEOL);
+	gtk_source_file_saver_set_compression_type(pSrcFileSaver, pEditData->eCompType);
 	
 	gtk_source_file_saver_save_async(pSrcFileSaver, G_PRIORITY_DEFAULT, NULL, NULL, NULL, NULL, simpledit_content_save_cb_async, (gpointer)pEditData);
 

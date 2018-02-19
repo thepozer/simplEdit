@@ -23,7 +23,7 @@ SimpleditContent * simpledit_content_new (GtkWindow * pWindow, GtkSourceView * p
 
 gboolean simpledit_content_update_title(SimpleditContent * pEditData);
 
-GtkWidget * simpledit_content_extra_widget(SimpleditContent * pEditData);
+gint simpledit_content_file_dialog(SimpleditContent * pEditData, GtkWidget * pDlgFile);
 
 gchar * simpledit_content_get_status(SimpleditContent * pEditData);
 
