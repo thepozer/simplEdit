@@ -16,3 +16,8 @@ simplEdit.gresources.c: simplEdit.gresources.xml simplEdit.glade
 
 simplEdit.gresources.h: simplEdit.gresources.xml simplEdit.glade
 	$(AM_V_GEN) glib-compile-resources --generate-header $<
+
+gsettings_SCHEMAS = net.thepozer.simpledit.gschema.xml
+EXTRA_DIST = $(gsettings_SCHEMAS)
+
+@GSETTINGS_RULES@
