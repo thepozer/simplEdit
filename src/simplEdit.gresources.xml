@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gresources>
   <gresource prefix="/net/thepozer/simpledit">
-    <file>simplEdit.glade</file>
+    <file>simplEdit.SimpleditAppWindow.glade</file>
+    <file>simplEdit.SimpleditPrefDialog.glade</file>
   </gresource>
 </gresources>

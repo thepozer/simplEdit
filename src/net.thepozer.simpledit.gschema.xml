@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist>
-  <schema path="/net/thepozer/simpledit/" id="net.thepozer.simpledit/">
+  <schema path="/net/thepozer/simpledit/" id="net.thepozer.simpledit">
     <key name="font" type="s">
       <default>'Monospace 12'</default>
       <summary>Font</summary>

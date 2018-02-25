@@ -1,4 +1,5 @@
 #include "simplEdit_window.h"
+#include "simplEdit_pref_dialog.h"
 
 struct _SimpleditAppWindow
 {
@@ -43,7 +44,7 @@ static void simpledit_app_window_init (SimpleditAppWindow *pWin) {
 }
 
 static void simpledit_app_window_class_init (SimpleditAppWindowClass *pClass) {
-	gtk_widget_class_set_template_from_resource(GTK_WIDGET_CLASS(pClass), "/net/thepozer/simpledit/simplEdit.glade");
+	gtk_widget_class_set_template_from_resource(GTK_WIDGET_CLASS(pClass), "/net/thepozer/simpledit/simplEdit.SimpleditAppWindow.glade");
 	
 	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, pSrcView);
 	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, statusBar);
@@ -239,6 +240,13 @@ void smpldt_clbk_menu_edit_paste (GtkMenuItem *menuitem, gpointer user_data) {
 	gtk_text_buffer_paste_clipboard(pTxtBuff, pClipboard, NULL, bWritable);
 
 	g_object_unref(pTxtBuff);
+}
+
+void smpldt_clbk_menu_edit_preference (GtkMenuItem *menuitem, gpointer user_data) {
+	SimpleditPrefDialog * pDialog = NULL;
+	
+	pDialog = simpledit_pref_dialog_new(SIMPLEDIT_APP_WINDOW(user_data));
+	gtk_dialog_run(GTK_DIALOG(pDialog));
 }
 
 void smpldt_clbk_menu_language_item (GtkMenuItem *menuitem, gpointer user_data) {
