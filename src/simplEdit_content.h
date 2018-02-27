@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include "simplEdit_main.h"
+#include "simplEdit_app.h"
 
 #include <glib-object.h>
 

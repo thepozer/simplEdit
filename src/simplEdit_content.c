@@ -139,6 +139,7 @@ static void simpledit_content_init (SimpleditContent *self) {
 
 
 SimpleditContent * simpledit_content_new (GtkWindow * pWindow, GtkSourceView * pSrcView) {
+	GSettings * pSettings = NULL;
 	SimpleditContent *self = SIMPLEDIT_CONTENT(g_object_new (SIMPLEDIT_TYPE_CONTENT, 
 		"window", pWindow, "sourceview", pSrcView, NULL));
 
@@ -148,6 +149,21 @@ SimpleditContent * simpledit_content_new (GtkWindow * pWindow, GtkSourceView * p
 	gtk_text_buffer_set_text(self->pTxtBuff, "", 0);
 	gtk_text_buffer_set_modified(self->pTxtBuff, FALSE);
 
+	pSettings = simpledit_app_get_settings(SIMPLEDIT_APP(gtk_window_get_application(GTK_WINDOW(pWindow))));
+	
+	g_settings_bind (pSettings, "show-line-numbers", pSrcView, "show-line-numbers", G_SETTINGS_BIND_DEFAULT);
+	g_settings_bind (pSettings, "show-line-marks", pSrcView, "show-line-marks", G_SETTINGS_BIND_DEFAULT);
+	g_settings_bind (pSettings, "highlight-current-line", pSrcView, "highlight-current-line", G_SETTINGS_BIND_DEFAULT);
+	//g_settings_bind (pSettings, "font", pSrcView, "active", G_SETTINGS_BIND_DEFAULT);
+	g_settings_bind (pSettings, "show-right-margin", pSrcView, "show-right-margin", G_SETTINGS_BIND_DEFAULT);
+	g_settings_bind (pSettings, "right-margin-position", pSrcView, "right-margin-position", G_SETTINGS_BIND_DEFAULT);
+	
+	g_settings_bind (pSettings, "auto-indent", pSrcView, "auto-indent", G_SETTINGS_BIND_DEFAULT);
+	g_settings_bind (pSettings, "indent-on-tab", pSrcView, "indent-on-tab", G_SETTINGS_BIND_DEFAULT);
+	g_settings_bind (pSettings, "smart-backspace", pSrcView, "smart-backspace", G_SETTINGS_BIND_DEFAULT);
+	g_settings_bind (pSettings, "insert-spaces-instead-of-tabs", pSrcView, "insert-spaces-instead-of-tabs", G_SETTINGS_BIND_DEFAULT);
+	g_settings_bind (pSettings, "indent-width", pSrcView, "indent-width", G_SETTINGS_BIND_DEFAULT);
+	g_settings_bind (pSettings, "tab-width", pSrcView, "tab-width", G_SETTINGS_BIND_DEFAULT);
     return self;
 }
 

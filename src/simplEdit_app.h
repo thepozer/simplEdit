@@ -9,5 +9,6 @@ G_DECLARE_FINAL_TYPE (SimpleditApp, simpledit_app, SIMPLEDIT, APP, GtkApplicatio
 
 SimpleditApp * simpledit_app_new (void);
 
+GSettings * simpledit_app_get_settings (SimpleditApp * pApp);
 
 #endif /* __SIMPLEDIT_APP_H__ */

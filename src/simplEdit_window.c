@@ -1,8 +1,7 @@
 #include "simplEdit_window.h"
 #include "simplEdit_pref_dialog.h"
 
-struct _SimpleditAppWindow
-{
+struct _SimpleditAppWindow {
 	GtkApplicationWindow parent;
 
 	SimpleditContent * pEditData;
@@ -243,9 +242,13 @@ void smpldt_clbk_menu_edit_paste (GtkMenuItem *menuitem, gpointer user_data) {
 }
 
 void smpldt_clbk_menu_edit_preference (GtkMenuItem *menuitem, gpointer user_data) {
+	SimpleditAppWindow * pWindow = SIMPLEDIT_APP_WINDOW(user_data);
+	SimpleditApp * pApp = NULL;
 	SimpleditPrefDialog * pDialog = NULL;
 	
-	pDialog = simpledit_pref_dialog_new(SIMPLEDIT_APP_WINDOW(user_data));
+	pApp = SIMPLEDIT_APP(gtk_window_get_application(GTK_WINDOW(pWindow)));
+	
+	pDialog = simpledit_pref_dialog_new(pWindow, simpledit_app_get_settings(pApp));
 	gtk_dialog_run(GTK_DIALOG(pDialog));
 }
 
