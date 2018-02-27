@@ -1,5 +1,6 @@
 #include "simplEdit_window.h"
 #include "simplEdit_pref_dialog.h"
+#include "simplEdit_search_dialog.h"
 
 struct _SimpleditAppWindow {
 	GtkApplicationWindow parent;
@@ -259,6 +260,11 @@ void smpldt_clbk_menu_language_item (GtkMenuItem *menuitem, gpointer user_data) 
 }
 
 void smpldt_clbk_menu_search_find (GtkMenuItem *menuitem, gpointer user_data) {
+	SimpleditAppWindow * pWindow = SIMPLEDIT_APP_WINDOW(user_data);
+	SimpleditSearchDialog * pDialog = NULL;
+	
+	pDialog = simpledit_search_dialog_new(pWindow);
+	gtk_dialog_run(GTK_DIALOG(pDialog));
 }
 
 void smpldt_clbk_menu_search_replace (GtkMenuItem *menuitem, gpointer user_data) {

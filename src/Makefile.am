@@ -8,14 +8,15 @@ simplEdit_app.c \
 simplEdit_window.c \
 simplEdit_content.c \
 simplEdit_pref_dialog.c \
+simplEdit_search_dialog.c \
 simplEdit.gresources.h \
 simplEdit.gresources.c
 
 
-simplEdit.gresources.c: simplEdit.gresources.xml simplEdit.SimpleditAppWindow.glade simplEdit.SimpleditPrefDialog.glade
+simplEdit.gresources.c: simplEdit.gresources.xml simplEdit.SimpleditAppWindow.glade simplEdit.SimpleditPrefDialog.glade simplEdit.SimpleditSearchDialog.glade
 	$(AM_V_GEN) glib-compile-resources --generate-source $<
 
-simplEdit.gresources.h: simplEdit.gresources.xml simplEdit.SimpleditAppWindow.glade simplEdit.SimpleditPrefDialog.glade
+simplEdit.gresources.h: simplEdit.gresources.xml simplEdit.SimpleditAppWindow.glade simplEdit.SimpleditPrefDialog.glade simplEdit.SimpleditSearchDialog.glade
 	$(AM_V_GEN) glib-compile-resources --generate-header $<
 
 gsettings_SCHEMAS = net.thepozer.simpledit.gschema.xml

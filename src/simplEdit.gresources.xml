@@ -3,5 +3,6 @@
   <gresource prefix="/net/thepozer/simpledit">
     <file>simplEdit.SimpleditAppWindow.glade</file>
     <file>simplEdit.SimpleditPrefDialog.glade</file>
+    <file>simplEdit.SimpleditSearchDialog.glade</file>
   </gresource>
 </gresources>

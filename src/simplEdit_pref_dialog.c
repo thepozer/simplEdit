@@ -46,7 +46,7 @@ static void simpledit_pref_dialog_class_init (SimpleditPrefDialogClass *pClass) 
 }
 
 SimpleditPrefDialog * simpledit_pref_dialog_new (SimpleditAppWindow *pWindow, GSettings * pSettings) {
-	SimpleditPrefDialog * pDialog = g_object_new(SIMPLEDIT_PREF_DIALOG_TYPE, "transient-for", pWindow, "use-header-bar", TRUE, NULL);
+	SimpleditPrefDialog * pDialog = g_object_new(SIMPLEDIT_PREF_DIALOG_TYPE, "transient-for", pWindow, NULL);
 	
 	pDialog->pSettings = pSettings;
 	
