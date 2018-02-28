@@ -17,6 +17,6 @@ void                 simpledit_app_window_open (SimpleditAppWindow * pWin, GFile
 
 
 GtkMenu * simpledit_app_window_get_language_menu(SimpleditAppWindow *pWin);
-
+SimpleditContent * simpledit_app_window_get_content (SimpleditAppWindow *pWin);
 
 #endif /* __SIMPLEDIT_WINDOW_H__ */

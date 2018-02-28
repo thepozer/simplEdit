@@ -86,6 +86,10 @@ void simpledit_app_window_open (SimpleditAppWindow *pWin, GFile *pFile) {
 	g_free(pcFileName);
 }
 
+SimpleditContent * simpledit_app_window_get_content (SimpleditAppWindow *pWin) {
+	return pWin->pEditData;
+}
+
 void smpldt_clbk_cursor_position_changed (GtkTextBuffer *textbuffer, GParamSpec *pspec, gpointer user_data) {
 	SimpleditAppWindow * pWin = SIMPLEDIT_APP_WINDOW(user_data);
 	gchar * pcStatus = NULL;
@@ -264,7 +268,7 @@ void smpldt_clbk_menu_search_find (GtkMenuItem *menuitem, gpointer user_data) {
 	SimpleditSearchDialog * pDialog = NULL;
 	
 	pDialog = simpledit_search_dialog_new(pWindow);
-	gtk_dialog_run(GTK_DIALOG(pDialog));
+	gtk_window_present(GTK_WINDOW(pDialog));
 }
 
 void smpldt_clbk_menu_search_replace (GtkMenuItem *menuitem, gpointer user_data) {

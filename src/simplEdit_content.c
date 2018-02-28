@@ -164,6 +164,7 @@ SimpleditContent * simpledit_content_new (GtkWindow * pWindow, GtkSourceView * p
 	g_settings_bind (pSettings, "insert-spaces-instead-of-tabs", pSrcView, "insert-spaces-instead-of-tabs", G_SETTINGS_BIND_DEFAULT);
 	g_settings_bind (pSettings, "indent-width", pSrcView, "indent-width", G_SETTINGS_BIND_DEFAULT);
 	g_settings_bind (pSettings, "tab-width", pSrcView, "tab-width", G_SETTINGS_BIND_DEFAULT);
+	
     return self;
 }
 

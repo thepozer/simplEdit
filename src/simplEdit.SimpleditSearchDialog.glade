@@ -22,6 +22,7 @@
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="use_stock">True</property>
+                <signal name="clicked" handler="smpldt_searchdlg_clbk_replace" object="SimpleditSearchDialog" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -36,6 +37,7 @@
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="use_stock">True</property>
+                <signal name="clicked" handler="smpldt_searchdlg_clbk_search" object="SimpleditSearchDialog" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -116,11 +118,12 @@
               </packing>
             </child>
             <child>
-              <object class="GtkCheckButton">
+              <object class="GtkCheckButton" id="checkWordBoundaries">
                 <property name="label" translatable="yes">Mot entier uniquement</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">False</property>
+                <property name="halign">start</property>
                 <property name="draw_indicator">True</property>
               </object>
               <packing>
@@ -130,11 +133,12 @@
               </packing>
             </child>
             <child>
-              <object class="GtkCheckButton">
+              <object class="GtkCheckButton" id="checkCaseSensitive">
                 <property name="label" translatable="yes">Sensible à la casse</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">False</property>
+                <property name="halign">start</property>
                 <property name="draw_indicator">True</property>
               </object>
               <packing>
@@ -144,11 +148,12 @@
               </packing>
             </child>
             <child>
-              <object class="GtkCheckButton">
+              <object class="GtkCheckButton" id="checkRegexEnabled">
                 <property name="label" translatable="yes">Utilise des Expressions Régulières</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">False</property>
+                <property name="halign">start</property>
                 <property name="draw_indicator">True</property>
               </object>
               <packing>
@@ -158,11 +163,12 @@
               </packing>
             </child>
             <child>
-              <object class="GtkCheckButton">
+              <object class="GtkCheckButton" id="checkWrapAround">
                 <property name="label" translatable="yes">Recommence au début à la fin du buffer</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">False</property>
+                <property name="halign">start</property>
                 <property name="draw_indicator">True</property>
               </object>
               <packing>
