@@ -216,12 +216,13 @@
                 <property name="can_focus">False</property>
                 <property name="label" translatable="yes">_Rechercher</property>
                 <property name="use_underline">True</property>
+				<signal name="activate" handler="smpldt_clbk_menu_search" object="SimpleditAppWindow" swapped="no"/>
                 <child type="submenu">
                   <object class="GtkMenu">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <child>
-                      <object class="GtkImageMenuItem">
+                      <object class="GtkImageMenuItem" id="menuSearchFind">
                         <property name="label">gtk-find</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
@@ -232,7 +233,7 @@
                       </object>
                     </child>
                     <child>
-                      <object class="GtkImageMenuItem">
+                      <object class="GtkImageMenuItem" id="menuSearchReplace">
                         <property name="label">gtk-find-and-replace</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>

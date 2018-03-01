@@ -21,6 +21,11 @@ struct _SimpleditAppWindow {
 
 	GtkMenuItem * menuLanguage;
 	
+	GtkMenuItem * menuSearchFind;
+	GtkMenuItem * menuSearchReplace;
+	
+	SimpleditSearchDialog * pSearchDlg;
+	
 	guint iSttsIdPosition;
 };
 
@@ -34,13 +39,15 @@ typedef struct _sMenuLangItem {
 void smpldt_clbk_text_changed (GtkTextBuffer *textbuffer, gpointer user_data);
 void smpldt_clbk_cursor_position_changed (GtkTextBuffer *textbuffer, GParamSpec *pspec, gpointer user_data);
 
-static void simpledit_app_window_init (SimpleditAppWindow *pWin) {
-	gtk_widget_init_template(GTK_WIDGET(pWin));
+static void simpledit_app_window_init (SimpleditAppWindow *pWindow) {
+	gtk_widget_init_template(GTK_WIDGET(pWindow));
 	
-	GtkMenu * pMnuLanguages = simpledit_app_window_get_language_menu(pWin);
-	gtk_menu_item_set_submenu(GTK_MENU_ITEM(pWin->menuLanguage), GTK_WIDGET(pMnuLanguages));
+	GtkMenu * pMnuLanguages = simpledit_app_window_get_language_menu(pWindow);
+	gtk_menu_item_set_submenu(GTK_MENU_ITEM(pWindow->menuLanguage), GTK_WIDGET(pMnuLanguages));
 	
-	pWin->iSttsIdPosition = gtk_statusbar_get_context_id (pWin->statusBar, "Cursor position");
+	pWindow->pSearchDlg = NULL;
+	
+	pWindow->iSttsIdPosition = gtk_statusbar_get_context_id (pWindow->statusBar, "Cursor position");
 }
 
 static void simpledit_app_window_class_init (SimpleditAppWindowClass *pClass) {
@@ -59,6 +66,9 @@ static void simpledit_app_window_class_init (SimpleditAppWindowClass *pClass) {
 	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, menuEditCopy);
 	
 	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, menuLanguage);
+	
+	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, menuSearchFind);
+	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, menuSearchReplace);
 }
 
 SimpleditAppWindow * simpledit_app_window_new (SimpleditApp *pApp) {
@@ -76,18 +86,22 @@ SimpleditAppWindow * simpledit_app_window_new (SimpleditApp *pApp) {
 	return pWindow;
 }
 
-void simpledit_app_window_open (SimpleditAppWindow *pWin, GFile *pFile) {
+void simpledit_app_window_open (SimpleditAppWindow *pWindow, GFile *pFile) {
 	gchar * pcFileName = NULL;
 	
 	pcFileName = g_file_get_path(pFile);
-	simpledit_content_set_filename(pWin->pEditData, pcFileName);
-	simpledit_content_load(pWin->pEditData);
+	simpledit_content_set_filename(pWindow->pEditData, pcFileName);
+	simpledit_content_load(pWindow->pEditData);
 	
 	g_free(pcFileName);
 }
 
-SimpleditContent * simpledit_app_window_get_content (SimpleditAppWindow *pWin) {
-	return pWin->pEditData;
+SimpleditContent * simpledit_app_window_get_content (SimpleditAppWindow *pWindow) {
+	return pWindow->pEditData;
+}
+
+void simpledit_app_window_clear_search_dialog (SimpleditAppWindow *pWindow) {
+	pWindow->pSearchDlg = NULL;
 }
 
 void smpldt_clbk_cursor_position_changed (GtkTextBuffer *textbuffer, GParamSpec *pspec, gpointer user_data) {
@@ -263,15 +277,31 @@ void smpldt_clbk_menu_language_item (GtkMenuItem *menuitem, gpointer user_data) 
 	simpledit_content_update_highlight(pMnuItemData->pWin->pEditData, pMnuItemData->pSelLang);
 }
 
+void smpldt_clbk_menu_search (GtkMenuItem *menuitem, gpointer user_data) {
+	SimpleditAppWindow * pWindow = SIMPLEDIT_APP_WINDOW(user_data);
+	
+	gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuSearchFind), (pWindow->pSearchDlg == NULL));
+	gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuSearchReplace), (pWindow->pSearchDlg == NULL));
+}
+
 void smpldt_clbk_menu_search_find (GtkMenuItem *menuitem, gpointer user_data) {
 	SimpleditAppWindow * pWindow = SIMPLEDIT_APP_WINDOW(user_data);
 	SimpleditSearchDialog * pDialog = NULL;
 	
-	pDialog = simpledit_search_dialog_new(pWindow);
-	gtk_window_present(GTK_WINDOW(pDialog));
+	if (!pWindow->pSearchDlg) {
+		pWindow->pSearchDlg = simpledit_search_dialog_new(pWindow, FALSE);
+		gtk_window_present(GTK_WINDOW(pWindow->pSearchDlg));
+	}
 }
 
 void smpldt_clbk_menu_search_replace (GtkMenuItem *menuitem, gpointer user_data) {
+	SimpleditAppWindow * pWindow = SIMPLEDIT_APP_WINDOW(user_data);
+	SimpleditSearchDialog * pDialog = NULL;
+	
+	if (!pWindow->pSearchDlg) {
+		pWindow->pSearchDlg = simpledit_search_dialog_new(pWindow, TRUE);
+		gtk_window_present(GTK_WINDOW(pWindow->pSearchDlg));
+	}
 }
 
 
@@ -295,7 +325,7 @@ void smpldt_clbk_menu_about (GtkMenuItem *menuitem, gpointer user_data) {
 		NULL);
 }
 
-GtkMenu * simpledit_app_window_get_language_menu(SimpleditAppWindow *pWin) {
+GtkMenu * simpledit_app_window_get_language_menu(SimpleditAppWindow *pWindow) {
 	GtkSourceLanguageManager * pLangMngr = NULL;
 	GtkSourceLanguage * pLang = NULL;
 	GtkWidget * pMnuMain    = NULL;
@@ -334,7 +364,7 @@ GtkMenu * simpledit_app_window_get_language_menu(SimpleditAppWindow *pWin) {
 			gtk_menu_shell_append (GTK_MENU_SHELL(pMnuSection), pMnuItem);
 			
 			pMnuItemData = g_new0(sMenuLangItem, 1);
-			pMnuItemData->pWin = pWin;
+			pMnuItemData->pWin = pWindow;
 			pMnuItemData->pSelLang = pLang;
 			g_signal_connect (pMnuItem, "activate", G_CALLBACK (smpldt_clbk_menu_language_item), pMnuItemData);
 		}

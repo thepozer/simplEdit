@@ -7,6 +7,6 @@
 #define SIMPLEDIT_SEARCH_DIALOG_TYPE (simpledit_search_dialog_get_type ())
 G_DECLARE_FINAL_TYPE (SimpleditSearchDialog, simpledit_search_dialog, SIMPLEDIT, SEARCH_DIALOG, GtkDialog)
 
-SimpleditSearchDialog * simpledit_search_dialog_new(SimpleditAppWindow * pWindow);
+SimpleditSearchDialog * simpledit_search_dialog_new(SimpleditAppWindow * pWindow, gboolean bReplace);
 
 #endif /* __SIMPLEDIT_SEARCH_DIALOG_H__ */

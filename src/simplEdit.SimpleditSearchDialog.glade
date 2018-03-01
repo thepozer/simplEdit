@@ -3,6 +3,7 @@
 <interface>
   <requires lib="gtk+" version="3.20"/>
   <template class="SimpleditSearchDialog" parent="GtkDialog">
+    <property name="width_request">480</property>
     <property name="can_focus">False</property>
     <property name="type_hint">dialog</property>
     <signal name="close" handler="smpldt_searchdlg_clbk_close" swapped="no"/>
@@ -16,7 +17,7 @@
             <property name="can_focus">False</property>
             <property name="layout_style">end</property>
             <child>
-              <object class="GtkButton">
+              <object class="GtkButton" id="btnReplace">
                 <property name="label">gtk-find-and-replace</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -83,7 +84,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkLabel">
+              <object class="GtkLabel" id="lblReplaceText">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="label" translatable="yes">Remplacer :</property>
