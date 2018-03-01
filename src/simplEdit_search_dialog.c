@@ -88,13 +88,21 @@ void smpldt_searchdlg_clbk_search (GtkMenuItem *menuitem, gpointer user_data) {
 	gtk_source_search_settings_set_search_text(pDialog->pSearchSettings,
 			gtk_entry_get_text(GTK_ENTRY(pDialog->txtSearchText)));
 			
-	gtk_source_search_context_forward2(pDialog->pSearchContext, pDialog->pStartIter, pDialog->pStartIter, pEndIter, NULL);
-	gtk_text_buffer_move_mark_by_name(GTK_TEXT_BUFFER(pSrcBuff), "selection_bound", pDialog->pStartIter);
-	gtk_text_buffer_move_mark_by_name(GTK_TEXT_BUFFER(pSrcBuff), "insert", pEndIter);
-	gtk_text_iter_assign(pDialog->pStartIter, pEndIter);
-	
-	pMark = gtk_text_buffer_get_mark (GTK_TEXT_BUFFER(pSrcBuff), "insert");
-	gtk_text_view_scroll_mark_onscreen (GTK_TEXT_VIEW(pSrcView), pMark);
+	if (gtk_source_search_context_forward2(pDialog->pSearchContext, pDialog->pStartIter, pDialog->pStartIter, pEndIter, NULL)) {
+		gtk_text_buffer_move_mark_by_name(GTK_TEXT_BUFFER(pSrcBuff), "selection_bound", pDialog->pStartIter);
+		gtk_text_buffer_move_mark_by_name(GTK_TEXT_BUFFER(pSrcBuff), "insert", pEndIter);
+		gtk_text_iter_assign(pDialog->pStartIter, pEndIter);
+		
+		pMark = gtk_text_buffer_get_mark (GTK_TEXT_BUFFER(pSrcBuff), "insert");
+		gtk_text_view_scroll_mark_onscreen (GTK_TEXT_VIEW(pSrcView), pMark);
+	} else {
+		GtkWidget * pDlgMsg = gtk_message_dialog_new(GTK_WINDOW(pDialog->pWindow), GTK_DIALOG_DESTROY_WITH_PARENT,
+										 GTK_MESSAGE_INFO, GTK_BUTTONS_CLOSE, "No more item found !");
+		gtk_dialog_run (GTK_DIALOG (pDlgMsg));
+		gtk_widget_destroy (pDlgMsg);
+		
+		gtk_text_buffer_get_start_iter(GTK_TEXT_BUFFER(pSrcBuff), pDialog->pStartIter);
+	}
 	
 	g_free(pEndIter);
 }
