@@ -152,7 +152,7 @@ void smpldt_searchdlg_clbk_replace (GtkMenuItem *menuitem, gpointer user_data) {
 	
 	pcReplace = gtk_entry_get_text(GTK_ENTRY(pDialog->txtReplaceText));
 	
-	if (gtk_source_search_context_replace2(pDialog->pSearchContext, pDialog->pStartIter, pDialog->pStartIter, pcReplace, -1, &pErr)) {
+	if (gtk_source_search_context_replace2(pDialog->pSearchContext, pDialog->pStartIter, pEndIter, pcReplace, -1, &pErr)) {
 		gtk_text_buffer_move_mark_by_name(GTK_TEXT_BUFFER(pSrcBuff), "selection_bound", pDialog->pStartIter);
 		gtk_text_buffer_move_mark_by_name(GTK_TEXT_BUFFER(pSrcBuff), "insert", pEndIter);
 		gtk_text_iter_assign(pDialog->pStartIter, pEndIter);

@@ -8,6 +8,7 @@ struct _SimpleditContent {
 	GtkSourceView * pSrcView;
 	GtkTextBuffer * pTxtBuff;
 	GtkSourceFile * pSrcFile;
+	GFile * pFile;
 	gchar * pcFilename;
 	gchar * pcFiletitle;
 	gboolean bWritable;
@@ -129,6 +130,8 @@ static void simpledit_content_init (SimpleditContent *self) {
   /* initialize all public and private members to reasonable default values.
    * They are all automatically initialized to 0 to begin with. */
 	
+	self->pFile = NULL;
+
 	self->pSrcFile = gtk_source_file_new();
 	gtk_source_file_set_location(self->pSrcFile, NULL);
 	
@@ -217,6 +220,10 @@ gchar * simpledit_content_get_status(SimpleditContent * pEditData) {
 }
 
 gboolean simpledit_content_reset(SimpleditContent * pEditData) {
+	
+	g_object_unref(pEditData->pFile);
+	pEditData->pFile = NULL;
+	
 	gtk_source_file_set_location(pEditData->pSrcFile, NULL);
 	
 	gtk_text_buffer_set_text(pEditData->pTxtBuff, "", 0);
@@ -232,31 +239,30 @@ gboolean simpledit_content_reset(SimpleditContent * pEditData) {
 }
 
 gboolean simpledit_content_set_filename(SimpleditContent * pEditData, const gchar * pcFilename) {
-	GFile * pFile = NULL;
-    
+	
 	if (pcFilename) {
-		pFile = g_file_new_for_path(pcFilename);
-		if (!pFile) {
+		g_object_unref(pEditData->pFile);
+		pEditData->pFile = g_file_new_for_path(pcFilename);
+		if (!pEditData->pFile) {
+			g_print("simpledit_content_set_filename - Can't create GFile\n");
 			return FALSE;
 		}
-		
-		gtk_source_file_set_location(pEditData->pSrcFile, pFile);
-        if (gtk_source_file_is_local(pEditData->pSrcFile)) {
-            gtk_source_file_check_file_on_disk(pEditData->pSrcFile);
-        }
-		
+
+		gtk_source_file_set_location(pEditData->pSrcFile, pEditData->pFile);
+		if (gtk_source_file_is_local(pEditData->pSrcFile)) {
+			gtk_source_file_check_file_on_disk(pEditData->pSrcFile);
+		}
+
 		g_free(pEditData->pcFilename);
 		pEditData->pcFilename = g_strdup(pcFilename);
-		
+
 		g_free(pEditData->pcFiletitle);
-		pEditData->pcFiletitle = g_file_get_basename(pFile);
-		
-		g_object_unref(pFile);
-        
-        return TRUE;
+		pEditData->pcFiletitle = g_file_get_basename(pEditData->pFile);
+
+		return TRUE;
 	}
-    
-    return FALSE;
+	
+	return FALSE;
 }
 
 void insertCharsetIntoCombo(gpointer data, gpointer user_data) {
@@ -519,10 +525,10 @@ g_print("load_cb_async - Compress : %d\n", pEditData->eCompType);
 
 gboolean simpledit_content_load(SimpleditContent * pEditData) {
 	GtkSourceFileLoader * pSrcFileLoader = NULL;
-	GFileInputStream * pInStream = NULL;
-	GError * pErr = NULL;
+	GFileInputStream    * pInStream      = NULL;
+	GError * pErr  = NULL;
 	
-	pInStream = g_file_read(gtk_source_file_get_location(pEditData->pSrcFile), NULL, &pErr);
+	pInStream = g_file_read(pEditData->pFile, NULL, &pErr);
 	if (pErr) {
 		GtkWidget * pDlgMsg = gtk_message_dialog_new(GTK_WINDOW(pEditData->pWindow), GTK_DIALOG_DESTROY_WITH_PARENT,
 										 GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
@@ -572,7 +578,8 @@ g_print("save_cb_async - Compress : %d\n", pEditData->eCompType);
 
 gboolean simpledit_content_save(SimpleditContent * pEditData) {
 	GtkSourceFileSaver * pSrcFileSaver = NULL;
-	pSrcFileSaver = gtk_source_file_saver_new(GTK_SOURCE_BUFFER(pEditData->pTxtBuff), pEditData->pSrcFile);
+	
+	pSrcFileSaver = gtk_source_file_saver_new_with_target(GTK_SOURCE_BUFFER(pEditData->pTxtBuff), pEditData->pSrcFile, pEditData->pFile);
 	
 	gtk_source_file_saver_set_encoding(pSrcFileSaver, pEditData->pEncod);
 	gtk_source_file_saver_set_newline_type(pSrcFileSaver, pEditData->eTypeEOL);
