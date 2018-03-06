@@ -67,7 +67,7 @@ SimpleditPrefDialog * simpledit_pref_dialog_new (SimpleditAppWindow *pWindow, GS
 	return pDialog;
 }
 
-void smpldt_prefdlg_clbk_close (GtkMenuItem *menuitem, gpointer user_data) {
+void smpldt_prefdlg_clbk_close (GtkWidget *widget, gpointer user_data) {
 	GtkWindow * pWin = GTK_WINDOW(user_data);
 
 	gtk_window_close(pWin);
