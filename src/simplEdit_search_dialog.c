@@ -111,7 +111,7 @@ void smpldt_searchdlg_clbk_search (GtkMenuItem *menuitem, gpointer user_data) {
 		gtk_text_view_scroll_mark_onscreen (GTK_TEXT_VIEW(pSrcView), pMark);
 	} else {
 		GtkWidget * pDlgMsg = gtk_message_dialog_new(GTK_WINDOW(pDialog->pWindow), GTK_DIALOG_DESTROY_WITH_PARENT,
-										 GTK_MESSAGE_INFO, GTK_BUTTONS_CLOSE, "No more item found !");
+										 GTK_MESSAGE_INFO, GTK_BUTTONS_CLOSE, _("No more item found !"));
 		gtk_dialog_run (GTK_DIALOG (pDlgMsg));
 		gtk_widget_destroy (pDlgMsg);
 		
@@ -166,10 +166,10 @@ void smpldt_searchdlg_clbk_replace (GtkMenuItem *menuitem, gpointer user_data) {
 		} else {
 			if (!pErr) {
 				pDlgMsg = gtk_message_dialog_new(GTK_WINDOW(pDialog->pWindow), GTK_DIALOG_DESTROY_WITH_PARENT,
-												 GTK_MESSAGE_INFO, GTK_BUTTONS_CLOSE, "No more item found !");
+												 GTK_MESSAGE_INFO, GTK_BUTTONS_CLOSE, _("No more item found !"));
 			} else {
 				pDlgMsg = gtk_message_dialog_new(GTK_WINDOW(pDialog->pWindow), GTK_DIALOG_DESTROY_WITH_PARENT,
-												 GTK_MESSAGE_INFO, GTK_BUTTONS_CLOSE, "Replace error (%i) : %s", pErr->code, pErr->message);
+												 GTK_MESSAGE_INFO, GTK_BUTTONS_CLOSE, _("Replace error (%i) : %s"), pErr->code, pErr->message);
 				g_error_free(pErr);
 			}
 			gtk_dialog_run (GTK_DIALOG (pDlgMsg));
@@ -179,7 +179,7 @@ void smpldt_searchdlg_clbk_replace (GtkMenuItem *menuitem, gpointer user_data) {
 		}
 	} else {
 		pDlgMsg = gtk_message_dialog_new(GTK_WINDOW(pDialog->pWindow), GTK_DIALOG_DESTROY_WITH_PARENT,
-										 GTK_MESSAGE_INFO, GTK_BUTTONS_CLOSE, "No more item found !");
+										 GTK_MESSAGE_INFO, GTK_BUTTONS_CLOSE, _("No more item found !"));
 		gtk_dialog_run (GTK_DIALOG (pDlgMsg));
 		gtk_widget_destroy (pDlgMsg);
 		

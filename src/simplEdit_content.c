@@ -212,9 +212,9 @@ gchar * simpledit_content_get_status(SimpleditContent * pEditData) {
 	
 	iTotalNbLine = gtk_text_buffer_get_line_count(GTK_TEXT_BUFFER(pEditData->pTxtBuff));
 		
-	g_string_append_printf(pStrStatus, "Ligne : %d / %d \tCol : %d", iLine, iTotalNbLine, iCol);
+	g_string_append_printf(pStrStatus, _("Line : %d / %d \tCol : %d"), iLine, iTotalNbLine, iCol);
 	
-	g_string_append_printf(pStrStatus, "\tFile type : %s", pEditData->pcLanguage);
+	g_string_append_printf(pStrStatus, _("\tFile type : %s"), pEditData->pcLanguage);
 
 	return g_string_free(pStrStatus, FALSE);
 }
@@ -337,7 +337,7 @@ g_print("Compress : %d\n", pEditData->eCompType);
 	pHBox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
 	gtk_widget_show(pHBox);
 	
-	pLabel = gtk_label_new("Encoding :");
+	pLabel = gtk_label_new(_("Encoding :"));
 	gtk_widget_show(pLabel);
 	gtk_box_pack_start(GTK_BOX(pHBox), pLabel, TRUE, TRUE, 1);
 
@@ -356,14 +356,14 @@ g_print("Compress : %d\n", pEditData->eCompType);
 	gtk_widget_show(pLstWidgetCharset);
 	gtk_box_pack_start(GTK_BOX(pHBox), pLstWidgetCharset, TRUE, TRUE, 1);
 
-	pLabel = gtk_label_new("End of line :");
+	pLabel = gtk_label_new(_("End of line :"));
 	gtk_widget_show(pLabel);
 	gtk_box_pack_start(GTK_BOX(pHBox), pLabel, TRUE, TRUE, 1);
 	
 	pLstModelEOL = gtk_list_store_new (2, G_TYPE_INT, G_TYPE_STRING);
-	gtk_list_store_insert_with_values (pLstModelEOL, &iter, -1, 0, GTK_SOURCE_NEWLINE_TYPE_LF,   1, "Unix (LF)", -1);
-	gtk_list_store_insert_with_values (pLstModelEOL, &iter, -1, 0, GTK_SOURCE_NEWLINE_TYPE_CR_LF, 1, "Windows (CR LF)", -1);
-	gtk_list_store_insert_with_values (pLstModelEOL, &iter, -1, 0, GTK_SOURCE_NEWLINE_TYPE_CR,   1, "Mac (CR)", -1);
+	gtk_list_store_insert_with_values (pLstModelEOL, &iter, -1, 0, GTK_SOURCE_NEWLINE_TYPE_LF,   1, _("Unix (LF)"), -1);
+	gtk_list_store_insert_with_values (pLstModelEOL, &iter, -1, 0, GTK_SOURCE_NEWLINE_TYPE_CR_LF, 1, _("Windows (CR LF)"), -1);
+	gtk_list_store_insert_with_values (pLstModelEOL, &iter, -1, 0, GTK_SOURCE_NEWLINE_TYPE_CR,   1, _("Mac (CR)"), -1);
 	pLstWidgetEndOfLines = gtk_combo_box_new_with_model(GTK_TREE_MODEL(pLstModelEOL));
  	pCellRndr = gtk_cell_renderer_text_new ();
 	gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (pLstWidgetEndOfLines), pCellRndr, FALSE);
@@ -375,13 +375,13 @@ g_print("Compress : %d\n", pEditData->eCompType);
 	gtk_widget_show(pLstWidgetEndOfLines);
 	gtk_box_pack_start(GTK_BOX(pHBox), pLstWidgetEndOfLines, TRUE, TRUE, 1);
 
-	pLabel = gtk_label_new("Compression :");
+	pLabel = gtk_label_new(_("Compression :"));
 	gtk_widget_show(pLabel);
 	gtk_box_pack_start(GTK_BOX(pHBox), pLabel, TRUE, TRUE, 1);
 
 	pLstModelCompress = gtk_list_store_new (2, G_TYPE_INT, G_TYPE_STRING);
-    gtk_list_store_insert_with_values(pLstModelCompress, &iter, -1, 0, GTK_SOURCE_COMPRESSION_TYPE_NONE, 1, "None", -1);
-    gtk_list_store_insert_with_values(pLstModelCompress, &iter, -1, 0, GTK_SOURCE_COMPRESSION_TYPE_GZIP, 1, "Gzip (.gz)", -1);
+    gtk_list_store_insert_with_values(pLstModelCompress, &iter, -1, 0, GTK_SOURCE_COMPRESSION_TYPE_NONE, 1, _("None"), -1);
+    gtk_list_store_insert_with_values(pLstModelCompress, &iter, -1, 0, GTK_SOURCE_COMPRESSION_TYPE_GZIP, 1, _("Gzip (.gz)"), -1);
 	pLstWidgetCompress = gtk_combo_box_new_with_model(GTK_TREE_MODEL(pLstModelCompress));
  	pCellRndr = gtk_cell_renderer_text_new ();
 	gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (pLstWidgetCompress), pCellRndr, FALSE);
@@ -431,18 +431,18 @@ gboolean simpledit_content_select_name(SimpleditContent * pEditData, GtkFileChoo
     gboolean bSelectName = FALSE;
     
     if (action == GTK_FILE_CHOOSER_ACTION_OPEN) {
-        pDlgFile = gtk_file_chooser_dialog_new ("Open File", GTK_WINDOW(pEditData->pWindow), GTK_FILE_CHOOSER_ACTION_OPEN, 
-                    "_Cancel", GTK_RESPONSE_CANCEL, "_Open", GTK_RESPONSE_ACCEPT, NULL);
+        pDlgFile = gtk_file_chooser_dialog_new (_("Open File"), GTK_WINDOW(pEditData->pWindow), GTK_FILE_CHOOSER_ACTION_OPEN, 
+                    _("_Cancel"), GTK_RESPONSE_CANCEL, _("_Open"), GTK_RESPONSE_ACCEPT, NULL);
     } else if (action == GTK_FILE_CHOOSER_ACTION_SAVE) {
-        pDlgFile = gtk_file_chooser_dialog_new ("Save File", GTK_WINDOW(pEditData->pWindow), GTK_FILE_CHOOSER_ACTION_SAVE,
-                    "_Cancel", GTK_RESPONSE_CANCEL, "_Save", GTK_RESPONSE_ACCEPT, NULL);
+        pDlgFile = gtk_file_chooser_dialog_new (_("Save File"), GTK_WINDOW(pEditData->pWindow), GTK_FILE_CHOOSER_ACTION_SAVE,
+                    _("_Cancel"), GTK_RESPONSE_CANCEL, _("_Save"), GTK_RESPONSE_ACCEPT, NULL);
 	}
     
     if (pDlgFile) {
         if (pEditData->pcFilename) {
             gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(pDlgFile), pEditData->pcFilename);
         } else if (action == GTK_FILE_CHOOSER_ACTION_SAVE) {
-            gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(pDlgFile), "New file");
+            gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(pDlgFile), _("New file"));
         }
         
         iResult = simpledit_content_file_dialog(pEditData, pDlgFile);
@@ -501,7 +501,7 @@ void simpledit_content_load_cb_async (GObject *source_object, GAsyncResult *res,
 	if (!success) {
 		GtkWidget * pDlgMsg = gtk_message_dialog_new(GTK_WINDOW(pEditData->pWindow), GTK_DIALOG_DESTROY_WITH_PARENT,
 										 GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
-										 "Error reading '%s' : (%i) %s",
+										 _("Error reading '%s' : (%i) %s"),
 										 pEditData->pcFilename, pErr->code, pErr->message);
 		gtk_dialog_run (GTK_DIALOG (pDlgMsg));
 		gtk_widget_destroy (pDlgMsg);
@@ -532,7 +532,7 @@ gboolean simpledit_content_load(SimpleditContent * pEditData) {
 	if (pErr) {
 		GtkWidget * pDlgMsg = gtk_message_dialog_new(GTK_WINDOW(pEditData->pWindow), GTK_DIALOG_DESTROY_WITH_PARENT,
 										 GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
-										 "Error reading (stream) '%s' : (%i) %s",
+										 _("Error reading (stream) '%s' : (%i) %s"),
 										 pEditData->pcFilename, pErr->code, pErr->message);
 		gtk_dialog_run (GTK_DIALOG (pDlgMsg));
 		gtk_widget_destroy (pDlgMsg);
@@ -555,7 +555,7 @@ void simpledit_content_save_cb_async (GObject *source_object, GAsyncResult *res,
 	if (!success) {
 		GtkWidget * pDlgMsg = gtk_message_dialog_new(GTK_WINDOW(pEditData->pWindow), GTK_DIALOG_DESTROY_WITH_PARENT,
 										 GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
-										 "Error writing '%s' : (%i) %s",
+										 _("Error writing '%s' : (%i) %s"),
 										 pEditData->pcFilename, pErr->code, pErr->message);
 		gtk_dialog_run (GTK_DIALOG (pDlgMsg));
 		gtk_widget_destroy (pDlgMsg);

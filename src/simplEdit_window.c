@@ -94,7 +94,7 @@ void simpledit_app_window_open (SimpleditAppWindow *pWindow, GFile *pFile) {
 		simpledit_content_load(pWindow->pEditData);
 	} else {
 		GtkWidget * pDlgMsg = gtk_message_dialog_new(GTK_WINDOW(pWindow), GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_ERROR, 
-								GTK_BUTTONS_CLOSE, "Error openning file '%s' : (%i) %s", pcFileName);
+								GTK_BUTTONS_CLOSE, _("Error openning file '%s' : (%i) %s"), pcFileName);
 		gtk_dialog_run (GTK_DIALOG (pDlgMsg));
 		gtk_widget_destroy (pDlgMsg);
 	}
@@ -320,14 +320,14 @@ void smpldt_clbk_menu_about (GtkMenuItem *menuitem, gpointer user_data) {
 	
 	gtk_show_about_dialog (GTK_WINDOW(pWin),
 		"authors", pcAuthors,
-		"comments", "Another small/simple editor based on GtkSourceView.\nIt try to make accessible every features of GtkSourceView.",
-		"copyright", "(c) 2018 Didier Prolhac",
-		"license", "MIT",
+		"comments", _("Another small/simple editor based on GtkSourceView.\nIt try to make accessible every features of GtkSourceView."),
+		"copyright", _("(c) 2018 Didier Prolhac"),
+		"license", _("MIT"),
 		"license-type", GTK_LICENSE_MIT_X11,
 		"program-name", PACKAGE_NAME,
 		"version", PACKAGE_VERSION,
 		"website", "https://github.com/thepozer/simplEdit",
-		"website-label", "github simplEdit",
+		"website-label", _("github simplEdit"),
 		NULL);
 }
 

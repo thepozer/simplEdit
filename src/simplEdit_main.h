@@ -3,8 +3,8 @@
 #define __SMPLDT_MAIN_H__
 
 #include <gtk/gtk.h>
-
 #include <gtksourceview/gtksource.h>
+#include <glib/gi18n.h>
 
 #include "simplEdit.gresources.h"
 
