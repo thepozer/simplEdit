@@ -4,6 +4,10 @@
 #include "simplEdit_app.h"
 
 int main (int argc, char *argv []) {
+	/* Set up internationalization */
+	setlocale (LC_ALL, "");
+	bindtextdomain (PACKAGE, LOCALEDIR);
+	textdomain (PACKAGE);
 
 	g_resources_register(simplEdit_get_resource());
 	

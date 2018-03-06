@@ -1,0 +1,134 @@
+# English translations for simplEdit package.
+# Copyright (C) 2018 THE simplEdit'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the simplEdit package.
+# Prolhac Didier <dev@thepozer.net>, 2018.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: simplEdit 0.4.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-03-06 17:40+0100\n"
+"PO-Revision-Date: 2018-03-06 17:41+0100\n"
+"Last-Translator: Prolhac Didier <dev@thepozer.net>\n"
+"Language-Team: English\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=ASCII\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: ../src/simplEdit_window.c:97
+#, c-format
+msgid "Error openning file '%s' : (%i) %s"
+msgstr "Error openning file '%s' : (%i) %s"
+
+#: ../src/simplEdit_window.c:323
+msgid ""
+"Another small/simple editor based on GtkSourceView.\n"
+"It try to make accessible every features of GtkSourceView."
+msgstr ""
+"Another small/simple editor based on GtkSourceView.\n"
+"It try to make accessible every features of GtkSourceView."
+
+#: ../src/simplEdit_window.c:324
+msgid "(c) 2018 Didier Prolhac"
+msgstr "(c) 2018 Didier Prolhac"
+
+#: ../src/simplEdit_window.c:325
+msgid "MIT"
+msgstr "MIT"
+
+#: ../src/simplEdit_window.c:330
+msgid "github simplEdit"
+msgstr "github simplEdit"
+
+#: ../src/simplEdit_content.c:215
+#, c-format
+msgid "Line : %d / %d \tCol : %d"
+msgstr "Line : %d / %d \tCol : %d"
+
+#: ../src/simplEdit_content.c:217
+#, c-format
+msgid "\tFile type : %s"
+msgstr "\tFile type : %s"
+
+#: ../src/simplEdit_content.c:340
+msgid "Encoding :"
+msgstr "Encoding :"
+
+#: ../src/simplEdit_content.c:359
+msgid "End of line :"
+msgstr "End of line :"
+
+#: ../src/simplEdit_content.c:364
+msgid "Unix (LF)"
+msgstr "Unix (LF)"
+
+#: ../src/simplEdit_content.c:365
+msgid "Windows (CR LF)"
+msgstr "Windows (CR LF)"
+
+#: ../src/simplEdit_content.c:366
+msgid "Mac (CR)"
+msgstr "Mac (CR)"
+
+#: ../src/simplEdit_content.c:378
+msgid "Compression :"
+msgstr "Compression :"
+
+#: ../src/simplEdit_content.c:383
+msgid "None"
+msgstr "None"
+
+#: ../src/simplEdit_content.c:384
+msgid "Gzip (.gz)"
+msgstr "Gzip (.gz)"
+
+#: ../src/simplEdit_content.c:434
+msgid "Open File"
+msgstr "Open File"
+
+#: ../src/simplEdit_content.c:435 ../src/simplEdit_content.c:438
+msgid "_Cancel"
+msgstr "_Cancel"
+
+#: ../src/simplEdit_content.c:435
+msgid "_Open"
+msgstr "_Open"
+
+#: ../src/simplEdit_content.c:437
+msgid "Save File"
+msgstr "Save File"
+
+#: ../src/simplEdit_content.c:438
+msgid "_Save"
+msgstr "_Save"
+
+#: ../src/simplEdit_content.c:445
+msgid "New file"
+msgstr "New file"
+
+#: ../src/simplEdit_content.c:504
+#, c-format
+msgid "Error reading '%s' : (%i) %s"
+msgstr "Error reading '%s' : (%i) %s"
+
+#: ../src/simplEdit_content.c:535
+#, c-format
+msgid "Error reading (stream) '%s' : (%i) %s"
+msgstr "Error reading (stream) '%s' : (%i) %s"
+
+#: ../src/simplEdit_content.c:558
+#, c-format
+msgid "Error writing '%s' : (%i) %s"
+msgstr "Error writing '%s' : (%i) %s"
+
+#: ../src/simplEdit_search_dialog.c:114 ../src/simplEdit_search_dialog.c:169
+#: ../src/simplEdit_search_dialog.c:182
+msgid "No more item found !"
+msgstr "No more item found !"
+
+#: ../src/simplEdit_search_dialog.c:172
+#, c-format
+msgid "Replace error (%i) : %s"
+msgstr "Replace error (%i) : %s"
