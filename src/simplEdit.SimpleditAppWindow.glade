@@ -22,7 +22,7 @@
               <object class="GtkMenuItem">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">_Fichier</property>
+                <property name="label" translatable="yes">_File</property>
                 <property name="use_underline">True</property>
                 <signal name="activate" handler="smpldt_clbk_menu_file" object="SimpleditAppWindow" swapped="no"/>
                 <child type="submenu">
@@ -114,7 +114,7 @@
               <object class="GtkMenuItem">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">É_dition</property>
+                <property name="label" translatable="yes">E_dit</property>
                 <property name="use_underline">True</property>
                 <signal name="activate" handler="smpldt_clbk_menu_edit" object="SimpleditAppWindow" swapped="no"/>
                 <child type="submenu">
@@ -206,7 +206,7 @@
               <object class="GtkMenuItem" id="menuLanguage">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">_Langage</property>
+                <property name="label" translatable="yes">_Language</property>
                 <property name="use_underline">True</property>
               </object>
             </child>
@@ -214,9 +214,9 @@
               <object class="GtkMenuItem">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">_Rechercher</property>
+                <property name="label" translatable="yes">_Search</property>
                 <property name="use_underline">True</property>
-				<signal name="activate" handler="smpldt_clbk_menu_search" object="SimpleditAppWindow" swapped="no"/>
+                <signal name="activate" handler="smpldt_clbk_menu_search" object="SimpleditAppWindow" swapped="no"/>
                 <child type="submenu">
                   <object class="GtkMenu">
                     <property name="visible">True</property>
@@ -251,7 +251,7 @@
               <object class="GtkMenuItem">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Aid_e</property>
+                <property name="label" translatable="yes">H_elp</property>
                 <property name="use_underline">True</property>
                 <child type="submenu">
                   <object class="GtkMenu">

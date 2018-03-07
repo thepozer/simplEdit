@@ -4,5 +4,7 @@ src/simplEdit_window.c
 src/simplEdit_content.c
 src/simplEdit_pref_dialog.c
 src/simplEdit_search_dialog.c
-# files added by intltool-prepare
+src/simplEdit.SimpleditAppWindow.glade
+src/simplEdit.SimpleditPrefDialog.glade
+src/simplEdit.SimpleditSearchDialog.glade
 simpledit.desktop.in

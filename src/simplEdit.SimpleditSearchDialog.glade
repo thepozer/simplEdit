@@ -76,7 +76,7 @@
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Rechercher :</property>
+                <property name="label" translatable="yes">Search :</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -87,7 +87,7 @@
               <object class="GtkLabel" id="lblReplaceText">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Remplacer :</property>
+                <property name="label" translatable="yes">Replace :</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -120,7 +120,7 @@
             </child>
             <child>
               <object class="GtkCheckButton" id="checkWordBoundaries">
-                <property name="label" translatable="yes">Mot entier uniquement</property>
+                <property name="label" translatable="yes">Whole word only</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">False</property>
@@ -135,7 +135,7 @@
             </child>
             <child>
               <object class="GtkCheckButton" id="checkCaseSensitive">
-                <property name="label" translatable="yes">Sensible à la casse</property>
+                <property name="label" translatable="yes">Case sensitive</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">False</property>
@@ -150,7 +150,7 @@
             </child>
             <child>
               <object class="GtkCheckButton" id="checkRegexEnabled">
-                <property name="label" translatable="yes">Utilise des Expressions Régulières</property>
+                <property name="label" translatable="yes">Use regular expression</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">False</property>
@@ -165,7 +165,7 @@
             </child>
             <child>
               <object class="GtkCheckButton" id="checkWrapAround">
-                <property name="label" translatable="yes">Recommence au début à la fin du buffer</property>
+                <property name="label" translatable="yes">Restart at the beginning at the end</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">False</property>

@@ -12,6 +12,7 @@ Makefile
 
 .deps
 /m4
+/ABOUT-NLS
 /autom4te.cache
 /autoscan.log
 /autoscan-*.log
@@ -19,6 +20,7 @@ Makefile
 /compile
 /config.guess
 /config.log
+/config.rpath
 /config.status
 /config.sub
 /configure
@@ -41,3 +43,6 @@ Makefile
 *.o
 simplEdit
 *.gresources.[ch]
+*.gschema.valid
+simpledit.desktop
+

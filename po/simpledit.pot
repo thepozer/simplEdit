@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-03-07 13:19+0100\n"
+"POT-Creation-Date: 2018-03-07 15:42+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -129,6 +129,114 @@ msgstr ""
 #: ../src/simplEdit_search_dialog.c:172
 #, c-format
 msgid "Replace error (%i) : %s"
+msgstr ""
+
+#: ../src/simplEdit.SimpleditAppWindow.glade.h:1
+msgid "_File"
+msgstr ""
+
+#: ../src/simplEdit.SimpleditAppWindow.glade.h:2
+msgid "E_dit"
+msgstr ""
+
+#: ../src/simplEdit.SimpleditAppWindow.glade.h:3
+msgid "_Language"
+msgstr ""
+
+#: ../src/simplEdit.SimpleditAppWindow.glade.h:4
+msgid "_Search"
+msgstr ""
+
+#: ../src/simplEdit.SimpleditAppWindow.glade.h:5
+msgid "H_elp"
+msgstr ""
+
+#: ../src/simplEdit.SimpleditPrefDialog.glade.h:1
+msgid "Show line numbers"
+msgstr ""
+
+#: ../src/simplEdit.SimpleditPrefDialog.glade.h:2
+msgid "Show line marks"
+msgstr ""
+
+#: ../src/simplEdit.SimpleditPrefDialog.glade.h:3
+msgid "Highlight current line"
+msgstr ""
+
+#: ../src/simplEdit.SimpleditPrefDialog.glade.h:4
+msgid "Font :"
+msgstr ""
+
+#: ../src/simplEdit.SimpleditPrefDialog.glade.h:5
+msgid "Show right margin : "
+msgstr ""
+
+#: ../src/simplEdit.SimpleditPrefDialog.glade.h:6
+msgid "Display"
+msgstr ""
+
+#: ../src/simplEdit.SimpleditPrefDialog.glade.h:7
+msgid "Automatic indentation"
+msgstr ""
+
+#: ../src/simplEdit.SimpleditPrefDialog.glade.h:8
+msgid "Use TAB to indent"
+msgstr ""
+
+#: ../src/simplEdit.SimpleditPrefDialog.glade.h:9
+msgid "Smart backspace"
+msgstr ""
+
+#: ../src/simplEdit.SimpleditPrefDialog.glade.h:10
+msgid "Use Spaces instead tabs"
+msgstr ""
+
+#: ../src/simplEdit.SimpleditPrefDialog.glade.h:11
+msgid "Indentation size :"
+msgstr ""
+
+#: ../src/simplEdit.SimpleditPrefDialog.glade.h:12
+msgid "Tab size :"
+msgstr ""
+
+#: ../src/simplEdit.SimpleditPrefDialog.glade.h:13
+msgid "Indentation"
+msgstr ""
+
+#: ../src/simplEdit.SimpleditPrefDialog.glade.h:14
+msgid "Editor"
+msgstr ""
+
+#: ../src/simplEdit.SimpleditPrefDialog.glade.h:15
+msgid "Auto-save file"
+msgstr ""
+
+#: ../src/simplEdit.SimpleditPrefDialog.glade.h:16
+msgid "File"
+msgstr ""
+
+#: ../src/simplEdit.SimpleditSearchDialog.glade.h:1
+msgid "Search :"
+msgstr ""
+
+#: ../src/simplEdit.SimpleditSearchDialog.glade.h:2
+msgid "Replace :"
+msgstr ""
+
+#: ../src/simplEdit.SimpleditSearchDialog.glade.h:3
+msgid "Whole word only"
+msgstr ""
+
+#: ../src/simplEdit.SimpleditSearchDialog.glade.h:4
+msgid "Case sensitive"
+msgstr ""
+
+#: ../src/simplEdit.SimpleditSearchDialog.glade.h:5
+msgid "Use regular expression"
+msgstr ""
+
+#: ../src/simplEdit.SimpleditSearchDialog.glade.h:6
+msgid "Restart at the beginning at the end"
 msgstr ""
 
 #: ../simpledit.desktop.in.h:1
