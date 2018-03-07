@@ -2,131 +2,143 @@
 # Copyright (C) 2018 THE simplEdit'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the simplEdit package.
 # Prolhac Didier <dev@thepozer.net>, 2018.
+# Didier Prolhac <dev@thepozer.net>, 2018.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: simplEdit 0.4.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-03-06 17:40+0100\n"
-"PO-Revision-Date: 2018-03-06 17:41+0100\n"
-"Last-Translator: Prolhac Didier <dev@thepozer.net>\n"
-"Language-Team: French\n"
+"POT-Creation-Date: 2018-03-07 13:19+0100\n"
+"PO-Revision-Date: 2018-03-07 13:20+0100\n"
+"Last-Translator: Didier Prolhac <dev@thepozer.net>\n"
+"Language-Team: français <dev@thepozer.net>\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=ASCII\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Generator: Gtranslator 2.91.7\n"
 
 #: ../src/simplEdit_window.c:97
 #, c-format
 msgid "Error openning file '%s' : (%i) %s"
-msgstr ""
+msgstr "Erreur lors de l'ouverture du fichier '%s' : (%i) %s"
 
 #: ../src/simplEdit_window.c:323
 msgid ""
 "Another small/simple editor based on GtkSourceView.\n"
 "It try to make accessible every features of GtkSourceView."
 msgstr ""
+"Un autre editeur de texte petit/simple basé sur GtkSourceView.\n"
+"Il essaie de rendre accessible toutes les fonctionnalités de GtkSourceView."
 
 #: ../src/simplEdit_window.c:324
 msgid "(c) 2018 Didier Prolhac"
-msgstr ""
+msgstr "(c) 2018 Didier Prolhac"
 
 #: ../src/simplEdit_window.c:325
 msgid "MIT"
-msgstr ""
+msgstr "MIT"
 
 #: ../src/simplEdit_window.c:330
 msgid "github simplEdit"
-msgstr ""
+msgstr "github simplEdit"
 
 #: ../src/simplEdit_content.c:215
 #, c-format
 msgid "Line : %d / %d \tCol : %d"
-msgstr ""
+msgstr "Ligne : %d / %d \tCol : %d"
 
 #: ../src/simplEdit_content.c:217
 #, c-format
 msgid "\tFile type : %s"
-msgstr ""
+msgstr "\tType de fichier : %s"
 
 #: ../src/simplEdit_content.c:340
 msgid "Encoding :"
-msgstr ""
+msgstr "Encodage :"
 
 #: ../src/simplEdit_content.c:359
 msgid "End of line :"
-msgstr ""
+msgstr "Fin de fichier :"
 
 #: ../src/simplEdit_content.c:364
 msgid "Unix (LF)"
-msgstr ""
+msgstr "Unix (LF)"
 
 #: ../src/simplEdit_content.c:365
 msgid "Windows (CR LF)"
-msgstr ""
+msgstr "Windows (CR LF)"
 
 #: ../src/simplEdit_content.c:366
 msgid "Mac (CR)"
-msgstr ""
+msgstr "Mac (CR)"
 
 #: ../src/simplEdit_content.c:378
 msgid "Compression :"
-msgstr ""
+msgstr "Compression :"
 
 #: ../src/simplEdit_content.c:383
 msgid "None"
-msgstr ""
+msgstr "Aucune"
 
 #: ../src/simplEdit_content.c:384
 msgid "Gzip (.gz)"
-msgstr ""
+msgstr "Gzip (.gz)"
 
 #: ../src/simplEdit_content.c:434
 msgid "Open File"
-msgstr ""
+msgstr "Ouvrir un fichier"
 
 #: ../src/simplEdit_content.c:435 ../src/simplEdit_content.c:438
 msgid "_Cancel"
-msgstr ""
+msgstr "_Annuler"
 
 #: ../src/simplEdit_content.c:435
 msgid "_Open"
-msgstr ""
+msgstr "_Ouvrir"
 
 #: ../src/simplEdit_content.c:437
 msgid "Save File"
-msgstr ""
+msgstr "Enregistrer un fichier"
 
 #: ../src/simplEdit_content.c:438
 msgid "_Save"
-msgstr ""
+msgstr "_Enregistrer"
 
 #: ../src/simplEdit_content.c:445
 msgid "New file"
-msgstr ""
+msgstr "Nouveau fichier"
 
 #: ../src/simplEdit_content.c:504
 #, c-format
 msgid "Error reading '%s' : (%i) %s"
-msgstr ""
+msgstr "Erreur durant la lecture '%s' : (%i) %s"
 
 #: ../src/simplEdit_content.c:535
 #, c-format
 msgid "Error reading (stream) '%s' : (%i) %s"
-msgstr ""
+msgstr "Erreur durant la lecture (stream) '%s' : (%i) %s"
 
 #: ../src/simplEdit_content.c:558
 #, c-format
 msgid "Error writing '%s' : (%i) %s"
-msgstr ""
+msgstr "Erreur durant l'écriture '%s' : (%i) %s"
 
 #: ../src/simplEdit_search_dialog.c:114 ../src/simplEdit_search_dialog.c:169
 #: ../src/simplEdit_search_dialog.c:182
 msgid "No more item found !"
-msgstr ""
+msgstr "Plus aucune occurrence!"
 
 #: ../src/simplEdit_search_dialog.c:172
 #, c-format
 msgid "Replace error (%i) : %s"
-msgstr ""
+msgstr "Erreur durant le remplacement (%i) : %s"
+
+#: ../simpledit.desktop.in.h:1
+msgid "Simple Edit"
+msgstr "Simple Edit"
+
+#: ../simpledit.desktop.in.h:2
+msgid "A simple GTK+ Editor using SourceView"
+msgstr "Un simple Editeur en GTK+ utilisant SourceView"
