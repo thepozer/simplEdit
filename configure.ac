@@ -21,6 +21,7 @@ AC_SUBST([GETTEXT_PACKAGE])
 AC_CONFIG_FILES([
     Makefile
     src/Makefile
+    data/Makefile
     po/Makefile.in
 ])
 AC_OUTPUT

@@ -7,4 +7,4 @@ src/simplEdit_search_dialog.c
 src/simplEdit.SimpleditAppWindow.glade
 src/simplEdit.SimpleditPrefDialog.glade
 src/simplEdit.SimpleditSearchDialog.glade
-simpledit.desktop.in
+data/simpledit.desktop.in
