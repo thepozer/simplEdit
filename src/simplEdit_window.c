@@ -38,6 +38,7 @@ typedef struct _sMenuLangItem {
 
 void smpldt_clbk_text_changed (GtkTextBuffer *textbuffer, gpointer user_data);
 void smpldt_clbk_cursor_position_changed (GtkTextBuffer *textbuffer, GParamSpec *pspec, gpointer user_data);
+void smpldt_clbk_mark_set (GtkTextBuffer * textbuffer, GtkTextIter * location, GtkTextMark * mark, gpointer user_data);
 
 static void simpledit_app_window_init (SimpleditAppWindow *pWindow) {
 	gtk_widget_init_template(GTK_WIDGET(pWindow));
@@ -77,6 +78,7 @@ SimpleditAppWindow * simpledit_app_window_new (SimpleditApp *pApp) {
 	GtkTextBuffer * pTxtBuff = gtk_text_view_get_buffer(GTK_TEXT_VIEW(pWindow->pSrcView));
 	g_signal_connect (pTxtBuff, "changed", G_CALLBACK (smpldt_clbk_text_changed), pWindow);
 	g_signal_connect (pTxtBuff, "notify::cursor-position", G_CALLBACK (smpldt_clbk_cursor_position_changed), pWindow);
+	g_signal_connect (pTxtBuff, "mark-set", G_CALLBACK (smpldt_clbk_mark_set), pWindow);
 	
 	pWindow->pEditData = simpledit_content_new(GTK_WINDOW(pWindow), pWindow->pSrcView);
 	
@@ -110,19 +112,31 @@ void simpledit_app_window_clear_search_dialog (SimpleditAppWindow *pWindow) {
 	pWindow->pSearchDlg = NULL;
 }
 
-void smpldt_clbk_cursor_position_changed (GtkTextBuffer *textbuffer, GParamSpec *pspec, gpointer user_data) {
-	SimpleditAppWindow * pWindow = SIMPLEDIT_APP_WINDOW(user_data);
+void simpledit_app_window_update_status (SimpleditAppWindow *pWindow) {
 	gchar * pcStatus = NULL;
 	
+	simpledit_content_update_title(pWindow->pEditData);
 	pcStatus = simpledit_content_get_status(pWindow->pEditData);
 	gtk_statusbar_push(pWindow->statusBar, pWindow->iSttsIdPosition, pcStatus);
 	g_free(pcStatus);
 }
 
+void smpldt_clbk_cursor_position_changed (GtkTextBuffer *textbuffer, GParamSpec *pspec, gpointer user_data) {
+	SimpleditAppWindow * pWindow = SIMPLEDIT_APP_WINDOW(user_data);
+	
+	simpledit_app_window_update_status(pWindow);
+}
+
 void smpldt_clbk_text_changed (GtkTextBuffer *textbuffer, gpointer user_data) {
 	SimpleditAppWindow * pWindow = SIMPLEDIT_APP_WINDOW(user_data);
 	
-	simpledit_content_update_title(pWindow->pEditData);
+	simpledit_app_window_update_status(pWindow);
+}
+
+void smpldt_clbk_mark_set (GtkTextBuffer * textbuffer, GtkTextIter * location, GtkTextMark * mark, gpointer user_data) {
+	SimpleditAppWindow * pWindow = SIMPLEDIT_APP_WINDOW(user_data);
+	
+	simpledit_app_window_update_status(pWindow);
 }
 
 void smpldt_clbk_menu_file (GtkMenuItem *menuitem, gpointer user_data) {
