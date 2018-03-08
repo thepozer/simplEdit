@@ -494,6 +494,7 @@ void simpledit_content_load_cb_async (GObject *source_object, GAsyncResult *res,
 	SimpleditContent * pEditData = SIMPLEDIT_CONTENT(user_data);
 	GtkSourceFileLoader * pSrcFileLoader = GTK_SOURCE_FILE_LOADER(source_object);
 	GError * pErr = NULL;
+	GtkTextIter sIter;
 	gboolean success = FALSE;
 
 	success = gtk_source_file_loader_load_finish(pSrcFileLoader, res, &pErr);
@@ -517,7 +518,9 @@ g_print("load_cb_async - Encoding : %s (%s)\n", gtk_source_encoding_get_name(pEd
 g_print("load_cb_async - EOL : %d\n", pEditData->eTypeEOL);
 g_print("load_cb_async - Compress : %d\n", pEditData->eCompType);
 		
-		g_signal_emit_by_name(pEditData->pTxtBuff, "changed", pEditData->pWindow);
+		gtk_text_buffer_get_start_iter(GTK_TEXT_BUFFER(pEditData->pTxtBuff), &sIter);
+		gtk_text_buffer_place_cursor(GTK_TEXT_BUFFER(pEditData->pTxtBuff), &sIter);
+		
 		simpledit_content_update_highlight(pEditData, NULL);
 	}
 }
