@@ -6,8 +6,10 @@ struct _SimpleditAppWindow {
 	GtkApplicationWindow parent;
 
 	SimpleditContent * pEditData;
+	
+	GtkStackSwitcher * stackSwitch;
+	GtkStack * stackEditors;
 
-	GtkSourceView * pSrcView;
 	GtkStatusbar  * statusBar;
 	
 	GtkMenuItem * menuFileSave;
@@ -36,10 +38,6 @@ typedef struct _sMenuLangItem {
 	GtkSourceLanguage * pSelLang;
 } sMenuLangItem;
 
-void smpldt_clbk_text_changed (GtkTextBuffer *textbuffer, gpointer user_data);
-void smpldt_clbk_cursor_position_changed (GtkTextBuffer *textbuffer, GParamSpec *pspec, gpointer user_data);
-void smpldt_clbk_mark_set (GtkTextBuffer * textbuffer, GtkTextIter * location, GtkTextMark * mark, gpointer user_data);
-
 static void simpledit_app_window_init (SimpleditAppWindow *pWindow) {
 	gtk_widget_init_template(GTK_WIDGET(pWindow));
 	
@@ -54,7 +52,9 @@ static void simpledit_app_window_init (SimpleditAppWindow *pWindow) {
 static void simpledit_app_window_class_init (SimpleditAppWindowClass *pClass) {
 	gtk_widget_class_set_template_from_resource(GTK_WIDGET_CLASS(pClass), "/net/thepozer/simpledit/simplEdit.SimpleditAppWindow.glade");
 	
-	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, pSrcView);
+	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, stackSwitch);
+	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, stackEditors);
+
 	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, statusBar);
 	
 	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, menuFileSave);
@@ -80,7 +80,7 @@ SimpleditAppWindow * simpledit_app_window_new (SimpleditApp *pApp) {
 	g_signal_connect (pTxtBuff, "notify::cursor-position", G_CALLBACK (smpldt_clbk_cursor_position_changed), pWindow);
 	g_signal_connect (pTxtBuff, "mark-set", G_CALLBACK (smpldt_clbk_mark_set), pWindow);
 	
-	pWindow->pEditData = simpledit_content_new(GTK_WINDOW(pWindow), pWindow->pSrcView);
+	pWindow->pEditData = simpledit_content_new_add(GTK_WINDOW(pWindow), pWindow->stackEditors);
 	
 	simpledit_content_update_highlight(pWindow->pEditData, NULL);
 	g_signal_emit_by_name(pTxtBuff, "changed", pWindow);

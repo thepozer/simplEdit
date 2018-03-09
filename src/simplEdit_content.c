@@ -8,6 +8,7 @@ struct _SimpleditContent {
 	GtkSourceView * pSrcView;
 	GtkTextBuffer * pTxtBuff;
 	GtkSourceFile * pSrcFile;
+	gchar * pcStackName;
 	GFile * pFile;
 	gchar * pcFilename;
 	gchar * pcFiletitle;
@@ -140,6 +141,53 @@ static void simpledit_content_init (SimpleditContent *self) {
 	self->eCompType = GTK_SOURCE_COMPRESSION_TYPE_NONE;
 }
 
+
+SimpleditContent * simpledit_content_add_new (GtkWindow * pWindow, GtkStack * stackEditors) {
+	SimpleditContent * pEditData;
+	GtkWidget * pScrolled, *pView;
+	
+	pScrolled = gtk_scrolled_window_new(NULL, NULL);
+	gtk_widget_show(pScrolled);
+	gtk_widget_set_hexpand(pScrolled, TRUE);
+	gtk_widget_set_vexpand(pScrolled, TRUE);
+	
+	pView = gtk_source_view_new();
+	gtk_text_view_set_monospace(GTK_TEXT_VIEW (pView), TRUE);
+	gtk_widget_show (pView);
+	gtk_container_add (GTK_CONTAINER (pScrolled), pView);
+	
+	gtk_stack_add_titled (GTK_STACK (priv->stack), pScrolled, basename, basename);
+	
+	
+	
+	GSettings * pSettings = NULL;
+	SimpleditContent *self = SIMPLEDIT_CONTENT(g_object_new (SIMPLEDIT_TYPE_CONTENT, 
+		"window", pWindow, "sourceview", pSrcView, NULL));
+
+    self->pTxtBuff = gtk_text_view_get_buffer(GTK_TEXT_VIEW(self->pSrcView));
+    self->pSrcLang = NULL;
+	
+	gtk_text_buffer_set_text(self->pTxtBuff, "", 0);
+	gtk_text_buffer_set_modified(self->pTxtBuff, FALSE);
+
+	pSettings = simpledit_app_get_settings(SIMPLEDIT_APP(gtk_window_get_application(GTK_WINDOW(pWindow))));
+	
+	g_settings_bind (pSettings, "show-line-numbers", pSrcView, "show-line-numbers", G_SETTINGS_BIND_DEFAULT);
+	g_settings_bind (pSettings, "show-line-marks", pSrcView, "show-line-marks", G_SETTINGS_BIND_DEFAULT);
+	g_settings_bind (pSettings, "highlight-current-line", pSrcView, "highlight-current-line", G_SETTINGS_BIND_DEFAULT);
+	//g_settings_bind (pSettings, "font", pSrcView, "active", G_SETTINGS_BIND_DEFAULT);
+	g_settings_bind (pSettings, "show-right-margin", pSrcView, "show-right-margin", G_SETTINGS_BIND_DEFAULT);
+	g_settings_bind (pSettings, "right-margin-position", pSrcView, "right-margin-position", G_SETTINGS_BIND_DEFAULT);
+	
+	g_settings_bind (pSettings, "auto-indent", pSrcView, "auto-indent", G_SETTINGS_BIND_DEFAULT);
+	g_settings_bind (pSettings, "indent-on-tab", pSrcView, "indent-on-tab", G_SETTINGS_BIND_DEFAULT);
+	g_settings_bind (pSettings, "smart-backspace", pSrcView, "smart-backspace", G_SETTINGS_BIND_DEFAULT);
+	g_settings_bind (pSettings, "insert-spaces-instead-of-tabs", pSrcView, "insert-spaces-instead-of-tabs", G_SETTINGS_BIND_DEFAULT);
+	g_settings_bind (pSettings, "indent-width", pSrcView, "indent-width", G_SETTINGS_BIND_DEFAULT);
+	g_settings_bind (pSettings, "tab-width", pSrcView, "tab-width", G_SETTINGS_BIND_DEFAULT);
+	
+    return pEditData;
+}
 
 SimpleditContent * simpledit_content_new (GtkWindow * pWindow, GtkSourceView * pSrcView) {
 	GSettings * pSettings = NULL;

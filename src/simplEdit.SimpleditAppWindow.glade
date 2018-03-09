@@ -2,7 +2,6 @@
 <!-- Generated with glade 3.20.2 -->
 <interface>
   <requires lib="gtk+" version="3.18"/>
-  <requires lib="gtksourceview" version="3.0"/>
   <template class="SimpleditAppWindow" parent="GtkApplicationWindow">
     <property name="can_focus">False</property>
     <property name="default_width">600</property>
@@ -279,29 +278,29 @@
           </packing>
         </child>
         <child>
-          <object class="GtkScrolledWindow">
+          <object class="GtkStackSwitcher" id="stackSwitch">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="shadow_type">in</property>
-            <property name="propagate_natural_width">True</property>
-            <property name="propagate_natural_height">True</property>
+            <property name="can_focus">False</property>
+            <property name="stack">stackEditors</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkStack" id="stackEditors">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
             <child>
-              <object class="GtkSourceView" id="pSrcView">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="left_margin">2</property>
-                <property name="right_margin">2</property>
-                <property name="monospace">True</property>
-                <property name="tab_width">4</property>
-                <property name="auto_indent">True</property>
-                <property name="insert_spaces_instead_of_tabs">True</property>
-              </object>
+              <placeholder/>
             </child>
           </object>
           <packing>
             <property name="expand">True</property>
             <property name="fill">True</property>
-            <property name="position">1</property>
+            <property name="position">2</property>
           </packing>
         </child>
         <child>
@@ -320,7 +319,7 @@
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">2</property>
+            <property name="position">3</property>
           </packing>
         </child>
       </object>
