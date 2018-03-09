@@ -23,7 +23,7 @@ To download simplEdit via git, type these commands in a terminal :
 
 If you have got source from git, you need to do some steps before in simplEdit directory :
 
-    $ autoreconf -i
+    $ ./autogen.sh
 
 These steps generate the configure script.
 

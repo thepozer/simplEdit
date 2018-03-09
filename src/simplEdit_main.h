@@ -3,12 +3,13 @@
 #define __SMPLDT_MAIN_H__
 
 #include <gtk/gtk.h>
-
 #include <gtksourceview/gtksource.h>
+#include <glib/gi18n.h>
+
+#include "simplEdit.gresources.h"
 
 #ifndef __SIMPLEDIT_MAIN_PART__
 
-extern GtkApplication * gpApp;
 
 #endif /* __SIMPLEDIT_MAIN_PART__ */
 

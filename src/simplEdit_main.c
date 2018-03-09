@@ -1,34 +1,15 @@
 #define __SIMPLEDIT_MAIN_PART__
 #include "simplEdit_main.h"
 
-#include "simplEdit_window.h"
-
-GtkApplication * GpApp = NULL;
+#include "simplEdit_app.h"
 
 int main (int argc, char *argv []) {
-	GtkBuilder * pBuilder = NULL;
-	GError * pErr = NULL;
-	gchar * pcFilename = NULL;
-	guint iRet = 0;
+	/* Set up internationalization */
+	setlocale (LC_ALL, "");
+	bindtextdomain (PACKAGE, LOCALEDIR);
+	textdomain (PACKAGE);
 
-	gtk_init(&argc, &argv);
-	GpApp = gtk_application_new("net.thepozer.simpledit", 0);
+	g_resources_register(simplEdit_get_resource());
 	
-	pBuilder = gtk_builder_new();
-	
-	pcFilename =  g_build_filename(".", "simplEdit.glade", NULL);
-	iRet = gtk_builder_add_from_file(pBuilder, pcFilename, &pErr);
-	g_free(pcFilename);
-	if (pErr) {
-		gint iCode = pErr->code;
-		g_printerr("%s\n", pErr->message);
-		g_error_free (pErr);
-		return iCode;
-	}
-
-	simplEdit_window_init(pBuilder);
-	
-	gtk_main();
-
-	return 0;
+	return g_application_run(G_APPLICATION(simpledit_app_new()), argc, argv);
 }

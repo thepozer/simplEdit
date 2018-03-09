@@ -1,0 +1,10 @@
+src/simplEdit_main.c
+src/simplEdit_app.c
+src/simplEdit_window.c
+src/simplEdit_content.c
+src/simplEdit_pref_dialog.c
+src/simplEdit_search_dialog.c
+src/simplEdit.SimpleditAppWindow.glade
+src/simplEdit.SimpleditPrefDialog.glade
+src/simplEdit.SimpleditSearchDialog.glade
+data/simpledit.desktop.in

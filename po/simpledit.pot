@@ -1,0 +1,258 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-03-09 14:00+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: ../src/simplEdit_window.c:99
+#, c-format
+msgid "Error openning file '%s' : (%i) %s"
+msgstr ""
+
+#: ../src/simplEdit_window.c:337
+msgid ""
+"Another small/simple editor based on GtkSourceView.\n"
+"It try to make accessible every features of GtkSourceView."
+msgstr ""
+
+#: ../src/simplEdit_window.c:338
+msgid "(c) 2018 Didier Prolhac"
+msgstr ""
+
+#: ../src/simplEdit_window.c:339
+msgid "MIT"
+msgstr ""
+
+#: ../src/simplEdit_window.c:344
+msgid "github simplEdit"
+msgstr ""
+
+#: ../src/simplEdit_content.c:218
+#, c-format
+msgid "Line : %d / %d \tCol : %d"
+msgstr ""
+
+#: ../src/simplEdit_content.c:220
+#, c-format
+msgid "\t\tOWR"
+msgstr ""
+
+#: ../src/simplEdit_content.c:220
+#, c-format
+msgid "\t\tINS"
+msgstr ""
+
+#: ../src/simplEdit_content.c:222
+#, c-format
+msgid "\t\tFile type : %s"
+msgstr ""
+
+#: ../src/simplEdit_content.c:345
+msgid "Encoding :"
+msgstr ""
+
+#: ../src/simplEdit_content.c:364
+msgid "End of line :"
+msgstr ""
+
+#: ../src/simplEdit_content.c:369
+msgid "Unix (LF)"
+msgstr ""
+
+#: ../src/simplEdit_content.c:370
+msgid "Windows (CR LF)"
+msgstr ""
+
+#: ../src/simplEdit_content.c:371
+msgid "Mac (CR)"
+msgstr ""
+
+#: ../src/simplEdit_content.c:383
+msgid "Compression :"
+msgstr ""
+
+#: ../src/simplEdit_content.c:388
+msgid "None"
+msgstr ""
+
+#: ../src/simplEdit_content.c:389
+msgid "Gzip (.gz)"
+msgstr ""
+
+#: ../src/simplEdit_content.c:439
+msgid "Open File"
+msgstr ""
+
+#: ../src/simplEdit_content.c:440 ../src/simplEdit_content.c:443
+msgid "_Cancel"
+msgstr ""
+
+#: ../src/simplEdit_content.c:440
+msgid "_Open"
+msgstr ""
+
+#: ../src/simplEdit_content.c:442
+msgid "Save File"
+msgstr ""
+
+#: ../src/simplEdit_content.c:443
+msgid "_Save"
+msgstr ""
+
+#: ../src/simplEdit_content.c:450
+msgid "New file"
+msgstr ""
+
+#: ../src/simplEdit_content.c:510
+#, c-format
+msgid "Error reading '%s' : (%i) %s"
+msgstr ""
+
+#: ../src/simplEdit_content.c:543
+#, c-format
+msgid "Error reading (stream) '%s' : (%i) %s"
+msgstr ""
+
+#: ../src/simplEdit_content.c:566
+#, c-format
+msgid "Error writing '%s' : (%i) %s"
+msgstr ""
+
+#: ../src/simplEdit_search_dialog.c:114 ../src/simplEdit_search_dialog.c:169
+#: ../src/simplEdit_search_dialog.c:182
+msgid "No more item found !"
+msgstr ""
+
+#: ../src/simplEdit_search_dialog.c:172
+#, c-format
+msgid "Replace error (%i) : %s"
+msgstr ""
+
+#: ../src/simplEdit.SimpleditAppWindow.glade.h:1
+msgid "_File"
+msgstr ""
+
+#: ../src/simplEdit.SimpleditAppWindow.glade.h:2
+msgid "E_dit"
+msgstr ""
+
+#: ../src/simplEdit.SimpleditAppWindow.glade.h:3
+msgid "_Language"
+msgstr ""
+
+#: ../src/simplEdit.SimpleditAppWindow.glade.h:4
+msgid "_Search"
+msgstr ""
+
+#: ../src/simplEdit.SimpleditAppWindow.glade.h:5
+msgid "H_elp"
+msgstr ""
+
+#: ../src/simplEdit.SimpleditPrefDialog.glade.h:1
+msgid "Show line numbers"
+msgstr ""
+
+#: ../src/simplEdit.SimpleditPrefDialog.glade.h:2
+msgid "Show line marks"
+msgstr ""
+
+#: ../src/simplEdit.SimpleditPrefDialog.glade.h:3
+msgid "Highlight current line"
+msgstr ""
+
+#: ../src/simplEdit.SimpleditPrefDialog.glade.h:4
+msgid "Font :"
+msgstr ""
+
+#: ../src/simplEdit.SimpleditPrefDialog.glade.h:5
+msgid "Show right margin : "
+msgstr ""
+
+#: ../src/simplEdit.SimpleditPrefDialog.glade.h:6
+msgid "Display"
+msgstr ""
+
+#: ../src/simplEdit.SimpleditPrefDialog.glade.h:7
+msgid "Automatic indentation"
+msgstr ""
+
+#: ../src/simplEdit.SimpleditPrefDialog.glade.h:8
+msgid "Use TAB to indent"
+msgstr ""
+
+#: ../src/simplEdit.SimpleditPrefDialog.glade.h:9
+msgid "Smart backspace"
+msgstr ""
+
+#: ../src/simplEdit.SimpleditPrefDialog.glade.h:10
+msgid "Use Spaces instead tabs"
+msgstr ""
+
+#: ../src/simplEdit.SimpleditPrefDialog.glade.h:11
+msgid "Indentation size :"
+msgstr ""
+
+#: ../src/simplEdit.SimpleditPrefDialog.glade.h:12
+msgid "Tab size :"
+msgstr ""
+
+#: ../src/simplEdit.SimpleditPrefDialog.glade.h:13
+msgid "Indentation"
+msgstr ""
+
+#: ../src/simplEdit.SimpleditPrefDialog.glade.h:14
+msgid "Editor"
+msgstr ""
+
+#: ../src/simplEdit.SimpleditPrefDialog.glade.h:15
+msgid "Auto-save file"
+msgstr ""
+
+#: ../src/simplEdit.SimpleditPrefDialog.glade.h:16
+msgid "File"
+msgstr ""
+
+#: ../src/simplEdit.SimpleditSearchDialog.glade.h:1
+msgid "Search :"
+msgstr ""
+
+#: ../src/simplEdit.SimpleditSearchDialog.glade.h:2
+msgid "Replace :"
+msgstr ""
+
+#: ../src/simplEdit.SimpleditSearchDialog.glade.h:3
+msgid "Whole word only"
+msgstr ""
+
+#: ../src/simplEdit.SimpleditSearchDialog.glade.h:4
+msgid "Case sensitive"
+msgstr ""
+
+#: ../src/simplEdit.SimpleditSearchDialog.glade.h:5
+msgid "Use regular expression"
+msgstr ""
+
+#: ../src/simplEdit.SimpleditSearchDialog.glade.h:6
+msgid "Restart at the beginning at the end"
+msgstr ""
+
+#: ../data/simpledit.desktop.in.h:1
+msgid "Simple Edit"
+msgstr ""
+
+#: ../data/simpledit.desktop.in.h:2
+msgid "A simple GTK+ Editor using SourceView"
+msgstr ""
