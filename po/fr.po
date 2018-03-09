@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: simplEdit 0.4.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-03-07 15:42+0100\n"
-"PO-Revision-Date: 2018-03-07 17:13+0100\n"
+"POT-Creation-Date: 2018-03-09 14:00+0100\n"
+"PO-Revision-Date: 2018-03-09 14:00+0100\n"
 "Last-Translator: Didier Prolhac <dev@thepozer.net>\n"
 "Language-Team: français <dev@thepozer.net>\n"
 "Language: fr\n"
@@ -19,12 +19,12 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Generator: Gtranslator 2.91.7\n"
 
-#: ../src/simplEdit_window.c:97
+#: ../src/simplEdit_window.c:99
 #, c-format
 msgid "Error openning file '%s' : (%i) %s"
 msgstr "Erreur lors de l'ouverture du fichier '%s' : (%i) %s"
 
-#: ../src/simplEdit_window.c:323
+#: ../src/simplEdit_window.c:337
 msgid ""
 "Another small/simple editor based on GtkSourceView.\n"
 "It try to make accessible every features of GtkSourceView."
@@ -32,95 +32,105 @@ msgstr ""
 "Un autre editeur de texte petit/simple basé sur GtkSourceView.\n"
 "Il essaie de rendre accessible toutes les fonctionnalités de GtkSourceView."
 
-#: ../src/simplEdit_window.c:324
+#: ../src/simplEdit_window.c:338
 msgid "(c) 2018 Didier Prolhac"
 msgstr "(c) 2018 Didier Prolhac"
 
-#: ../src/simplEdit_window.c:325
+#: ../src/simplEdit_window.c:339
 msgid "MIT"
 msgstr "MIT"
 
-#: ../src/simplEdit_window.c:330
+#: ../src/simplEdit_window.c:344
 msgid "github simplEdit"
 msgstr "github simplEdit"
 
-#: ../src/simplEdit_content.c:215
+#: ../src/simplEdit_content.c:218
 #, c-format
 msgid "Line : %d / %d \tCol : %d"
 msgstr "Ligne : %d / %d \tCol : %d"
 
-#: ../src/simplEdit_content.c:217
+#: ../src/simplEdit_content.c:220
 #, c-format
-msgid "\tFile type : %s"
-msgstr "\tType de fichier : %s"
+msgid "\t\tOWR"
+msgstr "\t\tOWR"
 
-#: ../src/simplEdit_content.c:340
+#: ../src/simplEdit_content.c:220
+#, c-format
+msgid "\t\tINS"
+msgstr "\t\tINS"
+
+#: ../src/simplEdit_content.c:222
+#, c-format
+msgid "\t\tFile type : %s"
+msgstr "\t\tType de fichier : %s"
+
+#: ../src/simplEdit_content.c:345
 msgid "Encoding :"
 msgstr "Encodage :"
 
-#: ../src/simplEdit_content.c:359
+#: ../src/simplEdit_content.c:364
 msgid "End of line :"
 msgstr "Fin de fichier :"
 
-#: ../src/simplEdit_content.c:364
+#: ../src/simplEdit_content.c:369
 msgid "Unix (LF)"
 msgstr "Unix (LF)"
 
-#: ../src/simplEdit_content.c:365
+#: ../src/simplEdit_content.c:370
 msgid "Windows (CR LF)"
 msgstr "Windows (CR LF)"
 
-#: ../src/simplEdit_content.c:366
+#: ../src/simplEdit_content.c:371
 msgid "Mac (CR)"
 msgstr "Mac (CR)"
 
-#: ../src/simplEdit_content.c:378
+#: ../src/simplEdit_content.c:383
 msgid "Compression :"
 msgstr "Compression :"
 
-#: ../src/simplEdit_content.c:383
+#: ../src/simplEdit_content.c:388
 msgid "None"
 msgstr "Aucune"
 
-#: ../src/simplEdit_content.c:384
+#: ../src/simplEdit_content.c:389
 msgid "Gzip (.gz)"
 msgstr "Gzip (.gz)"
 
-#: ../src/simplEdit_content.c:434
+#: ../src/simplEdit_content.c:439
 msgid "Open File"
 msgstr "Ouvrir un fichier"
 
-#: ../src/simplEdit_content.c:435 ../src/simplEdit_content.c:438
+#: ../src/simplEdit_content.c:440 ../src/simplEdit_content.c:443
 msgid "_Cancel"
 msgstr "_Annuler"
 
-#: ../src/simplEdit_content.c:435
+#: ../src/simplEdit_content.c:440
 msgid "_Open"
 msgstr "_Ouvrir"
 
-#: ../src/simplEdit_content.c:437
+#: ../src/simplEdit_content.c:442
 msgid "Save File"
 msgstr "Enregistrer un fichier"
 
-#: ../src/simplEdit_content.c:438
+#: ../src/simplEdit_content.c:443
 msgid "_Save"
 msgstr "_Enregistrer"
 
-#: ../src/simplEdit_content.c:445
+#: ../src/simplEdit_content.c:450
 msgid "New file"
 msgstr "Nouveau fichier"
 
-#: ../src/simplEdit_content.c:504
+#: ../src/simplEdit_content.c:510
 #, c-format
 msgid "Error reading '%s' : (%i) %s"
 msgstr "Erreur durant la lecture '%s' : (%i) %s"
 
-#: ../src/simplEdit_content.c:535
+#: ../src/simplEdit_content.c:543
 #, c-format
 msgid "Error reading (stream) '%s' : (%i) %s"
 msgstr "Erreur durant la lecture (stream) '%s' : (%i) %s"
 
-#: ../src/simplEdit_content.c:558
+#: ../src/simplEdit_content.c:566
 #, c-format
 msgid "Error writing '%s' : (%i) %s"
 msgstr "Erreur durant l'écriture '%s' : (%i) %s"
@@ -243,10 +253,10 @@ msgstr "Utilise des Expressions Régulières"
 msgid "Restart at the beginning at the end"
 msgstr "Recommence au début à la fin du buffer"
 
-#: ../simpledit.desktop.in.h:1
+#: ../data/simpledit.desktop.in.h:1
 msgid "Simple Edit"
 msgstr "Simple Edit"
 
-#: ../simpledit.desktop.in.h:2
+#: ../data/simpledit.desktop.in.h:2
 msgid "A simple GTK+ Editor using SourceView"
 msgstr "Un simple Editeur en GTK+ utilisant SourceView"
