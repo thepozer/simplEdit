@@ -22,6 +22,8 @@ G_DECLARE_FINAL_TYPE (SimpleditContent, simpledit_content, SIMPLEDIT, CONTENT, G
  */
 SimpleditContent * simpledit_content_new (GtkWindow * pWindow, GtkSourceView * pSrcView);
 
+SimpleditContent * simpledit_content_new_add (GtkWindow * pWindow, GtkStack * stackEditors, gchar * pcTitle);
+
 gboolean simpledit_content_update_title(SimpleditContent * pEditData);
 
 gint simpledit_content_file_dialog(SimpleditContent * pEditData, GtkWidget * pDlgFile);
