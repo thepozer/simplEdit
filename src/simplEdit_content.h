@@ -20,9 +20,9 @@ G_DECLARE_FINAL_TYPE (SimpleditContent, simpledit_content, SIMPLEDIT, CONTENT, G
 /*
  * Method definitions.
  */
-SimpleditContent * simpledit_content_new (GtkWindow * pWindow, GtkSourceView * pSrcView);
+SimpleditContent * simpledit_content_new (GtkWindow * pWindow);
 
-SimpleditContent * simpledit_content_new_add (GtkWindow * pWindow, GtkStack * stackEditors, gchar * pcTitle);
+void simpledit_content_add_to_stack (SimpleditContent * pEditData, GtkStack * stackEditors);
 
 gboolean simpledit_content_update_title(SimpleditContent * pEditData);
 

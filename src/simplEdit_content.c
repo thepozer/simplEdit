@@ -36,6 +36,7 @@ enum
   PROP_FILENAME,
   PROP_FILETITLE,
   PROP_WRITABLE,
+  PROP_STACKNAME,
   N_PROPERTIES
 };
 
@@ -64,6 +65,10 @@ static void simpledit_content_set_property (GObject * object, guint property_id,
 			break;
 		case PROP_WRITABLE:
 			self->bWritable = g_value_get_boolean(value);
+			break;
+		case PROP_STACKNAME:
+			g_free(self->pcStackName);
+			self->pcStackName = g_value_dup_string(value);
 			break;
 		default:
 			/* We don't have any other property... */
@@ -97,6 +102,9 @@ static void simpledit_content_get_property (GObject * object, guint property_id,
 		case PROP_WRITABLE:
 			g_value_set_boolean(value, self->bWritable);
 			break;
+		case PROP_STACKNAME:
+			g_value_set_string(value, self->pcStackName);
+			break;
 		default:
 			/* We don't have any other property... */
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -112,18 +120,20 @@ static void simpledit_content_class_init (SimpleditContentClass *klass) {
 
 	arObjectProperties[PROP_WINDOW]     = g_param_spec_object("window", "window", "window of the application.", 
 										GTK_TYPE_WINDOW, G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
-	arObjectProperties[PROP_SOURCEVIEW] = g_param_spec_object("sourceview", "sourceview", "sourceview of the application.", 
-										GTK_SOURCE_TYPE_VIEW, G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+	arObjectProperties[PROP_SOURCEVIEW] = g_param_spec_object("sourceview", "sourceview", "sourceview of the item.", 
+										GTK_SOURCE_TYPE_VIEW, G_PARAM_READWRITE);
 	arObjectProperties[PROP_TEXTBUFFER] = g_param_spec_object("textbuffer", "textbuffer", "textbuffer of the sourceview.", 
 										GTK_TYPE_TEXT_BUFFER, G_PARAM_READABLE);
-	arObjectProperties[PROP_SOURCEFILE] = g_param_spec_object("sourcefile", "sourcefile", "sourcefile of the application.", 
+	arObjectProperties[PROP_SOURCEFILE] = g_param_spec_object("sourcefile", "sourcefile", "sourcefile of the item.", 
 										GTK_SOURCE_TYPE_FILE, G_PARAM_READABLE);
 	
-	arObjectProperties[PROP_FILENAME]   = g_param_spec_string("filename", "Filename", "File name of the application.", 
+	arObjectProperties[PROP_FILENAME]   = g_param_spec_string("filename", "Filename", "File name of the item.", 
 										NULL, G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
-	arObjectProperties[PROP_FILETITLE]  = g_param_spec_string("filetitle", "Filetitle", "File Title of the application.", 
+	arObjectProperties[PROP_FILETITLE]  = g_param_spec_string("filetitle", "Filetitle", "File Title of the item.", 
 										NULL, G_PARAM_READABLE);
 
+	arObjectProperties[PROP_STACKNAME]  = g_param_spec_string("stackname", "Stackname", "Stackname for the item.", 
+										NULL, G_PARAM_READABLE);
 	arObjectProperties[PROP_WRITABLE]   = g_param_spec_boolean ("writable", "Writable", "TextView is writable.", 
 										TRUE, G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
 
@@ -136,19 +146,32 @@ static void simpledit_content_init (SimpleditContent *self) {
    * They are all automatically initialized to 0 to begin with. */
 	
 	self->pFile = NULL;
+	self->pcFilename = NULL;
+	self->pcFiletitle = NULL;
 
 	self->pSrcFile = gtk_source_file_new();
 	gtk_source_file_set_location(self->pSrcFile, NULL);
 	
+ 	self->pcStackName = NULL;
+	
+	self->pTxtBuff = NULL;
+    self->pSrcLang = NULL;
+
 	self->pEncod = gtk_source_encoding_get_utf8();
 	self->eTypeEOL = GTK_SOURCE_NEWLINE_TYPE_DEFAULT;
 	self->eCompType = GTK_SOURCE_COMPRESSION_TYPE_NONE;
 }
 
 
-SimpleditContent * simpledit_content_new_add (GtkWindow * pWindow, GtkStack * stackEditors, gchar * pcTitle) {
-	SimpleditContent * pEditData;
-	GtkWidget * pScrolled, *pView;
+SimpleditContent * simpledit_content_new (GtkWindow * pWindow) {
+	SimpleditContent *pEditData = SIMPLEDIT_CONTENT(g_object_new (SIMPLEDIT_TYPE_CONTENT, "window", pWindow, NULL));
+
+    return pEditData;
+}
+
+void simpledit_content_add_to_stack (SimpleditContent * pEditData, GtkStack * stackEditors) {
+	GtkWidget * pScrolled, *pSrcView, *pStackChild;
+	GSettings * pSettings = NULL;
 	gchar * pcStackName = NULL;
 	
 	pScrolled = gtk_scrolled_window_new(NULL, NULL);
@@ -156,32 +179,25 @@ SimpleditContent * simpledit_content_new_add (GtkWindow * pWindow, GtkStack * st
 	gtk_widget_set_hexpand(pScrolled, TRUE);
 	gtk_widget_set_vexpand(pScrolled, TRUE);
 	
-	pView = gtk_source_view_new();
-	gtk_text_view_set_monospace(GTK_TEXT_VIEW (pView), TRUE);
-	gtk_widget_show (pView);
-	gtk_container_add (GTK_CONTAINER (pScrolled), pView);
+	pEditData->pSrcView = GTK_SOURCE_VIEW(gtk_source_view_new());
+	gtk_text_view_set_monospace(GTK_TEXT_VIEW (pEditData->pSrcView), TRUE);
+	gtk_widget_show(GTK_WIDGET(pEditData->pSrcView));
+	gtk_container_add(GTK_CONTAINER(pScrolled), GTK_WIDGET(pEditData->pSrcView));
 	
 	pcStackName = g_strdup_printf("Content_%d", iCountContentObject++);
 	
-g_print("simpledit_content_new_add - pcTitle : '%s'", pcTitle);
-	if (pcTitle != NULL) {
-		gtk_stack_add_titled(GTK_STACK(stackEditors), pScrolled, pcStackName, pcTitle);
+g_print("simpledit_content_new_add - pcTitle : '%s'\n", pEditData->pcFiletitle);
+	if (pEditData->pcFiletitle != NULL) {
+		gtk_stack_add_titled(GTK_STACK(stackEditors), pScrolled, pcStackName, pEditData->pcFiletitle);
 	} else {
 		gtk_stack_add_titled(GTK_STACK(stackEditors), pScrolled, pcStackName, _("New file"));
 	}
 	
-	pEditData = simpledit_content_new(pWindow, GTK_SOURCE_VIEW(pView));
 	gtk_stack_set_visible_child_name(stackEditors, pcStackName);
+	pStackChild = gtk_stack_get_child_by_name(stackEditors, pcStackName);
+	g_object_set_data(G_OBJECT(pStackChild), "content_data", pEditData);
 	
 	pEditData->pcStackName = pcStackName;
-
-    return pEditData;
-}
-
-SimpleditContent * simpledit_content_new (GtkWindow * pWindow, GtkSourceView * pSrcView) {
-	GSettings * pSettings = NULL;
-	SimpleditContent *pEditData = SIMPLEDIT_CONTENT(g_object_new (SIMPLEDIT_TYPE_CONTENT, 
-		"window", pWindow, "sourceview", pSrcView, NULL));
 
     pEditData->pTxtBuff = gtk_text_view_get_buffer(GTK_TEXT_VIEW(pEditData->pSrcView));
     pEditData->pSrcLang = NULL;
@@ -189,27 +205,25 @@ SimpleditContent * simpledit_content_new (GtkWindow * pWindow, GtkSourceView * p
 	gtk_text_buffer_set_text(pEditData->pTxtBuff, "", 0);
 	gtk_text_buffer_set_modified(pEditData->pTxtBuff, FALSE);
 
-	pSettings = simpledit_app_get_settings(SIMPLEDIT_APP(gtk_window_get_application(GTK_WINDOW(pWindow))));
+	pSettings = simpledit_app_get_settings(SIMPLEDIT_APP(gtk_window_get_application(pEditData->pWindow)));
 	
-	g_settings_bind (pSettings, "show-line-numbers", pSrcView, "show-line-numbers", G_SETTINGS_BIND_DEFAULT);
-	g_settings_bind (pSettings, "show-line-marks", pSrcView, "show-line-marks", G_SETTINGS_BIND_DEFAULT);
-	g_settings_bind (pSettings, "highlight-current-line", pSrcView, "highlight-current-line", G_SETTINGS_BIND_DEFAULT);
-	//g_settings_bind (pSettings, "font", pSrcView, "active", G_SETTINGS_BIND_DEFAULT);
-	g_settings_bind (pSettings, "show-right-margin", pSrcView, "show-right-margin", G_SETTINGS_BIND_DEFAULT);
-	g_settings_bind (pSettings, "right-margin-position", pSrcView, "right-margin-position", G_SETTINGS_BIND_DEFAULT);
+	g_settings_bind (pSettings, "show-line-numbers", pEditData->pSrcView, "show-line-numbers", G_SETTINGS_BIND_DEFAULT);
+	g_settings_bind (pSettings, "show-line-marks",   pEditData->pSrcView, "show-line-marks", G_SETTINGS_BIND_DEFAULT);
+	g_settings_bind (pSettings, "highlight-current-line", pEditData->pSrcView, "highlight-current-line", G_SETTINGS_BIND_DEFAULT);
+	//g_settings_bind (pSettings, "font", pEditData->pSrcView, "active", G_SETTINGS_BIND_DEFAULT);
+	g_settings_bind (pSettings, "show-right-margin",     pEditData->pSrcView, "show-right-margin", G_SETTINGS_BIND_DEFAULT);
+	g_settings_bind (pSettings, "right-margin-position", pEditData->pSrcView, "right-margin-position", G_SETTINGS_BIND_DEFAULT);
 	
-	g_settings_bind (pSettings, "auto-indent", pSrcView, "auto-indent", G_SETTINGS_BIND_DEFAULT);
-	g_settings_bind (pSettings, "indent-on-tab", pSrcView, "indent-on-tab", G_SETTINGS_BIND_DEFAULT);
-	g_settings_bind (pSettings, "smart-backspace", pSrcView, "smart-backspace", G_SETTINGS_BIND_DEFAULT);
-	g_settings_bind (pSettings, "insert-spaces-instead-of-tabs", pSrcView, "insert-spaces-instead-of-tabs", G_SETTINGS_BIND_DEFAULT);
-	g_settings_bind (pSettings, "indent-width", pSrcView, "indent-width", G_SETTINGS_BIND_DEFAULT);
-	g_settings_bind (pSettings, "tab-width", pSrcView, "tab-width", G_SETTINGS_BIND_DEFAULT);
+	g_settings_bind (pSettings, "auto-indent",     pEditData->pSrcView, "auto-indent", G_SETTINGS_BIND_DEFAULT);
+	g_settings_bind (pSettings, "indent-on-tab",   pEditData->pSrcView, "indent-on-tab", G_SETTINGS_BIND_DEFAULT);
+	g_settings_bind (pSettings, "smart-backspace", pEditData->pSrcView, "smart-backspace", G_SETTINGS_BIND_DEFAULT);
+	g_settings_bind (pSettings, "insert-spaces-instead-of-tabs", pEditData->pSrcView, "insert-spaces-instead-of-tabs", G_SETTINGS_BIND_DEFAULT);
+	g_settings_bind (pSettings, "indent-width",    pEditData->pSrcView, "indent-width", G_SETTINGS_BIND_DEFAULT);
+	g_settings_bind (pSettings, "tab-width",       pEditData->pSrcView, "tab-width", G_SETTINGS_BIND_DEFAULT);
 	
-	g_signal_connect(pEditData->pTxtBuff, "changed", G_CALLBACK (smpldt_clbk_text_changed), pWindow);
-	g_signal_connect(pEditData->pTxtBuff, "notify::cursor-position", G_CALLBACK (smpldt_clbk_cursor_position_changed), pWindow);
-	g_signal_connect(pEditData->pTxtBuff, "mark-set", G_CALLBACK (smpldt_clbk_mark_set), pWindow);
-	
-    return pEditData;
+	g_signal_connect(pEditData->pTxtBuff, "changed", G_CALLBACK (smpldt_clbk_text_changed), pEditData->pWindow);
+	g_signal_connect(pEditData->pTxtBuff, "notify::cursor-position", G_CALLBACK (smpldt_clbk_cursor_position_changed), pEditData->pWindow);
+	g_signal_connect(pEditData->pTxtBuff, "mark-set", G_CALLBACK (smpldt_clbk_mark_set), pEditData->pWindow);
 }
 
 gboolean simpledit_content_update_title(SimpleditContent * pEditData) {
@@ -293,7 +307,7 @@ gboolean simpledit_content_set_filename(SimpleditContent * pEditData, const gcha
 			g_print("simpledit_content_set_filename - Can't create GFile\n");
 			return FALSE;
 		}
-
+		
 		gtk_source_file_set_location(pEditData->pSrcFile, pEditData->pFile);
 		if (gtk_source_file_is_local(pEditData->pSrcFile)) {
 			gtk_source_file_check_file_on_disk(pEditData->pSrcFile);

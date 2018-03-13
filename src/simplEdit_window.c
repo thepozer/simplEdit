@@ -33,6 +33,8 @@ struct _SimpleditAppWindow {
 
 G_DEFINE_TYPE(SimpleditAppWindow, simpledit_app_window, GTK_TYPE_APPLICATION_WINDOW);
 
+void smpldt_clbk_stack_switch_child (GtkStack * pStack, GParamSpec *pSpec, gpointer user_data);
+
 typedef struct _sMenuLangItem {
 	SimpleditAppWindow *pWin;
 	GtkSourceLanguage * pSelLang;
@@ -75,6 +77,8 @@ static void simpledit_app_window_class_init (SimpleditAppWindowClass *pClass) {
 SimpleditAppWindow * simpledit_app_window_new (SimpleditApp *pApp) {
 	SimpleditAppWindow * pWindow = g_object_new (SIMPLEDIT_APP_WINDOW_TYPE, "application", pApp, NULL);
 	
+	g_signal_connect(pWindow->stackEditors, "notify::visible-child", G_CALLBACK (smpldt_clbk_stack_switch_child), pWindow);
+	
 	pWindow->pEditData = NULL;
 	
 	return pWindow;
@@ -86,11 +90,12 @@ void simpledit_app_window_open (SimpleditAppWindow *pWindow, GFile *pFile) {
 	
 	pcFileName = g_file_get_path(pFile);
 	
-	pWindow->pEditData = simpledit_content_new_add(GTK_WINDOW(pWindow), pWindow->stackEditors, g_file_get_basename(pFile));
-	simpledit_content_update_highlight(pWindow->pEditData, NULL);
+	pWindow->pEditData = simpledit_content_new(GTK_WINDOW(pWindow));
 	
 	if (simpledit_content_set_filename(pWindow->pEditData, pcFileName)) {
+		simpledit_content_add_to_stack(pWindow->pEditData, pWindow->stackEditors);
 		simpledit_content_load(pWindow->pEditData);
+		simpledit_content_update_highlight(pWindow->pEditData, NULL);
 	} else {
 		GtkWidget * pDlgMsg = gtk_message_dialog_new(GTK_WINDOW(pWindow), GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_ERROR, 
 								GTK_BUTTONS_CLOSE, _("Error openning file '%s' : (%i) %s"), pcFileName);
@@ -120,7 +125,19 @@ void simpledit_app_window_update_status (SimpleditAppWindow *pWindow) {
 	}
 }
 
-void smpldt_clbk_cursor_position_changed (GtkTextBuffer *textbuffer, GParamSpec *pspec, gpointer user_data) {
+void smpldt_clbk_stack_switch_child (GtkStack * pStack, GParamSpec *pSpec, gpointer user_data) {
+	SimpleditAppWindow * pWindow = SIMPLEDIT_APP_WINDOW(user_data);
+	SimpleditContent * pTmpEditData = NULL;
+	GtkWidget * pStackChild;
+	
+	pStackChild = gtk_stack_get_visible_child(pStack);
+	pTmpEditData = g_object_get_data(G_OBJECT(pStackChild), "content_data");
+	if (pTmpEditData != NULL) {
+		pWindow->pEditData = pTmpEditData;
+	}
+}
+
+void smpldt_clbk_cursor_position_changed (GtkTextBuffer *textbuffer, GParamSpec *pSpec, gpointer user_data) {
 	SimpleditAppWindow * pWindow = SIMPLEDIT_APP_WINDOW(user_data);
 	
 	simpledit_app_window_update_status(pWindow);
@@ -156,16 +173,20 @@ void smpldt_clbk_menu_file (GtkMenuItem *menuitem, gpointer user_data) {
 void smpldt_clbk_menu_file_new (GtkMenuItem *menuitem, gpointer user_data) {
 	SimpleditAppWindow * pWindow = SIMPLEDIT_APP_WINDOW(user_data);
 
-	pWindow->pEditData = simpledit_content_new_add(GTK_WINDOW(pWindow), pWindow->stackEditors, NULL);
+	pWindow->pEditData = simpledit_content_new(GTK_WINDOW(pWindow));
+	simpledit_content_add_to_stack(pWindow->pEditData, pWindow->stackEditors);
 	simpledit_content_update_highlight(pWindow->pEditData, NULL);
 	simpledit_content_update_title(pWindow->pEditData);
 }
 
 void smpldt_clbk_menu_file_open (GtkMenuItem *menuitem, gpointer user_data) { 
 	SimpleditAppWindow * pWindow = SIMPLEDIT_APP_WINDOW(user_data);
+	SimpleditContent * pTmpEditData;
 	
-	pWindow->pEditData = simpledit_content_new_add(GTK_WINDOW(pWindow), pWindow->stackEditors, NULL);
-	if (simpledit_content_select_name(pWindow->pEditData, GTK_FILE_CHOOSER_ACTION_OPEN)) {
+	pTmpEditData = simpledit_content_new(GTK_WINDOW(pWindow));
+	if (simpledit_content_select_name(pTmpEditData, GTK_FILE_CHOOSER_ACTION_OPEN)) {
+		pWindow->pEditData = pTmpEditData;
+		simpledit_content_add_to_stack(pWindow->pEditData, pWindow->stackEditors);
 		if (simpledit_content_load(pWindow->pEditData)) {
 			simpledit_content_update_title(pWindow->pEditData);
 		}
