@@ -32,7 +32,9 @@ static void simpledit_app_open (GApplication * pApp, GFile **files, gint n_files
 	}
 	
 	if (n_files > 0) {
-		simpledit_app_window_open(pWindow, files[0]);
+		for (i = 0; i < n_files; i++) {
+			simpledit_app_window_open(pWindow, files[i]);
+		}
 	}
 
 	gtk_window_present(GTK_WINDOW(pWindow));

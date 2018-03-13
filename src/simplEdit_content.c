@@ -493,9 +493,11 @@ gboolean simpledit_content_select_name(SimpleditContent * pEditData, GtkFileChoo
     if (action == GTK_FILE_CHOOSER_ACTION_OPEN) {
         pDlgFile = gtk_file_chooser_dialog_new (_("Open File"), GTK_WINDOW(pEditData->pWindow), GTK_FILE_CHOOSER_ACTION_OPEN, 
                     _("_Cancel"), GTK_RESPONSE_CANCEL, _("_Open"), GTK_RESPONSE_ACCEPT, NULL);
+		gtk_file_chooser_set_select_multiple(GTK_FILE_CHOOSER(pDlgFile), TRUE);
     } else if (action == GTK_FILE_CHOOSER_ACTION_SAVE) {
         pDlgFile = gtk_file_chooser_dialog_new (_("Save File"), GTK_WINDOW(pEditData->pWindow), GTK_FILE_CHOOSER_ACTION_SAVE,
                     _("_Cancel"), GTK_RESPONSE_CANCEL, _("_Save"), GTK_RESPONSE_ACCEPT, NULL);
+		gtk_file_chooser_set_create_folders(GTK_FILE_CHOOSER(pDlgFile), TRUE);
 	}
     
     if (pDlgFile) {
@@ -508,8 +510,7 @@ gboolean simpledit_content_select_name(SimpleditContent * pEditData, GtkFileChoo
         iResult = simpledit_content_file_dialog(pEditData, pDlgFile);
 	    
         if (iResult == GTK_RESPONSE_ACCEPT) {
-            GtkFileChooser * pChooser = GTK_FILE_CHOOSER (pDlgFile);
-            gchar * pcNewFilename = gtk_file_chooser_get_filename (pChooser);
+            gchar * pcNewFilename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER (pDlgFile));
 		
             simpledit_content_set_filename(pEditData, pcNewFilename);
             
