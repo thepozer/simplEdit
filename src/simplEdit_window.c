@@ -14,7 +14,9 @@ struct _SimpleditAppWindow {
 	GtkMenuItem * menuFileSave;
 	GtkMenuItem * menuFileSaveAs;
 	GtkMenuItem * menuFileReturnToSaved;
+	GtkMenuItem * menuFileClose;
 	
+
 	GtkMenuItem * menuEditUndo;
 	GtkMenuItem * menuEditRedo;
 	GtkMenuItem * menuEditCut;
@@ -32,6 +34,7 @@ struct _SimpleditAppWindow {
 
 G_DEFINE_TYPE(SimpleditAppWindow, simpledit_app_window, GTK_TYPE_APPLICATION_WINDOW);
 
+void simpledit_app_window_update_status (SimpleditAppWindow *pWindow);
 void smpldt_clbk_notebook_switch_page (GtkNotebook * bookEditors, GtkWidget * pChild, guint page_num, gpointer user_data);
 
 typedef struct _sMenuLangItem {
@@ -60,6 +63,7 @@ static void simpledit_app_window_class_init (SimpleditAppWindowClass *pClass) {
 	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, menuFileSave);
 	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, menuFileSaveAs);
 	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, menuFileReturnToSaved);
+	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, menuFileClose);
 	
 	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, menuEditUndo);
 	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, menuEditRedo);
@@ -92,8 +96,11 @@ void simpledit_app_window_open (SimpleditAppWindow *pWindow, GFile *pFile) {
 	
 	if (simpledit_content_set_filename(pWindow->pEditData, pcFileName)) {
 		simpledit_content_add_to_stack(pWindow->pEditData, pWindow->bookEditors);
-		simpledit_content_load(pWindow->pEditData);
-		simpledit_content_update_highlight(pWindow->pEditData, NULL);
+		if (simpledit_content_load(pWindow->pEditData)) {
+			simpledit_app_window_update_status(pWindow);
+			simpledit_content_update_highlight(pWindow->pEditData, NULL);
+			gtk_notebook_set_current_page(pWindow->bookEditors, -1);
+		}
 	} else {
 		GtkWidget * pDlgMsg = gtk_message_dialog_new(GTK_WINDOW(pWindow), GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_ERROR, 
 								GTK_BUTTONS_CLOSE, _("Error openning file '%s' : (%i) %s"), pcFileName);
@@ -120,6 +127,8 @@ void simpledit_app_window_update_status (SimpleditAppWindow *pWindow) {
 		pcStatus = simpledit_content_get_status(pWindow->pEditData);
 		gtk_statusbar_push(pWindow->statusBar, pWindow->iSttsIdPosition, pcStatus);
 		g_free(pcStatus);
+	} else {
+		gtk_statusbar_push(pWindow->statusBar, pWindow->iSttsIdPosition, "");
 	}
 }
 
@@ -131,6 +140,7 @@ void smpldt_clbk_notebook_switch_page (GtkNotebook * bookEditors, GtkWidget * pC
 	if (pTmpEditData != NULL) {
 		pWindow->pEditData = pTmpEditData;
 	}
+	
 }
 
 void smpldt_clbk_cursor_position_changed (GtkTextBuffer *textbuffer, GParamSpec *pSpec, gpointer user_data) {
@@ -164,6 +174,8 @@ void smpldt_clbk_menu_file (GtkMenuItem *menuitem, gpointer user_data) {
 	gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFileSave), bModified && bHaveFilename);
 	gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFileSaveAs), bHaveFilename);
 	gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFileReturnToSaved), bModified && bHaveFilename);
+	
+	gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFileClose), pWindow->pEditData != NULL);
 }
 
 void smpldt_clbk_menu_file_new (GtkMenuItem *menuitem, gpointer user_data) {
@@ -184,7 +196,9 @@ void smpldt_clbk_menu_file_open (GtkMenuItem *menuitem, gpointer user_data) {
 		pWindow->pEditData = pTmpEditData;
 		simpledit_content_add_to_stack(pWindow->pEditData, pWindow->bookEditors);
 		if (simpledit_content_load(pWindow->pEditData)) {
-			simpledit_content_update_title(pWindow->pEditData);
+			simpledit_app_window_update_status(pWindow);
+			simpledit_content_update_highlight(pWindow->pEditData, NULL);
+			gtk_notebook_set_current_page(pWindow->bookEditors, -1);
 		}
 	}
 }
@@ -218,6 +232,17 @@ void smpldt_clbk_menu_file_returntosaved (GtkMenuItem *menuitem, gpointer user_d
 		if (simpledit_content_have_filename(pWindow->pEditData)) {
 			simpledit_content_load(pWindow->pEditData);
 		}
+	}
+}
+
+void smpldt_clbk_menu_file_close (GtkMenuItem *menuitem, gpointer user_data) {
+	SimpleditAppWindow * pWindow = SIMPLEDIT_APP_WINDOW(user_data);
+	gint iPos = -1;
+
+	iPos = gtk_notebook_get_current_page(pWindow->bookEditors);
+	if (iPos >= 0) {
+		pWindow->pEditData = NULL;
+		gtk_notebook_remove_page(pWindow->bookEditors, iPos);
 	}
 }
 
