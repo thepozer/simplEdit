@@ -22,7 +22,7 @@ G_DECLARE_FINAL_TYPE (SimpleditContent, simpledit_content, SIMPLEDIT, CONTENT, G
  */
 SimpleditContent * simpledit_content_new (GtkWindow * pWindow);
 
-void simpledit_content_add_to_stack (SimpleditContent * pEditData, GtkStack * stackEditors);
+void simpledit_content_add_to_stack (SimpleditContent * pEditData, GtkNotebook * bookEditors);
 
 gboolean simpledit_content_update_title(SimpleditContent * pEditData);
 

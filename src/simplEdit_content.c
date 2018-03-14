@@ -169,36 +169,32 @@ SimpleditContent * simpledit_content_new (GtkWindow * pWindow) {
     return pEditData;
 }
 
-void simpledit_content_add_to_stack (SimpleditContent * pEditData, GtkStack * stackEditors) {
-	GtkWidget * pScrolled, *pSrcView, *pStackChild;
+void simpledit_content_add_to_stack (SimpleditContent * pEditData, GtkNotebook * bookEditors) {
+	GtkWidget * pScrolled, * pSrcView, * pLabel, * pBookChild;
 	GSettings * pSettings = NULL;
-	gchar * pcStackName = NULL;
+	gint iPos = -1;
 	
 	pScrolled = gtk_scrolled_window_new(NULL, NULL);
 	gtk_widget_show(pScrolled);
 	gtk_widget_set_hexpand(pScrolled, TRUE);
 	gtk_widget_set_vexpand(pScrolled, TRUE);
-	
+
 	pEditData->pSrcView = GTK_SOURCE_VIEW(gtk_source_view_new());
 	gtk_text_view_set_monospace(GTK_TEXT_VIEW (pEditData->pSrcView), TRUE);
 	gtk_widget_show(GTK_WIDGET(pEditData->pSrcView));
 	gtk_container_add(GTK_CONTAINER(pScrolled), GTK_WIDGET(pEditData->pSrcView));
 	
-	pcStackName = g_strdup_printf("Content_%d", iCountContentObject++);
-	
 g_print("simpledit_content_new_add - pcTitle : '%s'\n", pEditData->pcFiletitle);
-	if (pEditData->pcFiletitle != NULL) {
-		gtk_stack_add_titled(GTK_STACK(stackEditors), pScrolled, pcStackName, pEditData->pcFiletitle);
-	} else {
-		gtk_stack_add_titled(GTK_STACK(stackEditors), pScrolled, pcStackName, _("New file"));
-	}
+	pLabel = gtk_label_new((pEditData->pcFiletitle != NULL) ? pEditData->pcFiletitle : _("New file"));
+	gtk_widget_show(pLabel);
 	
-	gtk_stack_set_visible_child_name(stackEditors, pcStackName);
-	pStackChild = gtk_stack_get_child_by_name(stackEditors, pcStackName);
-	g_object_set_data(G_OBJECT(pStackChild), "content_data", pEditData);
 	
-	pEditData->pcStackName = pcStackName;
-
+	iPos = gtk_notebook_append_page(bookEditors, pScrolled, pLabel);
+	
+	pBookChild = gtk_notebook_get_nth_page(bookEditors, iPos);
+	g_object_set_data(G_OBJECT(pBookChild), "content_data", pEditData);
+	gtk_notebook_set_tab_reorderable(bookEditors, pBookChild, TRUE);
+	
     pEditData->pTxtBuff = gtk_text_view_get_buffer(GTK_TEXT_VIEW(pEditData->pSrcView));
     pEditData->pSrcLang = NULL;
 	

@@ -7,8 +7,7 @@ struct _SimpleditAppWindow {
 
 	SimpleditContent * pEditData;
 	
-	GtkStackSwitcher * stackSwitch;
-	GtkStack * stackEditors;
+	GtkNotebook * bookEditors;
 
 	GtkStatusbar  * statusBar;
 	
@@ -33,7 +32,7 @@ struct _SimpleditAppWindow {
 
 G_DEFINE_TYPE(SimpleditAppWindow, simpledit_app_window, GTK_TYPE_APPLICATION_WINDOW);
 
-void smpldt_clbk_stack_switch_child (GtkStack * pStack, GParamSpec *pSpec, gpointer user_data);
+void smpldt_clbk_notebook_switch_page (GtkNotebook * bookEditors, GtkWidget * pChild, guint page_num, gpointer user_data);
 
 typedef struct _sMenuLangItem {
 	SimpleditAppWindow *pWin;
@@ -54,8 +53,7 @@ static void simpledit_app_window_init (SimpleditAppWindow *pWindow) {
 static void simpledit_app_window_class_init (SimpleditAppWindowClass *pClass) {
 	gtk_widget_class_set_template_from_resource(GTK_WIDGET_CLASS(pClass), "/net/thepozer/simpledit/simplEdit.SimpleditAppWindow.glade");
 	
-	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, stackSwitch);
-	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, stackEditors);
+	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, bookEditors);
 
 	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, statusBar);
 	
@@ -77,7 +75,7 @@ static void simpledit_app_window_class_init (SimpleditAppWindowClass *pClass) {
 SimpleditAppWindow * simpledit_app_window_new (SimpleditApp *pApp) {
 	SimpleditAppWindow * pWindow = g_object_new (SIMPLEDIT_APP_WINDOW_TYPE, "application", pApp, NULL);
 	
-	g_signal_connect(pWindow->stackEditors, "notify::visible-child", G_CALLBACK (smpldt_clbk_stack_switch_child), pWindow);
+	g_signal_connect(pWindow->bookEditors, "switch-page", G_CALLBACK (smpldt_clbk_notebook_switch_page), pWindow);
 	
 	pWindow->pEditData = NULL;
 	
@@ -93,7 +91,7 @@ void simpledit_app_window_open (SimpleditAppWindow *pWindow, GFile *pFile) {
 	pWindow->pEditData = simpledit_content_new(GTK_WINDOW(pWindow));
 	
 	if (simpledit_content_set_filename(pWindow->pEditData, pcFileName)) {
-		simpledit_content_add_to_stack(pWindow->pEditData, pWindow->stackEditors);
+		simpledit_content_add_to_stack(pWindow->pEditData, pWindow->bookEditors);
 		simpledit_content_load(pWindow->pEditData);
 		simpledit_content_update_highlight(pWindow->pEditData, NULL);
 	} else {
@@ -125,13 +123,11 @@ void simpledit_app_window_update_status (SimpleditAppWindow *pWindow) {
 	}
 }
 
-void smpldt_clbk_stack_switch_child (GtkStack * pStack, GParamSpec *pSpec, gpointer user_data) {
+void smpldt_clbk_notebook_switch_page (GtkNotebook * bookEditors, GtkWidget * pChild, guint page_num, gpointer user_data) {
 	SimpleditAppWindow * pWindow = SIMPLEDIT_APP_WINDOW(user_data);
 	SimpleditContent * pTmpEditData = NULL;
-	GtkWidget * pStackChild;
 	
-	pStackChild = gtk_stack_get_visible_child(pStack);
-	pTmpEditData = g_object_get_data(G_OBJECT(pStackChild), "content_data");
+	pTmpEditData = g_object_get_data(G_OBJECT(pChild), "content_data");
 	if (pTmpEditData != NULL) {
 		pWindow->pEditData = pTmpEditData;
 	}
@@ -166,7 +162,7 @@ void smpldt_clbk_menu_file (GtkMenuItem *menuitem, gpointer user_data) {
 	}
 	
 	gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFileSave), bModified && bHaveFilename);
-	gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFileSaveAs), bModified);
+	gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFileSaveAs), bHaveFilename);
 	gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFileReturnToSaved), bModified && bHaveFilename);
 }
 
@@ -174,7 +170,7 @@ void smpldt_clbk_menu_file_new (GtkMenuItem *menuitem, gpointer user_data) {
 	SimpleditAppWindow * pWindow = SIMPLEDIT_APP_WINDOW(user_data);
 
 	pWindow->pEditData = simpledit_content_new(GTK_WINDOW(pWindow));
-	simpledit_content_add_to_stack(pWindow->pEditData, pWindow->stackEditors);
+	simpledit_content_add_to_stack(pWindow->pEditData, pWindow->bookEditors);
 	simpledit_content_update_highlight(pWindow->pEditData, NULL);
 	simpledit_content_update_title(pWindow->pEditData);
 }
@@ -186,7 +182,7 @@ void smpldt_clbk_menu_file_open (GtkMenuItem *menuitem, gpointer user_data) {
 	pTmpEditData = simpledit_content_new(GTK_WINDOW(pWindow));
 	if (simpledit_content_select_name(pTmpEditData, GTK_FILE_CHOOSER_ACTION_OPEN)) {
 		pWindow->pEditData = pTmpEditData;
-		simpledit_content_add_to_stack(pWindow->pEditData, pWindow->stackEditors);
+		simpledit_content_add_to_stack(pWindow->pEditData, pWindow->bookEditors);
 		if (simpledit_content_load(pWindow->pEditData)) {
 			simpledit_content_update_title(pWindow->pEditData);
 		}
