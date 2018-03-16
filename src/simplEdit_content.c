@@ -9,15 +9,17 @@ struct _SimpleditContent {
 	GtkWindow     * pWindow;
 	GtkSourceView * pSrcView;
 	GtkTextBuffer * pTxtBuff;
+	GtkNotebook   * pNotebook;
+	GtkWidget     * pPageChild;
+	
 	GtkSourceFile * pSrcFile;
-	gchar * pcStackName;
 	GFile * pFile;
 	gchar * pcFilename;
 	gchar * pcFiletitle;
 	gboolean bWritable;
 	
 	GtkSourceLanguage * pSrcLang;
-	const gchar * pcLanguage;
+	gchar * pcLanguage;
 	
 	/* Private Data */
     const GtkSourceEncoding * pEncod;
@@ -27,17 +29,15 @@ struct _SimpleditContent {
 
 G_DEFINE_TYPE (SimpleditContent, simpledit_content, G_TYPE_OBJECT) ;
 
-enum
-{
-  PROP_WINDOW = 1,
-  PROP_SOURCEVIEW,
-  PROP_TEXTBUFFER,
-  PROP_SOURCEFILE,
-  PROP_FILENAME,
-  PROP_FILETITLE,
-  PROP_WRITABLE,
-  PROP_STACKNAME,
-  N_PROPERTIES
+enum {
+	PROP_WINDOW = 1,
+	PROP_SOURCEVIEW,
+	PROP_TEXTBUFFER,
+	PROP_SOURCEFILE,
+	PROP_FILENAME,
+	PROP_FILETITLE,
+	PROP_WRITABLE,
+	N_PROPERTIES
 };
 
 static GParamSpec * arObjectProperties[N_PROPERTIES] = { NULL, };
@@ -65,10 +65,6 @@ static void simpledit_content_set_property (GObject * object, guint property_id,
 			break;
 		case PROP_WRITABLE:
 			self->bWritable = g_value_get_boolean(value);
-			break;
-		case PROP_STACKNAME:
-			g_free(self->pcStackName);
-			self->pcStackName = g_value_dup_string(value);
 			break;
 		default:
 			/* We don't have any other property... */
@@ -102,9 +98,6 @@ static void simpledit_content_get_property (GObject * object, guint property_id,
 		case PROP_WRITABLE:
 			g_value_set_boolean(value, self->bWritable);
 			break;
-		case PROP_STACKNAME:
-			g_value_set_string(value, self->pcStackName);
-			break;
 		default:
 			/* We don't have any other property... */
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -112,11 +105,37 @@ static void simpledit_content_get_property (GObject * object, guint property_id,
 	}
 }
 
+static void simpledit_content_dispose (GObject * object) {
+	SimpleditContent * pEditData = SIMPLEDIT_CONTENT(object);
+	
+	g_clear_object(&pEditData->pSrcView);
+	g_clear_object(&pEditData->pTxtBuff);
+	
+	//g_object_unref(pEditData->pNotebook);
+
+	g_clear_object(&pEditData->pSrcFile);
+	g_clear_object(&pEditData->pFile);
+
+	G_OBJECT_CLASS (simpledit_content_parent_class)->dispose(object);
+}
+
+static void simpledit_content_finalize (GObject * object) {
+	SimpleditContent * pEditData = SIMPLEDIT_CONTENT(object);
+	
+	g_free(pEditData->pcFilename);
+	g_free(pEditData->pcFiletitle);
+	g_free((gpointer)pEditData->pcLanguage);
+	
+	G_OBJECT_CLASS (simpledit_content_parent_class)->finalize(object);
+}
+
 static void simpledit_content_class_init (SimpleditContentClass *klass) {
 	GObjectClass * pObjectClass = G_OBJECT_CLASS (klass);
 
 	pObjectClass->set_property = simpledit_content_set_property;
 	pObjectClass->get_property = simpledit_content_get_property;
+	pObjectClass->dispose      = simpledit_content_dispose;
+	pObjectClass->finalize     = simpledit_content_finalize;
 
 	arObjectProperties[PROP_WINDOW]     = g_param_spec_object("window", "window", "window of the application.", 
 										GTK_TYPE_WINDOW, G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
@@ -132,8 +151,6 @@ static void simpledit_content_class_init (SimpleditContentClass *klass) {
 	arObjectProperties[PROP_FILETITLE]  = g_param_spec_string("filetitle", "Filetitle", "File Title of the item.", 
 										NULL, G_PARAM_READABLE);
 
-	arObjectProperties[PROP_STACKNAME]  = g_param_spec_string("stackname", "Stackname", "Stackname for the item.", 
-										NULL, G_PARAM_READABLE);
 	arObjectProperties[PROP_WRITABLE]   = g_param_spec_boolean ("writable", "Writable", "TextView is writable.", 
 										TRUE, G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
 
@@ -141,25 +158,23 @@ static void simpledit_content_class_init (SimpleditContentClass *klass) {
 	
 }
 
-static void simpledit_content_init (SimpleditContent *self) {
+static void simpledit_content_init (SimpleditContent *pEditData) {
   /* initialize all public and private members to reasonable default values.
    * They are all automatically initialized to 0 to begin with. */
 	
-	self->pFile = NULL;
-	self->pcFilename = NULL;
-	self->pcFiletitle = NULL;
+	pEditData->pFile = NULL;
+	pEditData->pcFilename = NULL;
+	pEditData->pcFiletitle = NULL;
 
-	self->pSrcFile = gtk_source_file_new();
-	gtk_source_file_set_location(self->pSrcFile, NULL);
+	pEditData->pSrcFile = gtk_source_file_new();
+	gtk_source_file_set_location(pEditData->pSrcFile, NULL);
 	
- 	self->pcStackName = NULL;
-	
-	self->pTxtBuff = NULL;
-    self->pSrcLang = NULL;
+	pEditData->pTxtBuff = NULL;
+    pEditData->pSrcLang = NULL;
 
-	self->pEncod = gtk_source_encoding_get_utf8();
-	self->eTypeEOL = GTK_SOURCE_NEWLINE_TYPE_DEFAULT;
-	self->eCompType = GTK_SOURCE_COMPRESSION_TYPE_NONE;
+	pEditData->pEncod = gtk_source_encoding_get_utf8();
+	pEditData->eTypeEOL = GTK_SOURCE_NEWLINE_TYPE_DEFAULT;
+	pEditData->eCompType = GTK_SOURCE_COMPRESSION_TYPE_NONE;
 }
 
 
@@ -169,10 +184,48 @@ SimpleditContent * simpledit_content_new (GtkWindow * pWindow) {
     return pEditData;
 }
 
+gboolean simpledit_content_close (SimpleditContent * pEditData) {
+	GtkWidget * pDlgMsg = NULL;
+	gint iPos = -1, iResult = GTK_RESPONSE_NO;
+	
+	iPos = gtk_notebook_page_num(pEditData->pNotebook, pEditData->pPageChild);
+	if (iPos >=0) {
+		if (simpledit_content_is_modified(pEditData)) {
+			pDlgMsg = gtk_message_dialog_new(pEditData->pWindow, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_QUESTION, 
+						GTK_BUTTONS_NONE, _("This file '%s' is modified.\nDo you wan't to save it ?"), pEditData->pcFiletitle);
+			gtk_dialog_add_buttons(GTK_DIALOG(pDlgMsg), _("_Abort"), GTK_RESPONSE_REJECT, _("_Yes"), GTK_RESPONSE_YES, 
+						_("_No"), GTK_RESPONSE_NO, NULL);
+			iResult = gtk_dialog_run(GTK_DIALOG(pDlgMsg));
+			gtk_widget_destroy (pDlgMsg);
+		}
+		
+		if (iResult == GTK_RESPONSE_REJECT) {
+			return FALSE;
+		}
+		
+		if (iResult == GTK_RESPONSE_YES) {
+			simpledit_content_save(pEditData);
+		}
+		
+		gtk_notebook_remove_page(pEditData->pNotebook, iPos);
+		//g_object_unref(pEditData);
+	}
+	
+    return TRUE;
+}
+
+void smpldt_clbk_content_close (GtkButton *widget, gpointer user_data) {
+	SimpleditContent * pEditData = SIMPLEDIT_CONTENT(user_data);
+	
+	simpledit_content_close(pEditData);
+}
+
 void simpledit_content_add_to_stack (SimpleditContent * pEditData, GtkNotebook * bookEditors) {
-	GtkWidget * pScrolled, * pSrcView, * pLabel, * pBookChild;
+	GtkWidget * pScrolled, * pSrcView, * pHBox, * pLabel, * pBtnClose;
 	GSettings * pSettings = NULL;
 	gint iPos = -1;
+	
+	pEditData->pNotebook = bookEditors;
 	
 	pScrolled = gtk_scrolled_window_new(NULL, NULL);
 	gtk_widget_show(pScrolled);
@@ -184,16 +237,27 @@ void simpledit_content_add_to_stack (SimpleditContent * pEditData, GtkNotebook *
 	gtk_widget_show(GTK_WIDGET(pEditData->pSrcView));
 	gtk_container_add(GTK_CONTAINER(pScrolled), GTK_WIDGET(pEditData->pSrcView));
 	
+	pHBox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+	gtk_widget_show(pHBox);
+	
 g_print("simpledit_content_new_add - pcTitle : '%s'\n", pEditData->pcFiletitle);
 	pLabel = gtk_label_new((pEditData->pcFiletitle != NULL) ? pEditData->pcFiletitle : _("New file"));
 	gtk_widget_show(pLabel);
+	gtk_box_pack_start(GTK_BOX(pHBox), pLabel, TRUE, TRUE, 0);
 	
+	pBtnClose = gtk_button_new_from_icon_name("window-close", GTK_ICON_SIZE_BUTTON);
+	gtk_button_set_relief(GTK_BUTTON(pBtnClose), GTK_RELIEF_NONE);
+	gtk_widget_show(pBtnClose);
+	gtk_box_pack_start(GTK_BOX(pHBox), pBtnClose, FALSE, FALSE, 0);
 	
-	iPos = gtk_notebook_append_page(bookEditors, pScrolled, pLabel);
+	iPos = gtk_notebook_append_page(bookEditors, pScrolled, pHBox);
 	
-	pBookChild = gtk_notebook_get_nth_page(bookEditors, iPos);
-	g_object_set_data(G_OBJECT(pBookChild), "content_data", pEditData);
-	gtk_notebook_set_tab_reorderable(bookEditors, pBookChild, TRUE);
+	pEditData->pPageChild = gtk_notebook_get_nth_page(bookEditors, iPos);
+	g_object_set_data(G_OBJECT(pEditData->pPageChild), "content_data", pEditData);
+	gtk_notebook_set_tab_reorderable(bookEditors, pEditData->pPageChild, TRUE);
+	
+	g_signal_connect(pBtnClose, "clicked", G_CALLBACK(smpldt_clbk_content_close), pEditData);
+
 	
     pEditData->pTxtBuff = gtk_text_view_get_buffer(GTK_TEXT_VIEW(pEditData->pSrcView));
     pEditData->pSrcLang = NULL;
@@ -297,7 +361,7 @@ gboolean simpledit_content_reset(SimpleditContent * pEditData) {
 gboolean simpledit_content_set_filename(SimpleditContent * pEditData, const gchar * pcFilename) {
 	
 	if (pcFilename) {
-		g_object_unref(pEditData->pFile);
+		g_clear_object(&pEditData->pFile);
 		pEditData->pFile = g_file_new_for_path(pcFilename);
 		if (!pEditData->pFile) {
 			g_print("simpledit_content_set_filename - Can't create GFile\n");
@@ -540,8 +604,9 @@ gboolean simpledit_content_update_highlight(SimpleditContent * pEditData, GtkSou
 	pEditData->pSrcLang = pCurrentSrcLang;
 	gtk_source_buffer_set_language(GTK_SOURCE_BUFFER(pEditData->pTxtBuff), pCurrentSrcLang);
 	
+	g_free(pEditData->pcLanguage);
 	if (pEditData->pSrcLang) {
-		pEditData->pcLanguage = gtk_source_language_get_name(pEditData->pSrcLang);
+		pEditData->pcLanguage = g_strdup(gtk_source_language_get_name(pEditData->pSrcLang));
 	} else {
 		pEditData->pcLanguage = g_strdup("Text");
 	}

@@ -21,6 +21,7 @@ G_DECLARE_FINAL_TYPE (SimpleditContent, simpledit_content, SIMPLEDIT, CONTENT, G
  * Method definitions.
  */
 SimpleditContent * simpledit_content_new (GtkWindow * pWindow);
+gboolean simpledit_content_close (SimpleditContent * pEditData);
 
 void simpledit_content_add_to_stack (SimpleditContent * pEditData, GtkNotebook * bookEditors);
 

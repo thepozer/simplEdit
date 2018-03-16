@@ -237,12 +237,11 @@ void smpldt_clbk_menu_file_returntosaved (GtkMenuItem *menuitem, gpointer user_d
 
 void smpldt_clbk_menu_file_close (GtkMenuItem *menuitem, gpointer user_data) {
 	SimpleditAppWindow * pWindow = SIMPLEDIT_APP_WINDOW(user_data);
-	gint iPos = -1;
-
-	iPos = gtk_notebook_get_current_page(pWindow->bookEditors);
-	if (iPos >= 0) {
-		pWindow->pEditData = NULL;
-		gtk_notebook_remove_page(pWindow->bookEditors, iPos);
+	SimpleditContent * pTmpEditData = pWindow->pEditData;
+	
+	pWindow->pEditData = NULL;
+	if (!simpledit_content_close(pTmpEditData)) {
+		pWindow->pEditData = pTmpEditData;
 	}
 }
 
