@@ -2,12 +2,12 @@
 <!-- Generated with glade 3.22.0 -->
 <interface>
   <requires lib="gtk+" version="3.18"/>
+  <object class="GtkAccelGroup" id="acceleratorgrp"/>
   <object class="GtkImage" id="imgClose">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="stock">gtk-close</property>
   </object>
-  <object class="GtkAccelGroup" id="acceleratorgrp"/>
   <template class="SimpleditAppWindow" parent="GtkApplicationWindow">
     <property name="can_focus">False</property>
     <property name="default_width">600</property>
@@ -128,6 +128,7 @@
                         <property name="image">imgClose</property>
                         <property name="use_stock">False</property>
                         <signal name="activate" handler="smpldt_clbk_menu_file_close_all" object="SimpleditAppWindow" swapped="no"/>
+                        <accelerator key="w" signal="activate" modifiers="GDK_SHIFT_MASK | GDK_CONTROL_MASK"/>
                       </object>
                     </child>
                     <child>

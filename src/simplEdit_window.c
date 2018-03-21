@@ -76,10 +76,18 @@ static void simpledit_app_window_class_init (SimpleditAppWindowClass *pClass) {
 	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, menuSearchReplace);
 }
 
+gboolean smpldt_clbk_delete_event (GtkWidget * widget, GdkEvent * event, gpointer user_data) {
+	SimpleditAppWindow * pWindow = SIMPLEDIT_APP_WINDOW(widget);
+	
+	return !simpledit_app_window_close_all(pWindow);
+}
+
 SimpleditAppWindow * simpledit_app_window_new (SimpleditApp *pApp) {
 	SimpleditAppWindow * pWindow = g_object_new (SIMPLEDIT_APP_WINDOW_TYPE, "application", pApp, NULL);
 	
 	pWindow->pEditData = NULL;
+	
+	g_signal_connect(pWindow, "delete-event", G_CALLBACK(smpldt_clbk_delete_event), pWindow);
 	
 	return pWindow;
 }
