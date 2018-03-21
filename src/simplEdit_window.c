@@ -79,8 +79,6 @@ static void simpledit_app_window_class_init (SimpleditAppWindowClass *pClass) {
 SimpleditAppWindow * simpledit_app_window_new (SimpleditApp *pApp) {
 	SimpleditAppWindow * pWindow = g_object_new (SIMPLEDIT_APP_WINDOW_TYPE, "application", pApp, NULL);
 	
-	g_signal_connect(pWindow->bookEditors, "switch-page", G_CALLBACK (smpldt_clbk_notebook_switch_page), pWindow);
-	
 	pWindow->pEditData = NULL;
 	
 	return pWindow;
@@ -109,6 +107,31 @@ void simpledit_app_window_open (SimpleditAppWindow *pWindow, GFile *pFile) {
 	}
 	
 	g_free(pcFileName);
+}
+
+gboolean simpledit_app_window_close_all (SimpleditAppWindow *pWindow) {
+	SimpleditContent * pEditData;
+	GtkWidget * pPageChild = NULL;
+	gint iNbPages = -1;
+	
+	iNbPages = gtk_notebook_get_n_pages(pWindow->bookEditors);
+//g_print("simpledit_app_window_close_all - iNbPages : %d\n", iNbPages);
+	for (int iPage = iNbPages - 1; iPage >= 0; iPage --) {
+//g_print("simpledit_app_window_close_all - Closing page : %d - 01\n", iPage);
+		pPageChild = gtk_notebook_get_nth_page(pWindow->bookEditors, iPage);
+//g_print("simpledit_app_window_close_all - Closing page : %d - 02 - %d\n", iPage, (gint)pPageChild);
+		pEditData = g_object_get_data(G_OBJECT(pPageChild), "content_data");
+//g_print("simpledit_app_window_close_all - Closing page : %d - 03\n", iPage);
+		
+		if(!simpledit_content_close(pEditData)) {
+//g_print("simpledit_app_window_close_all - Closing page : %d - 04 - return FALSE\n", iPage);
+			return FALSE;
+		}
+//g_print("simpledit_app_window_close_all - Closing page : %d - 05\n", iPage);
+	}
+	
+//g_print("simpledit_app_window_close_all - return TRUE\n", iNbPages);
+	return TRUE;
 }
 
 SimpleditContent * simpledit_app_window_get_content (SimpleditAppWindow *pWindow) {
@@ -245,10 +268,18 @@ void smpldt_clbk_menu_file_close (GtkMenuItem *menuitem, gpointer user_data) {
 	}
 }
 
+void smpldt_clbk_menu_file_close_all (GtkMenuItem *menuitem, gpointer user_data) {
+	SimpleditAppWindow * pWindow = SIMPLEDIT_APP_WINDOW(user_data);
+	
+	simpledit_app_window_close_all(pWindow);
+}
+
 void smpldt_clbk_menu_file_quit (GtkMenuItem *menuitem, gpointer user_data) {
 	GtkWindow * pWindow = GTK_WINDOW(user_data);
-
-	gtk_window_close(pWindow);
+	SimpleditApp * pApp = NULL;
+	
+	pApp = SIMPLEDIT_APP(gtk_window_get_application(GTK_WINDOW(pWindow)));
+	simpledit_app_quit(pApp); 
 }
 
 

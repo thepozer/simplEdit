@@ -209,6 +209,8 @@ gboolean simpledit_content_close (SimpleditContent * pEditData) {
 		
 		gtk_notebook_remove_page(pEditData->pNotebook, iPos);
 		//g_object_unref(pEditData);
+	} else {
+		return FALSE;
 	}
 	
     return TRUE;
@@ -240,7 +242,7 @@ void simpledit_content_add_to_stack (SimpleditContent * pEditData, GtkNotebook *
 	pHBox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 	gtk_widget_show(pHBox);
 	
-g_print("simpledit_content_new_add - pcTitle : '%s'\n", pEditData->pcFiletitle);
+//g_print("simpledit_content_new_add - pcTitle : '%s'\n", pEditData->pcFiletitle);
 	pLabel = gtk_label_new((pEditData->pcFiletitle != NULL) ? pEditData->pcFiletitle : _("New file"));
 	gtk_widget_show(pLabel);
 	gtk_box_pack_start(GTK_BOX(pHBox), pLabel, TRUE, TRUE, 0);
@@ -636,9 +638,9 @@ void simpledit_content_load_cb_async (GObject *source_object, GAsyncResult *res,
 		
 		pEditData->eTypeEOL = gtk_source_file_get_newline_type(pEditData->pSrcFile);
 		pEditData->eCompType = gtk_source_file_get_compression_type(pEditData->pSrcFile);
-g_print("load_cb_async - Encoding : %s (%s)\n", gtk_source_encoding_get_name(pEditData->pEncod), gtk_source_encoding_get_charset(pEditData->pEncod));
-g_print("load_cb_async - EOL : %d\n", pEditData->eTypeEOL);
-g_print("load_cb_async - Compress : %d\n", pEditData->eCompType);
+//g_print("load_cb_async - Encoding : %s (%s)\n", gtk_source_encoding_get_name(pEditData->pEncod), gtk_source_encoding_get_charset(pEditData->pEncod));
+//g_print("load_cb_async - EOL : %d\n", pEditData->eTypeEOL);
+//g_print("load_cb_async - Compress : %d\n", pEditData->eCompType);
 		
 		gtk_text_buffer_get_start_iter(GTK_TEXT_BUFFER(pEditData->pTxtBuff), &sIter);
 		gtk_text_buffer_place_cursor(GTK_TEXT_BUFFER(pEditData->pTxtBuff), &sIter);
@@ -692,9 +694,9 @@ void simpledit_content_save_cb_async (GObject *source_object, GAsyncResult *res,
 		
 		pEditData->eTypeEOL = gtk_source_file_get_newline_type(pEditData->pSrcFile);
 		pEditData->eCompType = gtk_source_file_get_compression_type(pEditData->pSrcFile);
-g_print("save_cb_async - Encoding : %s (%s)\n", gtk_source_encoding_get_name(pEditData->pEncod), gtk_source_encoding_get_charset(pEditData->pEncod));
-g_print("save_cb_async - EOL : %d\n", pEditData->eTypeEOL);
-g_print("save_cb_async - Compress : %d\n", pEditData->eCompType);
+//g_print("save_cb_async - Encoding : %s (%s)\n", gtk_source_encoding_get_name(pEditData->pEncod), gtk_source_encoding_get_charset(pEditData->pEncod));
+//g_print("save_cb_async - EOL : %d\n", pEditData->eTypeEOL);
+//g_print("save_cb_async - Compress : %d\n", pEditData->eCompType);
 		
 		g_signal_emit_by_name(pEditData->pTxtBuff, "changed", pEditData->pWindow);
 		simpledit_content_update_highlight(pEditData, NULL);
