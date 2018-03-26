@@ -451,9 +451,9 @@ gint simpledit_content_file_dialog(SimpleditContent * pEditData, GtkWidget * pDl
 	}
 
     pSelCharset = gtk_source_encoding_get_charset(pEditData->pEncod);
-g_print("Encoding : %s (%s)\n", gtk_source_encoding_get_name(pEditData->pEncod), pSelCharset);
-g_print("EOL : %d\n", pEditData->eTypeEOL);
-g_print("Compress : %d\n", pEditData->eCompType);
+//g_print("Encoding : %s (%s)\n", gtk_source_encoding_get_name(pEditData->pEncod), pSelCharset);
+//g_print("EOL : %d\n", pEditData->eTypeEOL);
+//g_print("Compress : %d\n", pEditData->eCompType);
     
     
 	pHBox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
@@ -526,7 +526,7 @@ g_print("Compress : %d\n", pEditData->eCompType);
 		g_value_unset(&vRetVal);
 		
 		pSelCharset = gtk_source_encoding_get_charset(pEditData->pEncod);
-g_print("Selected - Encoding : %s (%s)\n", gtk_source_encoding_get_name(pEditData->pEncod), pSelCharset);
+//g_print("Selected - Encoding : %s (%s)\n", gtk_source_encoding_get_name(pEditData->pEncod), pSelCharset);
 	}
 	
 	if (gtk_combo_box_get_active_iter(GTK_COMBO_BOX(pLstWidgetEndOfLines), &iter)) {
@@ -534,7 +534,7 @@ g_print("Selected - Encoding : %s (%s)\n", gtk_source_encoding_get_name(pEditDat
 		pEditData->eTypeEOL = g_value_get_int(&vRetVal);
 		g_value_unset(&vRetVal);
 		
-g_print("Selected - EOL : %d\n", pEditData->eTypeEOL);
+//g_print("Selected - EOL : %d\n", pEditData->eTypeEOL);
 	}
 	
 	if (gtk_combo_box_get_active_iter(GTK_COMBO_BOX(pLstWidgetCompress), &iter)) {
@@ -542,7 +542,7 @@ g_print("Selected - EOL : %d\n", pEditData->eTypeEOL);
 		pEditData->eCompType = g_value_get_int(&vRetVal);
 		g_value_unset(&vRetVal);
 		
-g_print("Selected - Compress : %d\n", pEditData->eCompType);
+//g_print("Selected - Compress : %d\n", pEditData->eCompType);
 	}
 	return iResult;
 }
@@ -572,11 +572,33 @@ gboolean simpledit_content_select_name(SimpleditContent * pEditData, GtkFileChoo
         iResult = simpledit_content_file_dialog(pEditData, pDlgFile);
 	    
         if (iResult == GTK_RESPONSE_ACCEPT) {
-            gchar * pcNewFilename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER (pDlgFile));
-		
-            simpledit_content_set_filename(pEditData, pcNewFilename);
-            
-            g_free(pcNewFilename);
+            if (action == GTK_FILE_CHOOSER_ACTION_OPEN) {
+                GSList * pLstFilenames = gtk_file_chooser_get_filenames(GTK_FILE_CHOOSER(pDlgFile));
+
+                GSList * pCurrFilenames = pLstFilenames;
+                GFile * pNewFile = NULL;
+                gchar * pcNewFilename = (gchar *)pCurrFilenames->data;
+
+                simpledit_content_set_filename(pEditData, pcNewFilename);
+
+                while (pCurrFilenames->next != NULL) {
+                    pCurrFilenames = pCurrFilenames->next;
+
+                    pNewFile = g_file_new_for_path((gchar *)pCurrFilenames->data);
+
+                    simpledit_app_window_open(SIMPLEDIT_APP_WINDOW(pEditData->pWindow), pNewFile);
+
+                    g_object_unref(pNewFile);
+                }
+
+                g_slist_free_full(pLstFilenames, g_free);
+            } else {
+                gchar * pcNewFilename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(pDlgFile));
+
+                simpledit_content_set_filename(pEditData, pcNewFilename);
+
+                g_free(pcNewFilename);
+            }
             bSelectName = TRUE;
         }
 
