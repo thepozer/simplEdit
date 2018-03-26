@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-03-09 14:00+0100\n"
+"POT-Creation-Date: 2018-03-13 16:17+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,116 +17,116 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../src/simplEdit_window.c:99
+#: ../src/simplEdit_window.c:101
 #, c-format
 msgid "Error openning file '%s' : (%i) %s"
 msgstr ""
 
-#: ../src/simplEdit_window.c:337
+#: ../src/simplEdit_window.c:390
 msgid ""
 "Another small/simple editor based on GtkSourceView.\n"
 "It try to make accessible every features of GtkSourceView."
 msgstr ""
 
-#: ../src/simplEdit_window.c:338
+#: ../src/simplEdit_window.c:391
 msgid "(c) 2018 Didier Prolhac"
 msgstr ""
 
-#: ../src/simplEdit_window.c:339
+#: ../src/simplEdit_window.c:392
 msgid "MIT"
 msgstr ""
 
-#: ../src/simplEdit_window.c:344
+#: ../src/simplEdit_window.c:397
 msgid "github simplEdit"
 msgstr ""
 
-#: ../src/simplEdit_content.c:218
+#: ../src/simplEdit_content.c:193 ../src/simplEdit_content.c:505
+msgid "New file"
+msgstr ""
+
+#: ../src/simplEdit_content.c:273
 #, c-format
 msgid "Line : %d / %d \tCol : %d"
 msgstr ""
 
-#: ../src/simplEdit_content.c:220
+#: ../src/simplEdit_content.c:275
 #, c-format
 msgid "\t\tOWR"
 msgstr ""
 
-#: ../src/simplEdit_content.c:220
+#: ../src/simplEdit_content.c:275
 #, c-format
 msgid "\t\tINS"
 msgstr ""
 
-#: ../src/simplEdit_content.c:222
+#: ../src/simplEdit_content.c:277
 #, c-format
 msgid "\t\tFile type : %s"
 msgstr ""
 
-#: ../src/simplEdit_content.c:345
+#: ../src/simplEdit_content.c:400
 msgid "Encoding :"
 msgstr ""
 
-#: ../src/simplEdit_content.c:364
+#: ../src/simplEdit_content.c:419
 msgid "End of line :"
 msgstr ""
 
-#: ../src/simplEdit_content.c:369
+#: ../src/simplEdit_content.c:424
 msgid "Unix (LF)"
 msgstr ""
 
-#: ../src/simplEdit_content.c:370
+#: ../src/simplEdit_content.c:425
 msgid "Windows (CR LF)"
 msgstr ""
 
-#: ../src/simplEdit_content.c:371
+#: ../src/simplEdit_content.c:426
 msgid "Mac (CR)"
 msgstr ""
 
-#: ../src/simplEdit_content.c:383
+#: ../src/simplEdit_content.c:438
 msgid "Compression :"
 msgstr ""
 
-#: ../src/simplEdit_content.c:388
+#: ../src/simplEdit_content.c:443
 msgid "None"
 msgstr ""
 
-#: ../src/simplEdit_content.c:389
+#: ../src/simplEdit_content.c:444
 msgid "Gzip (.gz)"
 msgstr ""
 
-#: ../src/simplEdit_content.c:439
+#: ../src/simplEdit_content.c:494
 msgid "Open File"
 msgstr ""
 
-#: ../src/simplEdit_content.c:440 ../src/simplEdit_content.c:443
+#: ../src/simplEdit_content.c:495 ../src/simplEdit_content.c:498
 msgid "_Cancel"
 msgstr ""
 
-#: ../src/simplEdit_content.c:440
+#: ../src/simplEdit_content.c:495
 msgid "_Open"
 msgstr ""
 
-#: ../src/simplEdit_content.c:442
+#: ../src/simplEdit_content.c:497
 msgid "Save File"
 msgstr ""
 
-#: ../src/simplEdit_content.c:443
+#: ../src/simplEdit_content.c:498
 msgid "_Save"
 msgstr ""
 
-#: ../src/simplEdit_content.c:450
-msgid "New file"
-msgstr ""
-
-#: ../src/simplEdit_content.c:510
+#: ../src/simplEdit_content.c:565
 #, c-format
 msgid "Error reading '%s' : (%i) %s"
 msgstr ""
 
-#: ../src/simplEdit_content.c:543
+#: ../src/simplEdit_content.c:598
 #, c-format
 msgid "Error reading (stream) '%s' : (%i) %s"
 msgstr ""
 
-#: ../src/simplEdit_content.c:566
+#: ../src/simplEdit_content.c:621
 #, c-format
 msgid "Error writing '%s' : (%i) %s"
 msgstr ""

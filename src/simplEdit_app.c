@@ -32,7 +32,9 @@ static void simpledit_app_open (GApplication * pApp, GFile **files, gint n_files
 	}
 	
 	if (n_files > 0) {
-		simpledit_app_window_open(pWindow, files[0]);
+		for (i = 0; i < n_files; i++) {
+			simpledit_app_window_open(pWindow, files[i]);
+		}
 	}
 
 	gtk_window_present(GTK_WINDOW(pWindow));
@@ -56,4 +58,23 @@ SimpleditApp * simpledit_app_new (void) {
 
 GSettings * simpledit_app_get_settings (SimpleditApp * pApp) {
 	return pApp->pSettings;
+}
+
+void simpledit_app_quit (SimpleditApp * pApp) {
+	GList * pLstWindows;
+	SimpleditAppWindow * pWindow;
+	int i;
+	
+	pLstWindows = gtk_application_get_windows(GTK_APPLICATION(pApp));
+	while(pLstWindows != NULL) {
+		pWindow = SIMPLEDIT_APP_WINDOW(pLstWindows->data);
+		
+		if (!simpledit_app_window_close_all(pWindow)) {
+			return ;
+		}
+		
+		pLstWindows = pLstWindows->next;
+	}
+	
+	g_application_quit(G_APPLICATION(pApp));
 }

@@ -1,4 +1,6 @@
 #include "simplEdit_content.h"
+#include "simplEdit_app.h"
+#include "simplEdit_window.h"
 
 struct _SimpleditContent {
 	GObject parent_instance;
@@ -7,6 +9,9 @@ struct _SimpleditContent {
 	GtkWindow     * pWindow;
 	GtkSourceView * pSrcView;
 	GtkTextBuffer * pTxtBuff;
+	GtkNotebook   * pNotebook;
+	GtkWidget     * pPageChild;
+	
 	GtkSourceFile * pSrcFile;
 	GFile * pFile;
 	gchar * pcFilename;
@@ -14,7 +19,7 @@ struct _SimpleditContent {
 	gboolean bWritable;
 	
 	GtkSourceLanguage * pSrcLang;
-	const gchar * pcLanguage;
+	gchar * pcLanguage;
 	
 	/* Private Data */
     const GtkSourceEncoding * pEncod;
@@ -24,19 +29,20 @@ struct _SimpleditContent {
 
 G_DEFINE_TYPE (SimpleditContent, simpledit_content, G_TYPE_OBJECT) ;
 
-enum
-{
-  PROP_WINDOW = 1,
-  PROP_SOURCEVIEW,
-  PROP_TEXTBUFFER,
-  PROP_SOURCEFILE,
-  PROP_FILENAME,
-  PROP_FILETITLE,
-  PROP_WRITABLE,
-  N_PROPERTIES
+enum {
+	PROP_WINDOW = 1,
+	PROP_SOURCEVIEW,
+	PROP_TEXTBUFFER,
+	PROP_SOURCEFILE,
+	PROP_FILENAME,
+	PROP_FILETITLE,
+	PROP_WRITABLE,
+	N_PROPERTIES
 };
 
 static GParamSpec * arObjectProperties[N_PROPERTIES] = { NULL, };
+
+static guint iCountContentObject = 0;
 
 GtkWidget * simpledit_content_extra_widget(SimpleditContent * pEditData);
 
@@ -99,24 +105,50 @@ static void simpledit_content_get_property (GObject * object, guint property_id,
 	}
 }
 
+static void simpledit_content_dispose (GObject * object) {
+	SimpleditContent * pEditData = SIMPLEDIT_CONTENT(object);
+	
+	g_clear_object(&pEditData->pSrcView);
+	g_clear_object(&pEditData->pTxtBuff);
+	
+	//g_object_unref(pEditData->pNotebook);
+
+	g_clear_object(&pEditData->pSrcFile);
+	g_clear_object(&pEditData->pFile);
+
+	G_OBJECT_CLASS (simpledit_content_parent_class)->dispose(object);
+}
+
+static void simpledit_content_finalize (GObject * object) {
+	SimpleditContent * pEditData = SIMPLEDIT_CONTENT(object);
+	
+	g_free(pEditData->pcFilename);
+	g_free(pEditData->pcFiletitle);
+	g_free((gpointer)pEditData->pcLanguage);
+	
+	G_OBJECT_CLASS (simpledit_content_parent_class)->finalize(object);
+}
+
 static void simpledit_content_class_init (SimpleditContentClass *klass) {
 	GObjectClass * pObjectClass = G_OBJECT_CLASS (klass);
 
 	pObjectClass->set_property = simpledit_content_set_property;
 	pObjectClass->get_property = simpledit_content_get_property;
+	pObjectClass->dispose      = simpledit_content_dispose;
+	pObjectClass->finalize     = simpledit_content_finalize;
 
 	arObjectProperties[PROP_WINDOW]     = g_param_spec_object("window", "window", "window of the application.", 
 										GTK_TYPE_WINDOW, G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
-	arObjectProperties[PROP_SOURCEVIEW] = g_param_spec_object("sourceview", "sourceview", "sourceview of the application.", 
-										GTK_SOURCE_TYPE_VIEW, G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
+	arObjectProperties[PROP_SOURCEVIEW] = g_param_spec_object("sourceview", "sourceview", "sourceview of the item.", 
+										GTK_SOURCE_TYPE_VIEW, G_PARAM_READWRITE);
 	arObjectProperties[PROP_TEXTBUFFER] = g_param_spec_object("textbuffer", "textbuffer", "textbuffer of the sourceview.", 
 										GTK_TYPE_TEXT_BUFFER, G_PARAM_READABLE);
-	arObjectProperties[PROP_SOURCEFILE] = g_param_spec_object("sourcefile", "sourcefile", "sourcefile of the application.", 
+	arObjectProperties[PROP_SOURCEFILE] = g_param_spec_object("sourcefile", "sourcefile", "sourcefile of the item.", 
 										GTK_SOURCE_TYPE_FILE, G_PARAM_READABLE);
 	
-	arObjectProperties[PROP_FILENAME]   = g_param_spec_string("filename", "Filename", "File name of the application.", 
+	arObjectProperties[PROP_FILENAME]   = g_param_spec_string("filename", "Filename", "File name of the item.", 
 										NULL, G_PARAM_CONSTRUCT | G_PARAM_READWRITE);
-	arObjectProperties[PROP_FILETITLE]  = g_param_spec_string("filetitle", "Filetitle", "File Title of the application.", 
+	arObjectProperties[PROP_FILETITLE]  = g_param_spec_string("filetitle", "Filetitle", "File Title of the item.", 
 										NULL, G_PARAM_READABLE);
 
 	arObjectProperties[PROP_WRITABLE]   = g_param_spec_boolean ("writable", "Writable", "TextView is writable.", 
@@ -126,49 +158,134 @@ static void simpledit_content_class_init (SimpleditContentClass *klass) {
 	
 }
 
-static void simpledit_content_init (SimpleditContent *self) {
+static void simpledit_content_init (SimpleditContent *pEditData) {
   /* initialize all public and private members to reasonable default values.
    * They are all automatically initialized to 0 to begin with. */
 	
-	self->pFile = NULL;
+	pEditData->pFile = NULL;
+	pEditData->pcFilename = NULL;
+	pEditData->pcFiletitle = NULL;
 
-	self->pSrcFile = gtk_source_file_new();
-	gtk_source_file_set_location(self->pSrcFile, NULL);
+	pEditData->pSrcFile = gtk_source_file_new();
+	gtk_source_file_set_location(pEditData->pSrcFile, NULL);
 	
-	self->pEncod = gtk_source_encoding_get_utf8();
-	self->eTypeEOL = GTK_SOURCE_NEWLINE_TYPE_DEFAULT;
-	self->eCompType = GTK_SOURCE_COMPRESSION_TYPE_NONE;
+	pEditData->pTxtBuff = NULL;
+    pEditData->pSrcLang = NULL;
+
+	pEditData->pEncod = gtk_source_encoding_get_utf8();
+	pEditData->eTypeEOL = GTK_SOURCE_NEWLINE_TYPE_DEFAULT;
+	pEditData->eCompType = GTK_SOURCE_COMPRESSION_TYPE_NONE;
 }
 
 
-SimpleditContent * simpledit_content_new (GtkWindow * pWindow, GtkSourceView * pSrcView) {
+SimpleditContent * simpledit_content_new (GtkWindow * pWindow) {
+	SimpleditContent *pEditData = SIMPLEDIT_CONTENT(g_object_new (SIMPLEDIT_TYPE_CONTENT, "window", pWindow, NULL));
+
+    return pEditData;
+}
+
+gboolean simpledit_content_close (SimpleditContent * pEditData) {
+	GtkWidget * pDlgMsg = NULL;
+	gint iPos = -1, iResult = GTK_RESPONSE_NO;
+	
+	iPos = gtk_notebook_page_num(pEditData->pNotebook, pEditData->pPageChild);
+	if (iPos >=0) {
+		if (simpledit_content_is_modified(pEditData)) {
+			pDlgMsg = gtk_message_dialog_new(pEditData->pWindow, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_QUESTION, 
+						GTK_BUTTONS_NONE, _("This file '%s' is modified.\nDo you wan't to save it ?"), pEditData->pcFiletitle);
+			gtk_dialog_add_buttons(GTK_DIALOG(pDlgMsg), _("_Abort"), GTK_RESPONSE_REJECT, _("_Yes"), GTK_RESPONSE_YES, 
+						_("_No"), GTK_RESPONSE_NO, NULL);
+			iResult = gtk_dialog_run(GTK_DIALOG(pDlgMsg));
+			gtk_widget_destroy (pDlgMsg);
+		}
+		
+		if (iResult == GTK_RESPONSE_REJECT) {
+			return FALSE;
+		}
+		
+		if (iResult == GTK_RESPONSE_YES) {
+			simpledit_content_save(pEditData);
+		}
+		
+		gtk_notebook_remove_page(pEditData->pNotebook, iPos);
+		//g_object_unref(pEditData);
+	} else {
+		return FALSE;
+	}
+	
+    return TRUE;
+}
+
+void smpldt_clbk_content_close (GtkButton *widget, gpointer user_data) {
+	SimpleditContent * pEditData = SIMPLEDIT_CONTENT(user_data);
+	
+	simpledit_content_close(pEditData);
+}
+
+void simpledit_content_add_to_stack (SimpleditContent * pEditData, GtkNotebook * bookEditors) {
+	GtkWidget * pScrolled, * pSrcView, * pHBox, * pLabel, * pBtnClose;
 	GSettings * pSettings = NULL;
-	SimpleditContent *self = SIMPLEDIT_CONTENT(g_object_new (SIMPLEDIT_TYPE_CONTENT, 
-		"window", pWindow, "sourceview", pSrcView, NULL));
+	gint iPos = -1;
+	
+	pEditData->pNotebook = bookEditors;
+	
+	pScrolled = gtk_scrolled_window_new(NULL, NULL);
+	gtk_widget_show(pScrolled);
+	gtk_widget_set_hexpand(pScrolled, TRUE);
+	gtk_widget_set_vexpand(pScrolled, TRUE);
 
-    self->pTxtBuff = gtk_text_view_get_buffer(GTK_TEXT_VIEW(self->pSrcView));
-    self->pSrcLang = NULL;
+	pEditData->pSrcView = GTK_SOURCE_VIEW(gtk_source_view_new());
+	gtk_text_view_set_monospace(GTK_TEXT_VIEW (pEditData->pSrcView), TRUE);
+	gtk_widget_show(GTK_WIDGET(pEditData->pSrcView));
+	gtk_container_add(GTK_CONTAINER(pScrolled), GTK_WIDGET(pEditData->pSrcView));
 	
-	gtk_text_buffer_set_text(self->pTxtBuff, "", 0);
-	gtk_text_buffer_set_modified(self->pTxtBuff, FALSE);
+	pHBox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+	gtk_widget_show(pHBox);
+	
+//g_print("simpledit_content_new_add - pcTitle : '%s'\n", pEditData->pcFiletitle);
+	pLabel = gtk_label_new((pEditData->pcFiletitle != NULL) ? pEditData->pcFiletitle : _("New file"));
+	gtk_widget_show(pLabel);
+	gtk_box_pack_start(GTK_BOX(pHBox), pLabel, TRUE, TRUE, 0);
+	
+	pBtnClose = gtk_button_new_from_icon_name("window-close", GTK_ICON_SIZE_BUTTON);
+	gtk_button_set_relief(GTK_BUTTON(pBtnClose), GTK_RELIEF_NONE);
+	gtk_widget_show(pBtnClose);
+	gtk_box_pack_start(GTK_BOX(pHBox), pBtnClose, FALSE, FALSE, 0);
+	
+	iPos = gtk_notebook_append_page(bookEditors, pScrolled, pHBox);
+	
+	pEditData->pPageChild = gtk_notebook_get_nth_page(bookEditors, iPos);
+	g_object_set_data(G_OBJECT(pEditData->pPageChild), "content_data", pEditData);
+	gtk_notebook_set_tab_reorderable(bookEditors, pEditData->pPageChild, TRUE);
+	
+	g_signal_connect(pBtnClose, "clicked", G_CALLBACK(smpldt_clbk_content_close), pEditData);
 
-	pSettings = simpledit_app_get_settings(SIMPLEDIT_APP(gtk_window_get_application(GTK_WINDOW(pWindow))));
 	
-	g_settings_bind (pSettings, "show-line-numbers", pSrcView, "show-line-numbers", G_SETTINGS_BIND_DEFAULT);
-	g_settings_bind (pSettings, "show-line-marks", pSrcView, "show-line-marks", G_SETTINGS_BIND_DEFAULT);
-	g_settings_bind (pSettings, "highlight-current-line", pSrcView, "highlight-current-line", G_SETTINGS_BIND_DEFAULT);
-	//g_settings_bind (pSettings, "font", pSrcView, "active", G_SETTINGS_BIND_DEFAULT);
-	g_settings_bind (pSettings, "show-right-margin", pSrcView, "show-right-margin", G_SETTINGS_BIND_DEFAULT);
-	g_settings_bind (pSettings, "right-margin-position", pSrcView, "right-margin-position", G_SETTINGS_BIND_DEFAULT);
+    pEditData->pTxtBuff = gtk_text_view_get_buffer(GTK_TEXT_VIEW(pEditData->pSrcView));
+    pEditData->pSrcLang = NULL;
 	
-	g_settings_bind (pSettings, "auto-indent", pSrcView, "auto-indent", G_SETTINGS_BIND_DEFAULT);
-	g_settings_bind (pSettings, "indent-on-tab", pSrcView, "indent-on-tab", G_SETTINGS_BIND_DEFAULT);
-	g_settings_bind (pSettings, "smart-backspace", pSrcView, "smart-backspace", G_SETTINGS_BIND_DEFAULT);
-	g_settings_bind (pSettings, "insert-spaces-instead-of-tabs", pSrcView, "insert-spaces-instead-of-tabs", G_SETTINGS_BIND_DEFAULT);
-	g_settings_bind (pSettings, "indent-width", pSrcView, "indent-width", G_SETTINGS_BIND_DEFAULT);
-	g_settings_bind (pSettings, "tab-width", pSrcView, "tab-width", G_SETTINGS_BIND_DEFAULT);
+	gtk_text_buffer_set_text(pEditData->pTxtBuff, "", 0);
+	gtk_text_buffer_set_modified(pEditData->pTxtBuff, FALSE);
+
+	pSettings = simpledit_app_get_settings(SIMPLEDIT_APP(gtk_window_get_application(pEditData->pWindow)));
 	
-    return self;
+	g_settings_bind (pSettings, "show-line-numbers", pEditData->pSrcView, "show-line-numbers", G_SETTINGS_BIND_DEFAULT);
+	g_settings_bind (pSettings, "show-line-marks",   pEditData->pSrcView, "show-line-marks", G_SETTINGS_BIND_DEFAULT);
+	g_settings_bind (pSettings, "highlight-current-line", pEditData->pSrcView, "highlight-current-line", G_SETTINGS_BIND_DEFAULT);
+	//g_settings_bind (pSettings, "font", pEditData->pSrcView, "active", G_SETTINGS_BIND_DEFAULT);
+	g_settings_bind (pSettings, "show-right-margin",     pEditData->pSrcView, "show-right-margin", G_SETTINGS_BIND_DEFAULT);
+	g_settings_bind (pSettings, "right-margin-position", pEditData->pSrcView, "right-margin-position", G_SETTINGS_BIND_DEFAULT);
+	
+	g_settings_bind (pSettings, "auto-indent",     pEditData->pSrcView, "auto-indent", G_SETTINGS_BIND_DEFAULT);
+	g_settings_bind (pSettings, "indent-on-tab",   pEditData->pSrcView, "indent-on-tab", G_SETTINGS_BIND_DEFAULT);
+	g_settings_bind (pSettings, "smart-backspace", pEditData->pSrcView, "smart-backspace", G_SETTINGS_BIND_DEFAULT);
+	g_settings_bind (pSettings, "insert-spaces-instead-of-tabs", pEditData->pSrcView, "insert-spaces-instead-of-tabs", G_SETTINGS_BIND_DEFAULT);
+	g_settings_bind (pSettings, "indent-width",    pEditData->pSrcView, "indent-width", G_SETTINGS_BIND_DEFAULT);
+	g_settings_bind (pSettings, "tab-width",       pEditData->pSrcView, "tab-width", G_SETTINGS_BIND_DEFAULT);
+	
+	g_signal_connect(pEditData->pTxtBuff, "changed", G_CALLBACK (smpldt_clbk_text_changed), pEditData->pWindow);
+	g_signal_connect(pEditData->pTxtBuff, "notify::cursor-position", G_CALLBACK (smpldt_clbk_cursor_position_changed), pEditData->pWindow);
+	g_signal_connect(pEditData->pTxtBuff, "mark-set", G_CALLBACK (smpldt_clbk_mark_set), pEditData->pWindow);
 }
 
 gboolean simpledit_content_update_title(SimpleditContent * pEditData) {
@@ -246,13 +363,13 @@ gboolean simpledit_content_reset(SimpleditContent * pEditData) {
 gboolean simpledit_content_set_filename(SimpleditContent * pEditData, const gchar * pcFilename) {
 	
 	if (pcFilename) {
-		g_object_unref(pEditData->pFile);
+		g_clear_object(&pEditData->pFile);
 		pEditData->pFile = g_file_new_for_path(pcFilename);
 		if (!pEditData->pFile) {
 			g_print("simpledit_content_set_filename - Can't create GFile\n");
 			return FALSE;
 		}
-
+		
 		gtk_source_file_set_location(pEditData->pSrcFile, pEditData->pFile);
 		if (gtk_source_file_is_local(pEditData->pSrcFile)) {
 			gtk_source_file_check_file_on_disk(pEditData->pSrcFile);
@@ -334,9 +451,9 @@ gint simpledit_content_file_dialog(SimpleditContent * pEditData, GtkWidget * pDl
 	}
 
     pSelCharset = gtk_source_encoding_get_charset(pEditData->pEncod);
-g_print("Encoding : %s (%s)\n", gtk_source_encoding_get_name(pEditData->pEncod), pSelCharset);
-g_print("EOL : %d\n", pEditData->eTypeEOL);
-g_print("Compress : %d\n", pEditData->eCompType);
+//g_print("Encoding : %s (%s)\n", gtk_source_encoding_get_name(pEditData->pEncod), pSelCharset);
+//g_print("EOL : %d\n", pEditData->eTypeEOL);
+//g_print("Compress : %d\n", pEditData->eCompType);
     
     
 	pHBox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
@@ -409,7 +526,7 @@ g_print("Compress : %d\n", pEditData->eCompType);
 		g_value_unset(&vRetVal);
 		
 		pSelCharset = gtk_source_encoding_get_charset(pEditData->pEncod);
-g_print("Selected - Encoding : %s (%s)\n", gtk_source_encoding_get_name(pEditData->pEncod), pSelCharset);
+//g_print("Selected - Encoding : %s (%s)\n", gtk_source_encoding_get_name(pEditData->pEncod), pSelCharset);
 	}
 	
 	if (gtk_combo_box_get_active_iter(GTK_COMBO_BOX(pLstWidgetEndOfLines), &iter)) {
@@ -417,7 +534,7 @@ g_print("Selected - Encoding : %s (%s)\n", gtk_source_encoding_get_name(pEditDat
 		pEditData->eTypeEOL = g_value_get_int(&vRetVal);
 		g_value_unset(&vRetVal);
 		
-g_print("Selected - EOL : %d\n", pEditData->eTypeEOL);
+//g_print("Selected - EOL : %d\n", pEditData->eTypeEOL);
 	}
 	
 	if (gtk_combo_box_get_active_iter(GTK_COMBO_BOX(pLstWidgetCompress), &iter)) {
@@ -425,7 +542,7 @@ g_print("Selected - EOL : %d\n", pEditData->eTypeEOL);
 		pEditData->eCompType = g_value_get_int(&vRetVal);
 		g_value_unset(&vRetVal);
 		
-g_print("Selected - Compress : %d\n", pEditData->eCompType);
+//g_print("Selected - Compress : %d\n", pEditData->eCompType);
 	}
 	return iResult;
 }
@@ -438,9 +555,11 @@ gboolean simpledit_content_select_name(SimpleditContent * pEditData, GtkFileChoo
     if (action == GTK_FILE_CHOOSER_ACTION_OPEN) {
         pDlgFile = gtk_file_chooser_dialog_new (_("Open File"), GTK_WINDOW(pEditData->pWindow), GTK_FILE_CHOOSER_ACTION_OPEN, 
                     _("_Cancel"), GTK_RESPONSE_CANCEL, _("_Open"), GTK_RESPONSE_ACCEPT, NULL);
+		gtk_file_chooser_set_select_multiple(GTK_FILE_CHOOSER(pDlgFile), TRUE);
     } else if (action == GTK_FILE_CHOOSER_ACTION_SAVE) {
         pDlgFile = gtk_file_chooser_dialog_new (_("Save File"), GTK_WINDOW(pEditData->pWindow), GTK_FILE_CHOOSER_ACTION_SAVE,
                     _("_Cancel"), GTK_RESPONSE_CANCEL, _("_Save"), GTK_RESPONSE_ACCEPT, NULL);
+		gtk_file_chooser_set_create_folders(GTK_FILE_CHOOSER(pDlgFile), TRUE);
 	}
     
     if (pDlgFile) {
@@ -453,12 +572,33 @@ gboolean simpledit_content_select_name(SimpleditContent * pEditData, GtkFileChoo
         iResult = simpledit_content_file_dialog(pEditData, pDlgFile);
 	    
         if (iResult == GTK_RESPONSE_ACCEPT) {
-            GtkFileChooser * pChooser = GTK_FILE_CHOOSER (pDlgFile);
-            gchar * pcNewFilename = gtk_file_chooser_get_filename (pChooser);
-		
-            simpledit_content_set_filename(pEditData, pcNewFilename);
-            
-            g_free(pcNewFilename);
+            if (action == GTK_FILE_CHOOSER_ACTION_OPEN) {
+                GSList * pLstFilenames = gtk_file_chooser_get_filenames(GTK_FILE_CHOOSER(pDlgFile));
+
+                GSList * pCurrFilenames = pLstFilenames;
+                GFile * pNewFile = NULL;
+                gchar * pcNewFilename = (gchar *)pCurrFilenames->data;
+
+                simpledit_content_set_filename(pEditData, pcNewFilename);
+
+                while (pCurrFilenames->next != NULL) {
+                    pCurrFilenames = pCurrFilenames->next;
+
+                    pNewFile = g_file_new_for_path((gchar *)pCurrFilenames->data);
+
+                    simpledit_app_window_open(SIMPLEDIT_APP_WINDOW(pEditData->pWindow), pNewFile);
+
+                    g_object_unref(pNewFile);
+                }
+
+                g_slist_free_full(pLstFilenames, g_free);
+            } else {
+                gchar * pcNewFilename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(pDlgFile));
+
+                simpledit_content_set_filename(pEditData, pcNewFilename);
+
+                g_free(pcNewFilename);
+            }
             bSelectName = TRUE;
         }
 
@@ -488,8 +628,9 @@ gboolean simpledit_content_update_highlight(SimpleditContent * pEditData, GtkSou
 	pEditData->pSrcLang = pCurrentSrcLang;
 	gtk_source_buffer_set_language(GTK_SOURCE_BUFFER(pEditData->pTxtBuff), pCurrentSrcLang);
 	
+	g_free(pEditData->pcLanguage);
 	if (pEditData->pSrcLang) {
-		pEditData->pcLanguage = gtk_source_language_get_name(pEditData->pSrcLang);
+		pEditData->pcLanguage = g_strdup(gtk_source_language_get_name(pEditData->pSrcLang));
 	} else {
 		pEditData->pcLanguage = g_strdup("Text");
 	}
@@ -519,9 +660,9 @@ void simpledit_content_load_cb_async (GObject *source_object, GAsyncResult *res,
 		
 		pEditData->eTypeEOL = gtk_source_file_get_newline_type(pEditData->pSrcFile);
 		pEditData->eCompType = gtk_source_file_get_compression_type(pEditData->pSrcFile);
-g_print("load_cb_async - Encoding : %s (%s)\n", gtk_source_encoding_get_name(pEditData->pEncod), gtk_source_encoding_get_charset(pEditData->pEncod));
-g_print("load_cb_async - EOL : %d\n", pEditData->eTypeEOL);
-g_print("load_cb_async - Compress : %d\n", pEditData->eCompType);
+//g_print("load_cb_async - Encoding : %s (%s)\n", gtk_source_encoding_get_name(pEditData->pEncod), gtk_source_encoding_get_charset(pEditData->pEncod));
+//g_print("load_cb_async - EOL : %d\n", pEditData->eTypeEOL);
+//g_print("load_cb_async - Compress : %d\n", pEditData->eCompType);
 		
 		gtk_text_buffer_get_start_iter(GTK_TEXT_BUFFER(pEditData->pTxtBuff), &sIter);
 		gtk_text_buffer_place_cursor(GTK_TEXT_BUFFER(pEditData->pTxtBuff), &sIter);
@@ -575,11 +716,10 @@ void simpledit_content_save_cb_async (GObject *source_object, GAsyncResult *res,
 		
 		pEditData->eTypeEOL = gtk_source_file_get_newline_type(pEditData->pSrcFile);
 		pEditData->eCompType = gtk_source_file_get_compression_type(pEditData->pSrcFile);
-g_print("save_cb_async - Encoding : %s (%s)\n", gtk_source_encoding_get_name(pEditData->pEncod), gtk_source_encoding_get_charset(pEditData->pEncod));
-g_print("save_cb_async - EOL : %d\n", pEditData->eTypeEOL);
-g_print("save_cb_async - Compress : %d\n", pEditData->eCompType);
+//g_print("save_cb_async - Encoding : %s (%s)\n", gtk_source_encoding_get_name(pEditData->pEncod), gtk_source_encoding_get_charset(pEditData->pEncod));
+//g_print("save_cb_async - EOL : %d\n", pEditData->eTypeEOL);
+//g_print("save_cb_async - Compress : %d\n", pEditData->eCompType);
 		
-		g_signal_emit_by_name(pEditData->pTxtBuff, "changed", pEditData->pWindow);
 		simpledit_content_update_highlight(pEditData, NULL);
 	}
 }
