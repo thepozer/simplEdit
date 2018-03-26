@@ -720,7 +720,6 @@ void simpledit_content_save_cb_async (GObject *source_object, GAsyncResult *res,
 //g_print("save_cb_async - EOL : %d\n", pEditData->eTypeEOL);
 //g_print("save_cb_async - Compress : %d\n", pEditData->eCompType);
 		
-		g_signal_emit_by_name(pEditData->pTxtBuff, "changed", pEditData->pWindow);
 		simpledit_content_update_highlight(pEditData, NULL);
 	}
 }
