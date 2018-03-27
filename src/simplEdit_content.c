@@ -208,6 +208,7 @@ gboolean simpledit_content_close (SimpleditContent * pEditData) {
 		}
 		
 		gtk_notebook_remove_page(pEditData->pNotebook, iPos);
+		simpledit_app_window_clean_status(SIMPLEDIT_APP_WINDOW(pEditData->pWindow));
 		//g_object_unref(pEditData);
 	} else {
 		return FALSE;

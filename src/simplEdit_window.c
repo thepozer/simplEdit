@@ -150,6 +150,14 @@ void simpledit_app_window_clear_search_dialog (SimpleditAppWindow *pWindow) {
 	pWindow->pSearchDlg = NULL;
 }
 
+void simpledit_app_window_clean_status (SimpleditAppWindow *pWindow) {
+	if (gtk_notebook_get_n_pages(pWindow->bookEditors) < 1) {
+		pWindow->pEditData = NULL;
+	}
+	
+	simpledit_app_window_update_status(pWindow);
+}
+
 void simpledit_app_window_update_status (SimpleditAppWindow *pWindow) {
 	gchar * pcStatus = NULL;
 	
@@ -159,6 +167,7 @@ void simpledit_app_window_update_status (SimpleditAppWindow *pWindow) {
 		gtk_statusbar_push(pWindow->statusBar, pWindow->iSttsIdPosition, pcStatus);
 		g_free(pcStatus);
 	} else {
+		gtk_window_set_title(GTK_WINDOW(pWindow), "simplEdit");
 		gtk_statusbar_push(pWindow->statusBar, pWindow->iSttsIdPosition, "");
 	}
 }
