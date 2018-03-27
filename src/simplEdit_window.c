@@ -275,6 +275,22 @@ void smpldt_clbk_menu_file_returntosaved (GtkMenuItem *menuitem, gpointer user_d
 	}
 }
 
+void smpldt_clbk_menu_file_preview (GtkMenuItem *menuitem, gpointer user_data) {
+	SimpleditAppWindow * pWindow = SIMPLEDIT_APP_WINDOW(user_data);
+	
+	if (pWindow->pEditData) {
+		
+	}
+}
+
+void smpldt_clbk_menu_file_print (GtkMenuItem *menuitem, gpointer user_data) {
+	SimpleditAppWindow * pWindow = SIMPLEDIT_APP_WINDOW(user_data);
+	
+	if (pWindow->pEditData) {
+		simpledit_content_print(pWindow->pEditData);
+	}
+}
+
 void smpldt_clbk_menu_file_close (GtkMenuItem *menuitem, gpointer user_data) {
 	SimpleditAppWindow * pWindow = SIMPLEDIT_APP_WINDOW(user_data);
 	SimpleditContent * pTmpEditData = pWindow->pEditData;
