@@ -43,6 +43,7 @@ gboolean simpledit_content_reset(SimpleditContent * pEditData);
 gboolean simpledit_content_load(SimpleditContent * pEditData);
 gboolean simpledit_content_save(SimpleditContent * pEditData);
 
+gboolean simpledit_content_print(SimpleditContent * pEditData);
 
 G_END_DECLS
 

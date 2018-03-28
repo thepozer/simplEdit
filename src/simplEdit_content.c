@@ -208,6 +208,7 @@ gboolean simpledit_content_close (SimpleditContent * pEditData) {
 		}
 		
 		gtk_notebook_remove_page(pEditData->pNotebook, iPos);
+		simpledit_app_window_clean_status(SIMPLEDIT_APP_WINDOW(pEditData->pWindow));
 		//g_object_unref(pEditData);
 	} else {
 		return FALSE;
@@ -735,5 +736,70 @@ gboolean simpledit_content_save(SimpleditContent * pEditData) {
 	
 	gtk_source_file_saver_save_async(pSrcFileSaver, G_PRIORITY_DEFAULT, NULL, NULL, NULL, NULL, simpledit_content_save_cb_async, (gpointer)pEditData);
 
+	return TRUE;
+}
+
+void simpledit_content_clbk_begin_print (GtkPrintOperation * pPrntOpp, GtkPrintContext * pPrntCont, gpointer user_data) {
+    GtkSourcePrintCompositor * pCompositor = GTK_SOURCE_PRINT_COMPOSITOR (user_data);
+    gint iNbPages;
+
+    while (!gtk_source_print_compositor_paginate (pCompositor, pPrntCont));
+
+    iNbPages = gtk_source_print_compositor_get_n_pages (pCompositor);
+    gtk_print_operation_set_n_pages (pPrntOpp, iNbPages);
+}
+
+gboolean simpledit_content_clbk_paginate (GtkPrintOperation * pPrntOpp, GtkPrintContext * pPrntCont, gpointer user_data) {
+    GtkSourcePrintCompositor * pCompositor = GTK_SOURCE_PRINT_COMPOSITOR (user_data);
+
+    if (gtk_source_print_compositor_paginate (pCompositor, pPrntCont)) {
+        gint iNbPages;
+
+        iNbPages = gtk_source_print_compositor_get_n_pages (pCompositor);
+        gtk_print_operation_set_n_pages (pPrntOpp, iNbPages);
+
+        return TRUE;
+    }
+
+    return FALSE;
+}
+
+void simpledit_content_clbk_draw_page (GtkPrintOperation * pPrntOpp, GtkPrintContext * pPrntCont, gint iPageNbr, gpointer user_data) {
+    GtkSourcePrintCompositor * pCompositor = GTK_SOURCE_PRINT_COMPOSITOR(user_data);
+	
+    gtk_source_print_compositor_draw_page(pCompositor, pPrntCont, iPageNbr);
+}
+
+gboolean simpledit_content_print(SimpleditContent * pEditData) {
+	GtkSourcePrintCompositor * pCompositor;
+	GtkPrintOperation * pPrintOpp;
+	GtkPrintOperationResult sPrintRes;
+
+	pPrintOpp = gtk_print_operation_new ();
+	
+	pCompositor = gtk_source_print_compositor_new_from_view(pEditData->pSrcView);
+
+//	if (settings != NULL) {
+//		gtk_print_operation_set_print_settings (print, settings);
+//	}
+
+	g_signal_connect (pPrintOpp, "begin-print", G_CALLBACK (simpledit_content_clbk_begin_print), pCompositor);
+	g_signal_connect (pPrintOpp, "paginate",    G_CALLBACK (simpledit_content_clbk_paginate),    pCompositor);
+	g_signal_connect (pPrintOpp, "draw-page",   G_CALLBACK (simpledit_content_clbk_draw_page),   pCompositor);
+
+	sPrintRes = gtk_print_operation_run (pPrintOpp, GTK_PRINT_OPERATION_ACTION_PRINT_DIALOG,
+								 GTK_WINDOW (pEditData->pWindow), NULL);
+
+	if (sPrintRes == GTK_PRINT_OPERATION_RESULT_APPLY) {
+//		if (settings != NULL) {
+//			g_object_unref (settings);
+//		}
+//		settings = g_object_ref (gtk_print_operation_get_print_settings (pPrintOpp));
+	}
+
+	g_object_unref (pPrintOpp);
+	
+	
+	
 	return TRUE;
 }
