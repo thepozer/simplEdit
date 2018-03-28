@@ -276,6 +276,14 @@ void smpldt_clbk_menu_file_open (GtkMenuItem *menuitem, gpointer user_data) {
 	}
 }
 
+void smpldt_clbk_menu_file_open_recent (GtkRecentChooser *pChooser, gpointer user_data) {
+	SimpleditAppWindow * pWindow = SIMPLEDIT_APP_WINDOW(user_data);
+	GFile * pFile = NULL;
+	
+	pFile = g_file_new_for_uri(gtk_recent_chooser_get_current_uri(pChooser));
+	simpledit_app_window_open(pWindow, pFile);
+}
+
 void smpldt_clbk_menu_file_save (GtkMenuItem *menuitem, gpointer user_data) {
 	SimpleditAppWindow * pWindow = SIMPLEDIT_APP_WINDOW(user_data);
 	
