@@ -32,7 +32,6 @@
                 <property name="can_focus">False</property>
                 <property name="label" translatable="yes">_File</property>
                 <property name="use_underline">True</property>
-                <signal name="activate" handler="smpldt_clbk_menu_file" object="SimpleditAppWindow" swapped="no"/>
                 <child type="submenu">
                   <object class="GtkMenu">
                     <property name="visible">True</property>
@@ -177,7 +176,6 @@
                 <property name="can_focus">False</property>
                 <property name="label" translatable="yes">E_dit</property>
                 <property name="use_underline">True</property>
-                <signal name="activate" handler="smpldt_clbk_menu_edit" object="SimpleditAppWindow" swapped="no"/>
                 <child type="submenu">
                   <object class="GtkMenu">
                     <property name="visible">True</property>
@@ -283,7 +281,6 @@
                 <property name="can_focus">False</property>
                 <property name="label" translatable="yes">_Search</property>
                 <property name="use_underline">True</property>
-                <signal name="activate" handler="smpldt_clbk_menu_search" object="SimpleditAppWindow" swapped="no"/>
                 <child type="submenu">
                   <object class="GtkMenu">
                     <property name="visible">True</property>
