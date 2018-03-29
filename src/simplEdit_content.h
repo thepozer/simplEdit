@@ -39,6 +39,8 @@ gboolean simpledit_content_select_name(SimpleditContent * pEditData, GtkFileChoo
 
 gboolean simpledit_content_update_highlight(SimpleditContent * pEditData, GtkSourceLanguage * pSrcLang);
 
+void simpledit_content_show_message(SimpleditContent * pEditData, GtkMessageType vMsgType, gchar * pcMessage);
+
 gboolean simpledit_content_reset(SimpleditContent * pEditData);
 gboolean simpledit_content_load(SimpleditContent * pEditData);
 gboolean simpledit_content_save(SimpleditContent * pEditData);
