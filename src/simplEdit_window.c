@@ -9,13 +9,14 @@ struct _SimpleditAppWindow {
 	
 	GtkNotebook * bookEditors;
 
-	GtkStatusbar  * statusBar;
+	GtkLabel    * labelStatusBar;
 	
 	GtkMenuItem * menuFileSave;
 	GtkMenuItem * menuFileSaveAs;
 	GtkMenuItem * menuFileReturnToSaved;
 	GtkMenuItem * menuFileClose;
 	GtkMenuItem * menuFileCloseAll;
+	GtkMenuItem * menuFilePrint;
 	
 	GtkMenuItem * menuEditUndo;
 	GtkMenuItem * menuEditRedo;
@@ -29,8 +30,6 @@ struct _SimpleditAppWindow {
 	GtkMenuItem * menuSearchReplace;
 	
 	SimpleditSearchDialog * pSearchDlg;
-	
-	guint iSttsIdPosition;
 };
 
 G_DEFINE_TYPE(SimpleditAppWindow, simpledit_app_window, GTK_TYPE_APPLICATION_WINDOW);
@@ -50,8 +49,6 @@ static void simpledit_app_window_init (SimpleditAppWindow *pWindow) {
 	gtk_menu_item_set_submenu(GTK_MENU_ITEM(pWindow->menuLanguage), GTK_WIDGET(pMnuLanguages));
 	
 	pWindow->pSearchDlg = NULL;
-	
-	pWindow->iSttsIdPosition = gtk_statusbar_get_context_id (pWindow->statusBar, "Cursor position");
 }
 
 static void simpledit_app_window_class_init (SimpleditAppWindowClass *pClass) {
@@ -59,13 +56,14 @@ static void simpledit_app_window_class_init (SimpleditAppWindowClass *pClass) {
 	
 	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, bookEditors);
 
-	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, statusBar);
+	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, labelStatusBar);
 	
 	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, menuFileSave);
 	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, menuFileSaveAs);
 	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, menuFileReturnToSaved);
 	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, menuFileClose);
 	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, menuFileCloseAll);
+	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, menuFilePrint);
 	
 	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, menuEditUndo);
 	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, menuEditRedo);
@@ -93,11 +91,12 @@ SimpleditAppWindow * simpledit_app_window_new (SimpleditApp *pApp) {
 	g_signal_connect(pWindow, "delete-event", G_CALLBACK(smpldt_clbk_delete_event), pWindow);
 	
 	
-	gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFileSave), FALSE);
+	gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFileSave),   FALSE);
 	gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFileSaveAs), FALSE);
 	gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFileReturnToSaved),FALSE);
-	gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFileClose), FALSE);
+	gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFileClose),    FALSE);
 	gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFileCloseAll), FALSE);
+	gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFilePrint),    FALSE);
 	
 	gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuEditUndo),  FALSE);
 	gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuEditRedo),  FALSE);
@@ -105,6 +104,8 @@ SimpleditAppWindow * simpledit_app_window_new (SimpleditApp *pApp) {
 	gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuEditCopy),  FALSE);
 	gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuEditPaste), FALSE);
 	
+	gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuLanguage),  FALSE);
+
 	gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuSearchFind),    FALSE);
 	gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuSearchReplace), FALSE);
 	
@@ -178,7 +179,7 @@ void simpledit_app_window_update_status (SimpleditAppWindow *pWindow) {
 	if (pWindow->pEditData) {
 		simpledit_content_update_title(pWindow->pEditData);
 		pcStatus = simpledit_content_get_status(pWindow->pEditData);
-		gtk_statusbar_push(pWindow->statusBar, pWindow->iSttsIdPosition, pcStatus);
+		gtk_label_set_label(pWindow->labelStatusBar, pcStatus);
 		g_free(pcStatus);
 		
 		bModified = simpledit_content_is_modified(pWindow->pEditData);
@@ -190,6 +191,7 @@ void simpledit_app_window_update_status (SimpleditAppWindow *pWindow) {
 		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFileReturnToSaved), bModified && bHaveFilename);
 		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFileClose),    TRUE);
 		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFileCloseAll), TRUE);
+		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFilePrint),    TRUE);
 
 		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuEditUndo),  gtk_source_buffer_can_undo(GTK_SOURCE_BUFFER(pTxtBuff)));
 		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuEditRedo),  gtk_source_buffer_can_redo(GTK_SOURCE_BUFFER(pTxtBuff)));
@@ -197,19 +199,22 @@ void simpledit_app_window_update_status (SimpleditAppWindow *pWindow) {
 		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuEditCopy),  gtk_text_buffer_get_has_selection(pTxtBuff));
 		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuEditPaste), TRUE);
 		
+		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuLanguage),  TRUE);
+
 		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuSearchFind),    TRUE);
 		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuSearchReplace), TRUE);
 		
 		g_object_unref(pTxtBuff);
 	} else {
 		gtk_window_set_title(GTK_WINDOW(pWindow), "simplEdit");
-		gtk_statusbar_push(pWindow->statusBar, pWindow->iSttsIdPosition, "");
+		gtk_label_set_label(pWindow->labelStatusBar, "-");
 		
 		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFileSave),   FALSE);
 		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFileSaveAs), FALSE);
 		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFileReturnToSaved), FALSE);
 		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFileClose),    FALSE);
 		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFileCloseAll), FALSE);
+		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFilePrint),    FALSE);
 		
 		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuEditUndo),  FALSE);
 		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuEditRedo),  FALSE);
@@ -217,6 +222,8 @@ void simpledit_app_window_update_status (SimpleditAppWindow *pWindow) {
 		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuEditCopy),  FALSE);
 		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuEditPaste), FALSE);
 		
+		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuLanguage),  FALSE);
+
 		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuSearchFind),    FALSE);
 		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuSearchReplace), FALSE);
 	}
