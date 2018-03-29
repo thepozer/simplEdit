@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: simplEdit 0.4.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-03-26 14:23+0200\n"
-"PO-Revision-Date: 2018-03-26 14:24+0200\n"
+"POT-Creation-Date: 2018-03-29 10:49+0200\n"
+"PO-Revision-Date: 2018-03-29 10:50+0200\n"
 "Last-Translator: Didier Prolhac <dev@thepozer.net>\n"
 "Language-Team: français <dev@thepozer.net>\n"
 "Language: en\n"
@@ -19,12 +19,12 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Generator: Gtranslator 2.91.7\n"
 
-#: ../src/simplEdit_window.c:112
+#: ../src/simplEdit_window.c:131
 #, c-format
 msgid "Error openning file '%s' : (%i) %s"
 msgstr "Error openning file '%s' : (%i) %s"
 
-#: ../src/simplEdit_window.c:449
+#: ../src/simplEdit_window.c:471
 msgid ""
 "Another small/simple editor based on GtkSourceView.\n"
 "It try to make accessible every features of GtkSourceView."
@@ -32,15 +32,15 @@ msgstr ""
 "Another small/simple editor based on GtkSourceView.\n"
 "It try to make accessible every features of GtkSourceView."
 
-#: ../src/simplEdit_window.c:450
+#: ../src/simplEdit_window.c:472
 msgid "(c) 2018 Didier Prolhac"
 msgstr "(c) 2018 Didier Prolhac"
 
-#: ../src/simplEdit_window.c:451
+#: ../src/simplEdit_window.c:473
 msgid "MIT"
 msgstr "MIT"
 
-#: ../src/simplEdit_window.c:456
+#: ../src/simplEdit_window.c:478
 msgid "github simplEdit"
 msgstr "github simplEdit"
 
@@ -66,93 +66,93 @@ msgid "_No"
 msgstr "_No"
 
 #. g_print("simpledit_content_new_add - pcTitle : '%s'\n", pEditData->pcFiletitle);
-#: ../src/simplEdit_content.c:246 ../src/simplEdit_content.c:569
+#: ../src/simplEdit_content.c:247 ../src/simplEdit_content.c:570
 msgid "New file"
 msgstr "New file"
 
-#: ../src/simplEdit_content.c:335
+#: ../src/simplEdit_content.c:336
 #, c-format
 msgid "Line : %d / %d \tCol : %d"
 msgstr "Line : %d / %d \tCol : %d"
 
-#: ../src/simplEdit_content.c:337
+#: ../src/simplEdit_content.c:338
 #, c-format
 msgid "\t\tOWR"
 msgstr "\t\tOWR"
 
-#: ../src/simplEdit_content.c:337
+#: ../src/simplEdit_content.c:338
 #, c-format
 msgid "\t\tINS"
 msgstr "\t\tINS"
 
-#: ../src/simplEdit_content.c:339
+#: ../src/simplEdit_content.c:340
 #, c-format
 msgid "\t\tFile type : %s"
 msgstr "\t\tFile type : %s"
 
-#: ../src/simplEdit_content.c:462
+#: ../src/simplEdit_content.c:463
 msgid "Encoding :"
 msgstr "Encoding :"
 
-#: ../src/simplEdit_content.c:481
+#: ../src/simplEdit_content.c:482
 msgid "End of line :"
 msgstr "End of line :"
 
-#: ../src/simplEdit_content.c:486
+#: ../src/simplEdit_content.c:487
 msgid "Unix (LF)"
 msgstr "Unix (LF)"
 
-#: ../src/simplEdit_content.c:487
+#: ../src/simplEdit_content.c:488
 msgid "Windows (CR LF)"
 msgstr "Windows (CR LF)"
 
-#: ../src/simplEdit_content.c:488
+#: ../src/simplEdit_content.c:489
 msgid "Mac (CR)"
 msgstr "Mac (CR)"
 
-#: ../src/simplEdit_content.c:500
+#: ../src/simplEdit_content.c:501
 msgid "Compression :"
 msgstr "Compression :"
 
-#: ../src/simplEdit_content.c:505
+#: ../src/simplEdit_content.c:506
 msgid "None"
 msgstr "None"
 
-#: ../src/simplEdit_content.c:506
+#: ../src/simplEdit_content.c:507
 msgid "Gzip (.gz)"
 msgstr "Gzip (.gz)"
 
-#: ../src/simplEdit_content.c:556
+#: ../src/simplEdit_content.c:557
 msgid "Open File"
 msgstr "Open File"
 
-#: ../src/simplEdit_content.c:557 ../src/simplEdit_content.c:561
+#: ../src/simplEdit_content.c:558 ../src/simplEdit_content.c:562
 msgid "_Cancel"
 msgstr "_Cancel"
 
-#: ../src/simplEdit_content.c:557
+#: ../src/simplEdit_content.c:558
 msgid "_Open"
 msgstr "_Open"
 
-#: ../src/simplEdit_content.c:560
+#: ../src/simplEdit_content.c:561
 msgid "Save File"
 msgstr "Save File"
 
-#: ../src/simplEdit_content.c:561
+#: ../src/simplEdit_content.c:562
 msgid "_Save"
 msgstr "_Save"
 
-#: ../src/simplEdit_content.c:651
+#: ../src/simplEdit_content.c:652
 #, c-format
 msgid "Error reading '%s' : (%i) %s"
 msgstr "Error reading '%s' : (%i) %s"
 
-#: ../src/simplEdit_content.c:684
+#: ../src/simplEdit_content.c:685
 #, c-format
 msgid "Error reading (stream) '%s' : (%i) %s"
 msgstr "Error reading (stream) '%s' : (%i) %s"
 
-#: ../src/simplEdit_content.c:707
+#: ../src/simplEdit_content.c:708
 #, c-format
 msgid "Error writing '%s' : (%i) %s"
 msgstr "Error writing '%s' : (%i) %s"
@@ -172,22 +172,26 @@ msgid "_File"
 msgstr "_File"
 
 #: ../src/simplEdit.SimpleditAppWindow.glade.h:2
+msgid "_Recent File"
+msgstr "_Recent File"
+
+#: ../src/simplEdit.SimpleditAppWindow.glade.h:3
 msgid "Close All"
 msgstr "Close All"
 
-#: ../src/simplEdit.SimpleditAppWindow.glade.h:3
+#: ../src/simplEdit.SimpleditAppWindow.glade.h:4
 msgid "E_dit"
 msgstr "E_dit"
 
-#: ../src/simplEdit.SimpleditAppWindow.glade.h:4
+#: ../src/simplEdit.SimpleditAppWindow.glade.h:5
 msgid "_Language"
 msgstr "_Language"
 
-#: ../src/simplEdit.SimpleditAppWindow.glade.h:5
+#: ../src/simplEdit.SimpleditAppWindow.glade.h:6
 msgid "_Search"
 msgstr "_Search"
 
-#: ../src/simplEdit.SimpleditAppWindow.glade.h:6
+#: ../src/simplEdit.SimpleditAppWindow.glade.h:7
 msgid "H_elp"
 msgstr "H_elp"
 
