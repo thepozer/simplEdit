@@ -31,6 +31,11 @@ gint simpledit_content_file_dialog(SimpleditContent * pEditData, GtkWidget * pDl
 
 gchar * simpledit_content_get_status(SimpleditContent * pEditData);
 
+gboolean simpledit_content_get_overwrite(SimpleditContent * pEditData);
+void simpledit_content_toggle_overwrite(SimpleditContent * pEditData);
+
+gchar * simpledit_content_get_language(SimpleditContent * pEditData);
+
 gboolean simpledit_content_have_filename(SimpleditContent * pEditData);
 gboolean simpledit_content_is_modified(SimpleditContent * pEditData);
 

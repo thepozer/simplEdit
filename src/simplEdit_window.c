@@ -9,7 +9,9 @@ struct _SimpleditAppWindow {
 	
 	GtkNotebook * bookEditors;
 
-	GtkLabel    * labelStatusBar;
+	GtkLabel    * sttsbrLabel;
+	GtkButton   * sttsbrBtnLanguage;
+	GtkButton   * sttsbrBtnInsOwr;
 	
 	GtkMenuItem * menuFileSave;
 	GtkMenuItem * menuFileSaveAs;
@@ -56,7 +58,9 @@ static void simpledit_app_window_class_init (SimpleditAppWindowClass *pClass) {
 	
 	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, bookEditors);
 
-	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, labelStatusBar);
+	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, sttsbrLabel);
+	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, sttsbrBtnLanguage);
+	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, sttsbrBtnInsOwr);
 	
 	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, menuFileSave);
 	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, menuFileSaveAs);
@@ -172,18 +176,19 @@ void simpledit_app_window_clean_status (SimpleditAppWindow *pWindow) {
 }
 
 void simpledit_app_window_update_status (SimpleditAppWindow *pWindow) {
-	gchar * pcStatus = NULL;
-	gboolean bModified = FALSE, bHaveFilename = FALSE;
+	gchar * pcStatus = NULL, * pcTypeFile = NULL;
+	gboolean bModified = FALSE, bHaveFilename = FALSE, bOverwriteMode = FALSE;
 	GtkTextBuffer * pTxtBuff;
 	
 	if (pWindow->pEditData) {
 		simpledit_content_update_title(pWindow->pEditData);
 		pcStatus = simpledit_content_get_status(pWindow->pEditData);
-		gtk_label_set_label(pWindow->labelStatusBar, pcStatus);
+		gtk_label_set_label(pWindow->sttsbrLabel, pcStatus);
 		g_free(pcStatus);
 		
 		bModified = simpledit_content_is_modified(pWindow->pEditData);
 		bHaveFilename = simpledit_content_have_filename(pWindow->pEditData);
+		bOverwriteMode = simpledit_content_get_overwrite(pWindow->pEditData);
 		g_object_get(pWindow->pEditData, "textbuffer", &pTxtBuff, NULL);
 		
 		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFileSave),   bModified && bHaveFilename);
@@ -204,10 +209,16 @@ void simpledit_app_window_update_status (SimpleditAppWindow *pWindow) {
 		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuSearchFind),    TRUE);
 		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuSearchReplace), TRUE);
 		
+		pcTypeFile = g_strdup_printf(_("File type : %s"), simpledit_content_get_language(pWindow->pEditData));
+		gtk_button_set_label(pWindow->sttsbrBtnLanguage, pcTypeFile);
+		g_free(pcTypeFile);
+		
+		gtk_button_set_label(pWindow->sttsbrBtnInsOwr, ((bOverwriteMode) ? _("OWR") : _("INS")));
+		
 		g_object_unref(pTxtBuff);
 	} else {
 		gtk_window_set_title(GTK_WINDOW(pWindow), "simplEdit");
-		gtk_label_set_label(pWindow->labelStatusBar, "-");
+		gtk_label_set_label(pWindow->sttsbrLabel, "-");
 		
 		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFileSave),   FALSE);
 		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFileSaveAs), FALSE);
@@ -256,6 +267,14 @@ void smpldt_clbk_mark_set (GtkTextBuffer * textbuffer, GtkTextIter * location, G
 	SimpleditAppWindow * pWindow = SIMPLEDIT_APP_WINDOW(user_data);
 	
 	simpledit_app_window_update_status(pWindow);
+}
+
+void smpldt_clbk_btn_sttsbr_btn_insowr (GtkButton * button, gpointer user_data) {
+	SimpleditAppWindow * pWindow = SIMPLEDIT_APP_WINDOW(user_data);
+	
+	if (pWindow->pEditData) {
+		simpledit_content_toggle_overwrite(pWindow->pEditData);
+	}
 }
 
 void smpldt_clbk_menu_file_new (GtkMenuItem *menuitem, gpointer user_data) {

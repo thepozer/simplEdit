@@ -346,8 +346,7 @@ gboolean simpledit_content_is_modified(SimpleditContent * pEditData) {
 gchar * simpledit_content_get_status(SimpleditContent * pEditData) {
 	GtkTextIter sIter;
 	GString * pStrStatus = g_string_new("");
-	gint iTotalNbLine = 0, iLine = 0, iCol = 0, iPos = 0;
-	gboolean bOverwriteMode = FALSE;
+	gint iTotalNbLine = 0, iTotalChar = 0, iLine = 0, iCol = 0, iPos = 0;
 	
 	g_object_get(GTK_TEXT_BUFFER(pEditData->pTxtBuff), "cursor-position", &iPos, NULL);
 	gtk_text_buffer_get_iter_at_offset(GTK_TEXT_BUFFER(pEditData->pTxtBuff), &sIter, iPos);
@@ -355,16 +354,26 @@ gchar * simpledit_content_get_status(SimpleditContent * pEditData) {
 	iCol = gtk_source_view_get_visual_column(GTK_SOURCE_VIEW(pEditData->pSrcView), &sIter) + 1;
 	
 	iTotalNbLine = gtk_text_buffer_get_line_count(GTK_TEXT_BUFFER(pEditData->pTxtBuff));
+	iTotalChar   = gtk_text_buffer_get_char_count(GTK_TEXT_BUFFER(pEditData->pTxtBuff));
 	
-	bOverwriteMode = gtk_text_view_get_overwrite(GTK_TEXT_VIEW(pEditData->pSrcView)); 
+	g_string_append_printf(pStrStatus, _("Line : %d \tCol : %d\tTotal : %d line / %d chars"), iLine, iCol, iTotalNbLine, iTotalChar);
 	
-	g_string_append_printf(pStrStatus, _("Line : %d / %d \tCol : %d"), iLine, iTotalNbLine, iCol);
-	
-	g_string_append_printf(pStrStatus, ((bOverwriteMode) ? _("\t\tOWR") :  _("\t\tINS")));
-
-	g_string_append_printf(pStrStatus, _("\t\tFile type : %s"), pEditData->pcLanguage);
-
 	return g_string_free(pStrStatus, FALSE);
+}
+
+gboolean simpledit_content_get_overwrite(SimpleditContent * pEditData) {
+	return gtk_text_view_get_overwrite(GTK_TEXT_VIEW(pEditData->pSrcView)); 
+}
+
+void simpledit_content_toggle_overwrite(SimpleditContent * pEditData) {
+	gboolean bOverwriteMode = FALSE;
+	
+	bOverwriteMode = gtk_text_view_get_overwrite(GTK_TEXT_VIEW(pEditData->pSrcView));
+	gtk_text_view_set_overwrite(GTK_TEXT_VIEW(pEditData->pSrcView), !bOverwriteMode);
+}
+
+gchar * simpledit_content_get_language(SimpleditContent * pEditData) {
+	return pEditData->pcLanguage; 
 }
 
 gboolean simpledit_content_reset(SimpleditContent * pEditData) {
