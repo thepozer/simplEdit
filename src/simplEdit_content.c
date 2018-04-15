@@ -317,16 +317,21 @@ void simpledit_content_show_message(SimpleditContent * pEditData, GtkMessageType
 gboolean simpledit_content_update_title(SimpleditContent * pEditData) {
 	GString * pStrTitle = NULL;
 	
-	pStrTitle = g_string_new("simplEdit");
+	pStrTitle = g_string_new("");
 	
 	if (pEditData->pcFiletitle != NULL) {
-		g_string_append(pStrTitle, " - ");
 		g_string_append(pStrTitle, pEditData->pcFiletitle);
 	}	
 	
 	if (gtk_text_buffer_get_modified(GTK_TEXT_BUFFER(pEditData->pTxtBuff))) {
 		g_string_append(pStrTitle, " *");
 	}
+	
+	if (pStrTitle->len > 0) {
+		g_string_append(pStrTitle, " - ");
+	}
+	
+	g_string_append(pStrTitle, "simplEdit");
 	
 	gtk_window_set_title(GTK_WINDOW(pEditData->pWindow), pStrTitle->str);
 	g_string_free(pStrTitle, TRUE);
