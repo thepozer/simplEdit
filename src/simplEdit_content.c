@@ -205,7 +205,14 @@ gboolean simpledit_content_close (SimpleditContent * pEditData) {
 		}
 		
 		if (iResult == GTK_RESPONSE_YES) {
-			simpledit_content_save(pEditData);
+			if (pEditData->pcFiletitle == NULL) {
+				if(!simpledit_content_select_name(pEditData, GTK_FILE_CHOOSER_ACTION_SAVE)) {
+					return FALSE;
+				}
+			}
+			if (pEditData->pcFiletitle != NULL) {
+				simpledit_content_save(pEditData);
+			}
 		}
 		
 		gtk_notebook_remove_page(pEditData->pNotebook, iPos);
