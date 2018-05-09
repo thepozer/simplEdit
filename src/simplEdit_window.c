@@ -31,6 +31,8 @@ struct _SimpleditAppWindow {
 	GtkMenuItem * menuSearchFind;
 	GtkMenuItem * menuSearchReplace;
 	
+	GtkWidget * menuSelectedLanguage;
+
 	SimpleditSearchDialog * pSearchDlg;
 };
 
@@ -42,6 +44,7 @@ void smpldt_clbk_notebook_switch_page (GtkNotebook * bookEditors, GtkWidget * pC
 typedef struct _sMenuLangItem {
 	SimpleditAppWindow *pWin;
 	GtkSourceLanguage * pSelLang;
+	GtkWidget * pMenuItem;
 } sMenuLangItem;
 
 static void simpledit_app_window_init (SimpleditAppWindow *pWindow) {
@@ -49,6 +52,7 @@ static void simpledit_app_window_init (SimpleditAppWindow *pWindow) {
 	
 	GtkMenu * pMnuLanguages = simpledit_app_window_get_language_menu(pWindow);
 	gtk_menu_item_set_submenu(GTK_MENU_ITEM(pWindow->menuLanguage), GTK_WIDGET(pMnuLanguages));
+	pWindow->menuSelectedLanguage = NULL;
 	
 	pWindow->pSearchDlg = NULL;
 }
@@ -461,6 +465,11 @@ void smpldt_clbk_menu_language_item (GtkMenuItem *menuitem, gpointer user_data) 
 	
 	if (pMnuItemData->pWin->pEditData) {
 		simpledit_content_update_highlight(pMnuItemData->pWin->pEditData, pMnuItemData->pSelLang);
+		/*if (pMnuItemData->pWin->menuSelectedLanguage != NULL) {
+			gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(pMnuItemData->pWin->menuSelectedLanguage), FALSE);
+		}*/
+		pMnuItemData->pWin->menuSelectedLanguage = pMnuItemData->pMenuItem;
+		//gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(pMnuItemData->pWin->menuSelectedLanguage), TRUE);
 	}
 }
 
@@ -508,6 +517,7 @@ void smpldt_clbk_menu_about (GtkMenuItem *menuitem, gpointer user_data) {
 GtkMenu * simpledit_app_window_get_language_menu(SimpleditAppWindow *pWindow) {
 	GtkSourceLanguageManager * pLangMngr = NULL;
 	GtkSourceLanguage * pLang = NULL;
+	GSList * pGrpMenu = NULL;
 	GtkWidget * pMnuMain    = NULL;
 	GtkWidget * pMnuSection = NULL;
 	GtkWidget * pMnuItem    = NULL;
@@ -539,13 +549,15 @@ GtkMenu * simpledit_app_window_get_language_menu(SimpleditAppWindow *pWindow) {
 				g_hash_table_insert(pHash, (gchar *)pcSection, pMnuSection);
 			}
 			
-			pMnuItem = gtk_menu_item_new_with_label(pcName);
+			pMnuItem = gtk_radio_menu_item_new_with_label(pGrpMenu, pcName);
+			pGrpMenu = gtk_radio_menu_item_get_group(GTK_RADIO_MENU_ITEM(pMnuItem));
 			gtk_widget_show (pMnuItem);
 			gtk_menu_shell_append (GTK_MENU_SHELL(pMnuSection), pMnuItem);
 			
 			pMnuItemData = g_new0(sMenuLangItem, 1);
 			pMnuItemData->pWin = pWindow;
 			pMnuItemData->pSelLang = pLang;
+			pMnuItemData->pMenuItem = pMnuItem;
 			g_signal_connect (pMnuItem, "activate", G_CALLBACK (smpldt_clbk_menu_language_item), pMnuItemData);
 		}
 		
