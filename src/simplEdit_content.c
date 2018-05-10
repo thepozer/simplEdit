@@ -712,6 +712,7 @@ void simpledit_content_load_cb_async (GObject *source_object, GAsyncResult *res,
 		gtk_text_buffer_place_cursor(GTK_TEXT_BUFFER(pEditData->pTxtBuff), &sIter);
 		
 		simpledit_content_update_highlight(pEditData, NULL);
+		simpledit_app_window_select_language_in_menu(SIMPLEDIT_APP_WINDOW(pEditData->pWindow), (const gchar *)pEditData->pcLanguage);
 	}
 }
 

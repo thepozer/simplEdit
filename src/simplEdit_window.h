@@ -20,6 +20,7 @@ GtkMenu          * simpledit_app_window_get_language_menu   (SimpleditAppWindow 
 SimpleditContent * simpledit_app_window_get_content         (SimpleditAppWindow * pWindow);
 void               simpledit_app_window_clear_search_dialog (SimpleditAppWindow * pWindow);
 void               simpledit_app_window_clean_status        (SimpleditAppWindow * pWindow);
+void               simpledit_app_window_select_language_in_menu(SimpleditAppWindow *pWindow, const gchar * pcLanguageName);
 
 void smpldt_clbk_text_changed            (GtkTextBuffer * textbuffer, gpointer user_data);
 void smpldt_clbk_cursor_position_changed (GtkTextBuffer * textbuffer, GParamSpec * pspec, gpointer user_data);

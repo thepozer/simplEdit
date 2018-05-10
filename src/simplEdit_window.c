@@ -32,6 +32,7 @@ struct _SimpleditAppWindow {
 	GtkMenuItem * menuSearchReplace;
 	
 	GtkWidget * menuSelectedLanguage;
+	GHashTable * pHashLanguage;
 
 	SimpleditSearchDialog * pSearchDlg;
 };
@@ -247,10 +248,14 @@ void simpledit_app_window_update_status (SimpleditAppWindow *pWindow) {
 void smpldt_clbk_notebook_switch_page (GtkNotebook * bookEditors, GtkWidget * pChild, guint page_num, gpointer user_data) {
 	SimpleditAppWindow * pWindow = SIMPLEDIT_APP_WINDOW(user_data);
 	SimpleditContent * pTmpEditData = NULL;
+	const gchar * pcLanguage = NULL;
 	
 	pTmpEditData = g_object_get_data(G_OBJECT(pChild), "content_data");
 	if (pTmpEditData != NULL) {
 		pWindow->pEditData = pTmpEditData;
+		
+		pcLanguage = simpledit_content_get_language(pWindow->pEditData);
+		simpledit_app_window_select_language_in_menu(SIMPLEDIT_APP_WINDOW(pWindow), pcLanguage);
 	}
 	
 }
@@ -465,11 +470,7 @@ void smpldt_clbk_menu_language_item (GtkMenuItem *menuitem, gpointer user_data) 
 	
 	if (pMnuItemData->pWin->pEditData) {
 		simpledit_content_update_highlight(pMnuItemData->pWin->pEditData, pMnuItemData->pSelLang);
-		/*if (pMnuItemData->pWin->menuSelectedLanguage != NULL) {
-			gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(pMnuItemData->pWin->menuSelectedLanguage), FALSE);
-		}*/
 		pMnuItemData->pWin->menuSelectedLanguage = pMnuItemData->pMenuItem;
-		//gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(pMnuItemData->pWin->menuSelectedLanguage), TRUE);
 	}
 }
 
@@ -514,6 +515,17 @@ void smpldt_clbk_menu_about (GtkMenuItem *menuitem, gpointer user_data) {
 		NULL);
 }
 
+void simpledit_app_window_select_language_in_menu(SimpleditAppWindow *pWindow, const gchar * pcLanguageName) {
+	sMenuLangItem * pMnuItemData = NULL;
+	
+	if (pcLanguageName != NULL) {
+		pMnuItemData = (sMenuLangItem *)g_hash_table_lookup(pWindow->pHashLanguage, pcLanguageName);
+		if (pMnuItemData != NULL) {
+			gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(pMnuItemData->pMenuItem), TRUE);
+		}
+	}
+}
+
 GtkMenu * simpledit_app_window_get_language_menu(SimpleditAppWindow *pWindow) {
 	GtkSourceLanguageManager * pLangMngr = NULL;
 	GtkSourceLanguage * pLang = NULL;
@@ -530,7 +542,8 @@ GtkMenu * simpledit_app_window_get_language_menu(SimpleditAppWindow *pWindow) {
 	pLangMngr = gtk_source_language_manager_get_default();
 	arpcLangIds = gtk_source_language_manager_get_language_ids(pLangMngr);
 	
-	pHash = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);		
+	pHash = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
+	pWindow->pHashLanguage = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
 	arpcPtrIds = arpcLangIds;
 	for (pcCurrentId = *arpcPtrIds; pcCurrentId; pcCurrentId = *++arpcPtrIds) {
 		const gchar * pcSection, * pcName;
@@ -559,6 +572,7 @@ GtkMenu * simpledit_app_window_get_language_menu(SimpleditAppWindow *pWindow) {
 			pMnuItemData->pSelLang = pLang;
 			pMnuItemData->pMenuItem = pMnuItem;
 			g_signal_connect (pMnuItem, "activate", G_CALLBACK (smpldt_clbk_menu_language_item), pMnuItemData);
+			g_hash_table_insert(pWindow->pHashLanguage, (gchar *)pcName, pMnuItemData);
 		}
 		
 	}
