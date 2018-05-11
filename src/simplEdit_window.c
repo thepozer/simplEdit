@@ -536,8 +536,8 @@ void smpldt_clbk_menu_about (GtkMenuItem *menuitem, gpointer user_data) {
 		"license-type", GTK_LICENSE_MIT_X11,
 		"program-name", PACKAGE_NAME,
 		"version", PACKAGE_VERSION,
-		"website", "https://github.com/thepozer/simplEdit",
-		"website-label", _("github simplEdit"),
+		"website", "https://simpledit.thepozer.net/",
+		"website-label", _("simplEdit"),
 		NULL);
 }
 
