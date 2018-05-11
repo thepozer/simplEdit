@@ -31,7 +31,8 @@ struct _SimpleditAppWindow {
 	GtkMenuItem * menuSearchFind;
 	GtkMenuItem * menuSearchReplace;
 	
-	GtkWidget * menuSelectedLanguage;
+	GtkMenu    * menuListLanguages;
+	GtkWidget  * menuSelectedLanguage;
 	GHashTable * pHashLanguage;
 
 	SimpleditSearchDialog * pSearchDlg;
@@ -51,8 +52,8 @@ typedef struct _sMenuLangItem {
 static void simpledit_app_window_init (SimpleditAppWindow *pWindow) {
 	gtk_widget_init_template(GTK_WIDGET(pWindow));
 	
-	GtkMenu * pMnuLanguages = simpledit_app_window_get_language_menu(pWindow);
-	gtk_menu_item_set_submenu(GTK_MENU_ITEM(pWindow->menuLanguage), GTK_WIDGET(pMnuLanguages));
+	pWindow->menuListLanguages = simpledit_app_window_get_language_menu(pWindow);
+	gtk_menu_item_set_submenu(GTK_MENU_ITEM(pWindow->menuLanguage), GTK_WIDGET(pWindow->menuListLanguages));
 	pWindow->menuSelectedLanguage = NULL;
 	
 	pWindow->pSearchDlg = NULL;
@@ -276,6 +277,15 @@ void smpldt_clbk_mark_set (GtkTextBuffer * textbuffer, GtkTextIter * location, G
 	SimpleditAppWindow * pWindow = SIMPLEDIT_APP_WINDOW(user_data);
 	
 	simpledit_app_window_update_status(pWindow);
+}
+
+void smpldt_clbk_btn_sttsbr_btn_language (GtkButton * button, gpointer user_data) {
+	SimpleditAppWindow * pWindow = SIMPLEDIT_APP_WINDOW(user_data);
+	
+	if (pWindow->pEditData) {
+		gtk_menu_popup_at_widget(pWindow->menuListLanguages, GTK_WIDGET(pWindow->sttsbrBtnLanguage),
+			GDK_GRAVITY_NORTH_WEST, GDK_GRAVITY_SOUTH_EAST, NULL);
+	}
 }
 
 void smpldt_clbk_btn_sttsbr_btn_insowr (GtkButton * button, gpointer user_data) {
