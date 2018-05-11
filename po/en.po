@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: simplEdit 0.4.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-04-16 14:57+0200\n"
-"PO-Revision-Date: 2018-04-16 14:55+0200\n"
+"POT-Creation-Date: 2018-05-11 13:56+0200\n"
+"PO-Revision-Date: 2018-05-11 13:57+0200\n"
 "Last-Translator: Didier Prolhac <dev@thepozer.net>\n"
 "Language-Team: français <dev@thepozer.net>\n"
 "Language: en\n"
@@ -19,25 +19,25 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Generator: Gtranslator 2.91.7\n"
 
-#: ../src/simplEdit_window.c:136
+#: ../src/simplEdit_window.c:142
 #, c-format
 msgid "Error openning file '%s' : (%i) %s"
 msgstr "Error openning file '%s' : (%i) %s"
 
-#: ../src/simplEdit_window.c:212
+#: ../src/simplEdit_window.c:218
 #, c-format
 msgid "File type : %s"
 msgstr "File type : %s"
 
-#: ../src/simplEdit_window.c:216
+#: ../src/simplEdit_window.c:222
 msgid "OWR"
 msgstr "OWR"
 
-#: ../src/simplEdit_window.c:216
+#: ../src/simplEdit_window.c:222
 msgid "INS"
 msgstr "INS"
 
-#: ../src/simplEdit_window.c:497
+#: ../src/simplEdit_window.c:533
 msgid ""
 "Another small/simple editor based on GtkSourceView.\n"
 "It try to make accessible every features of GtkSourceView."
@@ -45,17 +45,27 @@ msgstr ""
 "Another small/simple editor based on GtkSourceView.\n"
 "It try to make accessible every features of GtkSourceView."
 
-#: ../src/simplEdit_window.c:498
+#: ../src/simplEdit_window.c:534
 msgid "(c) 2018 Didier Prolhac"
 msgstr "(c) 2018 Didier Prolhac"
 
-#: ../src/simplEdit_window.c:499
+#: ../src/simplEdit_window.c:535
 msgid "MIT"
 msgstr "MIT"
 
-#: ../src/simplEdit_window.c:504
+#: ../src/simplEdit_window.c:540
 msgid "github simplEdit"
 msgstr "github simplEdit"
+
+#. Add default/empty language
+#: ../src/simplEdit_window.c:610
+msgid "Plain text"
+msgstr "Plain text"
+
+#. Add auto select language
+#: ../src/simplEdit_window.c:623
+msgid "Autodetect"
+msgstr "Autodetect"
 
 #: ../src/simplEdit_content.c:196
 #, c-format
@@ -140,17 +150,17 @@ msgstr "Save File"
 msgid "_Save"
 msgstr "_Save"
 
-#: ../src/simplEdit_content.c:696
+#: ../src/simplEdit_content.c:704
 #, c-format
 msgid "Error reading '%s' : (%i) %s"
 msgstr "Error reading '%s' : (%i) %s"
 
-#: ../src/simplEdit_content.c:726
+#: ../src/simplEdit_content.c:735
 #, c-format
 msgid "Error reading (stream) '%s' : (%i) %s"
 msgstr "Error reading (stream) '%s' : (%i) %s"
 
-#: ../src/simplEdit_content.c:746
+#: ../src/simplEdit_content.c:755
 #, c-format
 msgid "Error writing '%s' : (%i) %s"
 msgstr "Error writing '%s' : (%i) %s"

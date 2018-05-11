@@ -655,7 +655,7 @@ gboolean simpledit_content_select_name(SimpleditContent * pEditData, GtkFileChoo
     return bSelectName;
 }
 
-gboolean simpledit_content_update_highlight(SimpleditContent * pEditData, GtkSourceLanguage * pSrcLang) {
+void simpledit_content_update_highlight(SimpleditContent * pEditData, GtkSourceLanguage * pSrcLang) {
 	GtkSourceLanguageManager * prcLangMngr = gtk_source_language_manager_get_default();
 	GtkSourceLanguage * pCurrentSrcLang = pSrcLang;
 	gchar * pcContentType = NULL;
@@ -681,6 +681,14 @@ gboolean simpledit_content_update_highlight(SimpleditContent * pEditData, GtkSou
 	} else {
 		pEditData->pcLanguage = g_strdup("Text");
 	}
+}
+
+void simpledit_content_text_highlight(SimpleditContent * pEditData) {
+	pEditData->pSrcLang = NULL;
+	gtk_source_buffer_set_language(GTK_SOURCE_BUFFER(pEditData->pTxtBuff), NULL);
+	
+	g_free(pEditData->pcLanguage);
+	pEditData->pcLanguage = g_strdup("Text");
 }
 
 void simpledit_content_load_cb_async (GObject *source_object, GAsyncResult *res, gpointer user_data) {

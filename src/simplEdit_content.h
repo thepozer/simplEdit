@@ -42,7 +42,8 @@ gboolean simpledit_content_is_modified(SimpleditContent * pEditData);
 gboolean simpledit_content_set_filename(SimpleditContent * pEditData, const gchar * pcFilename);
 gboolean simpledit_content_select_name(SimpleditContent * pEditData, GtkFileChooserAction action);
 
-gboolean simpledit_content_update_highlight(SimpleditContent * pEditData, GtkSourceLanguage * pSrcLang);
+void simpledit_content_update_highlight(SimpleditContent * pEditData, GtkSourceLanguage * pSrcLang);
+void simpledit_content_text_highlight(SimpleditContent * pEditData);
 
 void simpledit_content_show_message(SimpleditContent * pEditData, GtkMessageType vMsgType, gchar * pcMessage);
 
