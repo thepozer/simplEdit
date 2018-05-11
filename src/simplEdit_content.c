@@ -7,6 +7,7 @@ struct _SimpleditContent {
 
 	/* Read/Write Data */
 	GtkWindow     * pWindow;
+	GtkInfoBar    * pInfoBar;
 	GtkSourceView * pSrcView;
 	GtkTextBuffer * pTxtBuff;
 	GtkNotebook   * pNotebook;
@@ -204,7 +205,14 @@ gboolean simpledit_content_close (SimpleditContent * pEditData) {
 		}
 		
 		if (iResult == GTK_RESPONSE_YES) {
-			simpledit_content_save(pEditData);
+			if (pEditData->pcFiletitle == NULL) {
+				if(!simpledit_content_select_name(pEditData, GTK_FILE_CHOOSER_ACTION_SAVE)) {
+					return FALSE;
+				}
+			}
+			if (pEditData->pcFiletitle != NULL) {
+				simpledit_content_save(pEditData);
+			}
 		}
 		
 		gtk_notebook_remove_page(pEditData->pNotebook, iPos);
@@ -224,21 +232,31 @@ void smpldt_clbk_content_close (GtkButton *widget, gpointer user_data) {
 }
 
 void simpledit_content_add_to_stack (SimpleditContent * pEditData, GtkNotebook * bookEditors) {
-	GtkWidget * pScrolled, * pSrcView, * pHBox, * pLabel, * pBtnClose;
+	GtkWidget * pVBox, * pChild, * pScrolled, * pHBox, * pLabel, * pBtnClose;
 	GSettings * pSettings = NULL;
 	gint iPos = -1;
 	
 	pEditData->pNotebook = bookEditors;
 	
+	pVBox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+	gtk_widget_show(pVBox);
+	
+	pEditData->pInfoBar = GTK_INFO_BAR(gtk_info_bar_new());
+	gtk_info_bar_set_show_close_button(pEditData->pInfoBar, TRUE);
+	gtk_widget_hide(GTK_WIDGET(pEditData->pInfoBar));
+	gtk_box_pack_start(GTK_BOX(pVBox), GTK_WIDGET(pEditData->pInfoBar), FALSE, FALSE, 0);
+		
 	pScrolled = gtk_scrolled_window_new(NULL, NULL);
 	gtk_widget_show(pScrolled);
 	gtk_widget_set_hexpand(pScrolled, TRUE);
 	gtk_widget_set_vexpand(pScrolled, TRUE);
+	gtk_box_pack_start(GTK_BOX(pVBox), pScrolled, TRUE, TRUE, 0);
 
 	pEditData->pSrcView = GTK_SOURCE_VIEW(gtk_source_view_new());
 	gtk_text_view_set_monospace(GTK_TEXT_VIEW (pEditData->pSrcView), TRUE);
 	gtk_widget_show(GTK_WIDGET(pEditData->pSrcView));
 	gtk_container_add(GTK_CONTAINER(pScrolled), GTK_WIDGET(pEditData->pSrcView));
+	
 	
 	pHBox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 	gtk_widget_show(pHBox);
@@ -253,13 +271,14 @@ void simpledit_content_add_to_stack (SimpleditContent * pEditData, GtkNotebook *
 	gtk_widget_show(pBtnClose);
 	gtk_box_pack_start(GTK_BOX(pHBox), pBtnClose, FALSE, FALSE, 0);
 	
-	iPos = gtk_notebook_append_page(bookEditors, pScrolled, pHBox);
+	iPos = gtk_notebook_append_page(bookEditors, pVBox, pHBox);
 	
 	pEditData->pPageChild = gtk_notebook_get_nth_page(bookEditors, iPos);
 	g_object_set_data(G_OBJECT(pEditData->pPageChild), "content_data", pEditData);
 	gtk_notebook_set_tab_reorderable(bookEditors, pEditData->pPageChild, TRUE);
 	
 	g_signal_connect(pBtnClose, "clicked", G_CALLBACK(smpldt_clbk_content_close), pEditData);
+	g_signal_connect(pEditData->pInfoBar, "response", G_CALLBACK(gtk_widget_hide), NULL);
 
 	
     pEditData->pTxtBuff = gtk_text_view_get_buffer(GTK_TEXT_VIEW(pEditData->pSrcView));
@@ -289,19 +308,37 @@ void simpledit_content_add_to_stack (SimpleditContent * pEditData, GtkNotebook *
 	g_signal_connect(pEditData->pTxtBuff, "mark-set", G_CALLBACK (smpldt_clbk_mark_set), pEditData->pWindow);
 }
 
+void simpledit_content_show_message(SimpleditContent * pEditData, GtkMessageType vMsgType, gchar * pcMessage) {
+	GtkWidget * pChild, * pLabel;
+	
+	gtk_info_bar_set_message_type(pEditData->pInfoBar, vMsgType);
+	
+	pChild = gtk_info_bar_get_content_area(pEditData->pInfoBar);
+	pLabel = gtk_label_new(pcMessage);
+	gtk_widget_show(pLabel);
+	gtk_container_add(GTK_CONTAINER(pChild), pLabel);
+	
+	gtk_widget_show(GTK_WIDGET(pEditData->pInfoBar));
+}
+
 gboolean simpledit_content_update_title(SimpleditContent * pEditData) {
 	GString * pStrTitle = NULL;
 	
-	pStrTitle = g_string_new("simplEdit");
+	pStrTitle = g_string_new("");
 	
 	if (pEditData->pcFiletitle != NULL) {
-		g_string_append(pStrTitle, " - ");
 		g_string_append(pStrTitle, pEditData->pcFiletitle);
 	}	
 	
 	if (gtk_text_buffer_get_modified(GTK_TEXT_BUFFER(pEditData->pTxtBuff))) {
 		g_string_append(pStrTitle, " *");
 	}
+	
+	if (pStrTitle->len > 0) {
+		g_string_append(pStrTitle, " - ");
+	}
+	
+	g_string_append(pStrTitle, "simplEdit");
 	
 	gtk_window_set_title(GTK_WINDOW(pEditData->pWindow), pStrTitle->str);
 	g_string_free(pStrTitle, TRUE);
@@ -321,8 +358,7 @@ gboolean simpledit_content_is_modified(SimpleditContent * pEditData) {
 gchar * simpledit_content_get_status(SimpleditContent * pEditData) {
 	GtkTextIter sIter;
 	GString * pStrStatus = g_string_new("");
-	gint iTotalNbLine = 0, iLine = 0, iCol = 0, iPos = 0;
-	gboolean bOverwriteMode = FALSE;
+	gint iTotalNbLine = 0, iTotalChar = 0, iLine = 0, iCol = 0, iPos = 0;
 	
 	g_object_get(GTK_TEXT_BUFFER(pEditData->pTxtBuff), "cursor-position", &iPos, NULL);
 	gtk_text_buffer_get_iter_at_offset(GTK_TEXT_BUFFER(pEditData->pTxtBuff), &sIter, iPos);
@@ -330,16 +366,26 @@ gchar * simpledit_content_get_status(SimpleditContent * pEditData) {
 	iCol = gtk_source_view_get_visual_column(GTK_SOURCE_VIEW(pEditData->pSrcView), &sIter) + 1;
 	
 	iTotalNbLine = gtk_text_buffer_get_line_count(GTK_TEXT_BUFFER(pEditData->pTxtBuff));
+	iTotalChar   = gtk_text_buffer_get_char_count(GTK_TEXT_BUFFER(pEditData->pTxtBuff));
 	
-	bOverwriteMode = gtk_text_view_get_overwrite(GTK_TEXT_VIEW(pEditData->pSrcView)); 
+	g_string_append_printf(pStrStatus, _("Line : %d \tCol : %d\tTotal : %d line / %d chars"), iLine, iCol, iTotalNbLine, iTotalChar);
 	
-	g_string_append_printf(pStrStatus, _("Line : %d / %d \tCol : %d"), iLine, iTotalNbLine, iCol);
-	
-	g_string_append_printf(pStrStatus, ((bOverwriteMode) ? _("\t\tOWR") :  _("\t\tINS")));
-
-	g_string_append_printf(pStrStatus, _("\t\tFile type : %s"), pEditData->pcLanguage);
-
 	return g_string_free(pStrStatus, FALSE);
+}
+
+gboolean simpledit_content_get_overwrite(SimpleditContent * pEditData) {
+	return gtk_text_view_get_overwrite(GTK_TEXT_VIEW(pEditData->pSrcView)); 
+}
+
+void simpledit_content_toggle_overwrite(SimpleditContent * pEditData) {
+	gboolean bOverwriteMode = FALSE;
+	
+	bOverwriteMode = gtk_text_view_get_overwrite(GTK_TEXT_VIEW(pEditData->pSrcView));
+	gtk_text_view_set_overwrite(GTK_TEXT_VIEW(pEditData->pSrcView), !bOverwriteMode);
+}
+
+gchar * simpledit_content_get_language(SimpleditContent * pEditData) {
+	return pEditData->pcLanguage; 
 }
 
 gboolean simpledit_content_reset(SimpleditContent * pEditData) {
@@ -609,7 +655,7 @@ gboolean simpledit_content_select_name(SimpleditContent * pEditData, GtkFileChoo
     return bSelectName;
 }
 
-gboolean simpledit_content_update_highlight(SimpleditContent * pEditData, GtkSourceLanguage * pSrcLang) {
+void simpledit_content_update_highlight(SimpleditContent * pEditData, GtkSourceLanguage * pSrcLang) {
 	GtkSourceLanguageManager * prcLangMngr = gtk_source_language_manager_get_default();
 	GtkSourceLanguage * pCurrentSrcLang = pSrcLang;
 	gchar * pcContentType = NULL;
@@ -637,6 +683,14 @@ gboolean simpledit_content_update_highlight(SimpleditContent * pEditData, GtkSou
 	}
 }
 
+void simpledit_content_text_highlight(SimpleditContent * pEditData) {
+	pEditData->pSrcLang = NULL;
+	gtk_source_buffer_set_language(GTK_SOURCE_BUFFER(pEditData->pTxtBuff), NULL);
+	
+	g_free(pEditData->pcLanguage);
+	pEditData->pcLanguage = g_strdup("Text");
+}
+
 void simpledit_content_load_cb_async (GObject *source_object, GAsyncResult *res, gpointer user_data) {
 	SimpleditContent * pEditData = SIMPLEDIT_CONTENT(user_data);
 	GtkSourceFileLoader * pSrcFileLoader = GTK_SOURCE_FILE_LOADER(source_object);
@@ -647,12 +701,9 @@ void simpledit_content_load_cb_async (GObject *source_object, GAsyncResult *res,
 	success = gtk_source_file_loader_load_finish(pSrcFileLoader, res, &pErr);
 
 	if (!success) {
-		GtkWidget * pDlgMsg = gtk_message_dialog_new(GTK_WINDOW(pEditData->pWindow), GTK_DIALOG_DESTROY_WITH_PARENT,
-										 GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
-										 _("Error reading '%s' : (%i) %s"),
-										 pEditData->pcFilename, pErr->code, pErr->message);
-		gtk_dialog_run (GTK_DIALOG (pDlgMsg));
-		gtk_widget_destroy (pDlgMsg);
+		gchar * pcMsg = g_strdup_printf(_("Error reading '%s' : (%i) %s"), pEditData->pcFilename, pErr->code, pErr->message);
+		simpledit_content_show_message(pEditData, GTK_MESSAGE_ERROR, pcMsg);
+		g_free(pcMsg);
 	} else {
 		pEditData->pEncod = gtk_source_file_get_encoding(pEditData->pSrcFile);
 		if (!pEditData->pEncod) {
@@ -669,6 +720,7 @@ void simpledit_content_load_cb_async (GObject *source_object, GAsyncResult *res,
 		gtk_text_buffer_place_cursor(GTK_TEXT_BUFFER(pEditData->pTxtBuff), &sIter);
 		
 		simpledit_content_update_highlight(pEditData, NULL);
+		simpledit_app_window_select_language_in_menu(SIMPLEDIT_APP_WINDOW(pEditData->pWindow), (const gchar *)pEditData->pcLanguage);
 	}
 }
 
@@ -680,12 +732,9 @@ gboolean simpledit_content_load(SimpleditContent * pEditData) {
 	
 	pInStream = g_file_read(pEditData->pFile, NULL, &pErr);
 	if (pErr) {
-		GtkWidget * pDlgMsg = gtk_message_dialog_new(GTK_WINDOW(pEditData->pWindow), GTK_DIALOG_DESTROY_WITH_PARENT,
-										 GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
-										 _("Error reading (stream) '%s' : (%i) %s"),
-										 pEditData->pcFilename, pErr->code, pErr->message);
-		gtk_dialog_run (GTK_DIALOG (pDlgMsg));
-		gtk_widget_destroy (pDlgMsg);
+		gchar * pcMsg = g_strdup_printf(_("Error reading (stream) '%s' : (%i) %s"), pEditData->pcFilename, pErr->code, pErr->message);
+		simpledit_content_show_message(pEditData, GTK_MESSAGE_ERROR, pcMsg);
+		g_free(pcMsg);
 	}
 	pSrcFileLoader = gtk_source_file_loader_new_from_stream(GTK_SOURCE_BUFFER(pEditData->pTxtBuff), pEditData->pSrcFile, G_INPUT_STREAM(pInStream));
 	
@@ -703,12 +752,9 @@ void simpledit_content_save_cb_async (GObject *source_object, GAsyncResult *res,
 	success = gtk_source_file_saver_save_finish(pSrcFileSaver, res, &pErr);
 
 	if (!success) {
-		GtkWidget * pDlgMsg = gtk_message_dialog_new(GTK_WINDOW(pEditData->pWindow), GTK_DIALOG_DESTROY_WITH_PARENT,
-										 GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
-										 _("Error writing '%s' : (%i) %s"),
-										 pEditData->pcFilename, pErr->code, pErr->message);
-		gtk_dialog_run (GTK_DIALOG (pDlgMsg));
-		gtk_widget_destroy (pDlgMsg);
+		gchar * pcMsg = g_strdup_printf(_("Error writing '%s' : (%i) %s"), pEditData->pcFilename, pErr->code, pErr->message);
+		simpledit_content_show_message(pEditData, GTK_MESSAGE_ERROR, pcMsg);
+		g_free(pcMsg);
 	} else {
 		pEditData->pEncod = gtk_source_file_get_encoding(pEditData->pSrcFile);
 		if (!pEditData->pEncod) {

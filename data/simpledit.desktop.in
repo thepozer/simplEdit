@@ -1,8 +1,9 @@
 [Desktop Entry]
-Version=1.0
+Version=1.1
 Type=Application
 _Name=Simple Edit
 Exec=simplEdit
 _Comment=A simple GTK+ Editor using SourceView
-Icon=simplEdit
+Icon=accessories-text-editor
 Terminal=false
+Categories=Utility;TextTools;TextEditor;GTK

@@ -31,13 +31,21 @@ gint simpledit_content_file_dialog(SimpleditContent * pEditData, GtkWidget * pDl
 
 gchar * simpledit_content_get_status(SimpleditContent * pEditData);
 
+gboolean simpledit_content_get_overwrite(SimpleditContent * pEditData);
+void simpledit_content_toggle_overwrite(SimpleditContent * pEditData);
+
+gchar * simpledit_content_get_language(SimpleditContent * pEditData);
+
 gboolean simpledit_content_have_filename(SimpleditContent * pEditData);
 gboolean simpledit_content_is_modified(SimpleditContent * pEditData);
 
 gboolean simpledit_content_set_filename(SimpleditContent * pEditData, const gchar * pcFilename);
 gboolean simpledit_content_select_name(SimpleditContent * pEditData, GtkFileChooserAction action);
 
-gboolean simpledit_content_update_highlight(SimpleditContent * pEditData, GtkSourceLanguage * pSrcLang);
+void simpledit_content_update_highlight(SimpleditContent * pEditData, GtkSourceLanguage * pSrcLang);
+void simpledit_content_text_highlight(SimpleditContent * pEditData);
+
+void simpledit_content_show_message(SimpleditContent * pEditData, GtkMessageType vMsgType, gchar * pcMessage);
 
 gboolean simpledit_content_reset(SimpleditContent * pEditData);
 gboolean simpledit_content_load(SimpleditContent * pEditData);
