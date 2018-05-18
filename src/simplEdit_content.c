@@ -306,6 +306,8 @@ void simpledit_content_add_to_stack (SimpleditContent * pEditData, GtkNotebook *
 	g_signal_connect(pEditData->pTxtBuff, "changed", G_CALLBACK (smpldt_clbk_text_changed), pEditData->pWindow);
 	g_signal_connect(pEditData->pTxtBuff, "notify::cursor-position", G_CALLBACK (smpldt_clbk_cursor_position_changed), pEditData->pWindow);
 	g_signal_connect(pEditData->pTxtBuff, "mark-set", G_CALLBACK (smpldt_clbk_mark_set), pEditData->pWindow);
+	
+	gtk_notebook_set_current_page(bookEditors, iPos);
 }
 
 void simpledit_content_show_message(SimpleditContent * pEditData, GtkMessageType vMsgType, gchar * pcMessage) {
