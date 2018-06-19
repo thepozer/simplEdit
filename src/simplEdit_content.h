@@ -26,10 +26,11 @@ gboolean simpledit_content_close (SimpleditContent * pEditData);
 void simpledit_content_add_to_stack (SimpleditContent * pEditData, GtkNotebook * bookEditors);
 
 gboolean simpledit_content_update_title(SimpleditContent * pEditData);
+gchar * simpledit_content_get_status(SimpleditContent * pEditData);
 
 gint simpledit_content_file_dialog(SimpleditContent * pEditData, GtkWidget * pDlgFile);
 
-gchar * simpledit_content_get_status(SimpleditContent * pEditData);
+gboolean simpledit_content_search(SimpleditContent * pEditData, GtkSourceSearchSettings * pSearchSettings);
 
 gboolean simpledit_content_get_overwrite(SimpleditContent * pEditData);
 void simpledit_content_toggle_overwrite(SimpleditContent * pEditData);

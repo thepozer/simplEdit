@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Generated with glade 3.22.1 -->
 <interface>
-  <requires lib="gtk+" version="3.18"/>
+  <requires lib="gtk+" version="3.20"/>
   <object class="GtkAccelGroup" id="acceleratorgrp"/>
   <object class="GtkRecentFilter" id="filterTextOnly">
     <mime-types>
@@ -329,6 +329,30 @@
                       </object>
                     </child>
                     <child>
+                      <object class="GtkMenuItem" id="menuSearchFindNext">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">Find _next</property>
+                        <property name="use_underline">True</property>
+                        <accelerator key="g" signal="activate" modifiers="GDK_CONTROL_MASK"/>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkMenuItem" id="menuSearchFindPrevious">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">Find _previous</property>
+                        <property name="use_underline">True</property>
+                        <accelerator key="g" signal="activate" modifiers="GDK_SHIFT_MASK | GDK_CONTROL_MASK"/>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkSeparatorMenuItem">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                      </object>
+                    </child>
+                    <child>
                       <object class="GtkImageMenuItem" id="menuSearchReplace">
                         <property name="label">gtk-find-and-replace</property>
                         <property name="visible">True</property>
@@ -338,6 +362,21 @@
                         <property name="accel_group">acceleratorgrp</property>
                         <signal name="activate" handler="smpldt_clbk_menu_search_replace" object="SimpleditAppWindow" swapped="no"/>
                         <accelerator key="h" signal="activate" modifiers="GDK_CONTROL_MASK"/>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkSeparatorMenuItem">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkImageMenuItem" id="menuSearchJumpTo">
+                        <property name="label">gtk-jump-to</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="use_underline">True</property>
+                        <property name="use_stock">True</property>
                       </object>
                     </child>
                   </object>
@@ -389,7 +428,7 @@
               </object>
               <packing>
                 <property name="expand">False</property>
-                <property name="homogeneous">True</property>
+                <property name="homogeneous">False</property>
               </packing>
             </child>
             <child>
@@ -402,21 +441,33 @@
               </object>
               <packing>
                 <property name="expand">False</property>
-                <property name="homogeneous">True</property>
+                <property name="homogeneous">False</property>
               </packing>
             </child>
             <child>
               <object class="GtkToolButton" id="tlbrBtnSave">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">__glade_unnamed_25</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-save</property>
                 <signal name="clicked" handler="smpldt_clbk_menu_file_save" object="SimpleditAppWindow" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
-                <property name="homogeneous">True</property>
+                <property name="homogeneous">False</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToolButton">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-print</property>
+                <signal name="clicked" handler="smpldt_clbk_menu_file_print" object="SimpleditAppWindow" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">False</property>
               </packing>
             </child>
             <child>
@@ -433,28 +484,26 @@
               <object class="GtkToolButton" id="tlbrBtnUndo">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">__glade_unnamed_27</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-undo</property>
                 <signal name="clicked" handler="smpldt_clbk_menu_edit_undo" object="SimpleditAppWindow" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
-                <property name="homogeneous">True</property>
+                <property name="homogeneous">False</property>
               </packing>
             </child>
             <child>
               <object class="GtkToolButton" id="tlbrBtnRedo">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">__glade_unnamed_28</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-redo</property>
                 <signal name="clicked" handler="smpldt_clbk_menu_edit_redo" object="SimpleditAppWindow" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
-                <property name="homogeneous">True</property>
+                <property name="homogeneous">False</property>
               </packing>
             </child>
             <child>
@@ -472,7 +521,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <child>
-                  <object class="GtkSearchEntry">
+                  <object class="GtkSearchEntry" id="tlbrTxtSearch">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="width_chars">20</property>
@@ -488,16 +537,17 @@
               </packing>
             </child>
             <child>
-              <object class="GtkToolButton" id="tlbrBtnSearch">
+              <object class="GtkMenuToolButton" id="tlbrBtnSearch">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">__glade_unnamed_31</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-find</property>
+                <signal name="clicked" handler="smpldt_clbk_tlbr_search" object="SimpleditAppWindow" swapped="no"/>
+                <signal name="show-menu" handler="smpldt_clbk_tlbr_search_menu" object="SimpleditAppWindow" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
-                <property name="homogeneous">True</property>
+                <property name="homogeneous">False</property>
               </packing>
             </child>
             <child>
@@ -505,7 +555,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <child>
-                  <object class="GtkEntry">
+                  <object class="GtkEntry" id="tlbrTxtReplace">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="width_chars">12</property>
@@ -521,13 +571,13 @@
               <object class="GtkToolButton" id="tlbrBtnReplace">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">__glade_unnamed_33</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-find-and-replace</property>
+                <signal name="clicked" handler="smpldt_clbk_tlbr_replace" object="SimpleditAppWindow" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
-                <property name="homogeneous">True</property>
+                <property name="homogeneous">False</property>
               </packing>
             </child>
             <child>
@@ -545,10 +595,11 @@
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <child>
-                  <object class="GtkEntry">
+                  <object class="GtkEntry" id="tlbrTxtJumpTo">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="width_chars">5</property>
+                    <property name="input_purpose">number</property>
                   </object>
                 </child>
               </object>
@@ -561,13 +612,13 @@
               <object class="GtkToolButton" id="tlbrBtnJumpTo">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">__glade_unnamed_36</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-jump-to</property>
+                <signal name="clicked" handler="smpldt_clbk_tlbr_jumpto" object="SimpleditAppWindow" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
-                <property name="homogeneous">True</property>
+                <property name="homogeneous">False</property>
               </packing>
             </child>
           </object>

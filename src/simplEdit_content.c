@@ -25,6 +25,9 @@ struct _SimpleditContent {
 	gchar * pcLanguage;
 	
 	/* Private Data */
+	GtkSourceSearchContext  * pSearchContext;
+	GtkTextIter * pStartIter;
+	
     const GtkSourceEncoding * pEncod;
 	GtkSourceNewlineType eTypeEOL;
     GtkSourceCompressionType eCompType;
@@ -174,6 +177,8 @@ static void simpledit_content_init (SimpleditContent *pEditData) {
 	
 	pEditData->pTxtBuff = NULL;
         pEditData->pSrcLang = NULL;
+
+	pEditData->pSearchContext = NULL;
 
 	pEditData->pEncod = gtk_source_encoding_get_utf8();
 	pEditData->eTypeEOL = GTK_SOURCE_NEWLINE_TYPE_DEFAULT;
@@ -402,6 +407,44 @@ void simpledit_content_toggle_overwrite(SimpleditContent * pEditData) {
 
 gchar * simpledit_content_get_language(SimpleditContent * pEditData) {
 	return pEditData->pcLanguage; 
+}
+
+void simpledit_content_search_reset(SimpleditContent * pEditData) {
+	gtk_text_buffer_get_start_iter(GTK_TEXT_BUFFER(pEditData->pTxtBuff), pEditData->pStartIter);
+	pEditData->pSearchContext = NULL;
+}
+
+gboolean simpledit_content_search(SimpleditContent * pEditData, GtkSourceSearchSettings * pSearchSettings) {
+	GtkTextMark * pMark = NULL;
+	GtkTextIter * pEndIter = g_new0(GtkTextIter, 1);
+	gboolean gFind = FALSE;
+
+	if (pEditData->pSearchContext == NULL) {
+		gtk_text_buffer_get_start_iter(GTK_TEXT_BUFFER(pEditData->pTxtBuff), pEditData->pStartIter);
+		pEditData->pSearchContext = gtk_source_search_context_new(GTK_SOURCE_BUFFER(pEditData->pTxtBuff), pSearchSettings);
+	}
+	
+	if (gtk_source_search_context_forward2(pEditData->pSearchContext, pEditData->pStartIter, pEditData->pStartIter, pEndIter, NULL)) {
+		gtk_text_buffer_move_mark_by_name(GTK_TEXT_BUFFER(pEditData->pTxtBuff), "selection_bound", pEditData->pStartIter);
+		gtk_text_buffer_move_mark_by_name(GTK_TEXT_BUFFER(pEditData->pTxtBuff), "insert", pEndIter);
+		gtk_text_iter_assign(pEditData->pStartIter, pEndIter);
+		
+		pMark = gtk_text_buffer_get_mark (GTK_TEXT_BUFFER(pEditData->pTxtBuff), "insert");
+		gtk_text_view_scroll_mark_onscreen (GTK_TEXT_VIEW(pEditData->pSrcView), pMark);
+		
+		gFind = TRUE;
+	} else {
+		GtkWidget * pDlgMsg = gtk_message_dialog_new(GTK_WINDOW(pEditData->pWindow), GTK_DIALOG_DESTROY_WITH_PARENT,
+										 GTK_MESSAGE_INFO, GTK_BUTTONS_CLOSE, _("No more item found !"));
+		gtk_dialog_run (GTK_DIALOG (pDlgMsg));
+		gtk_widget_destroy (pDlgMsg);
+		
+		gtk_text_buffer_get_start_iter(GTK_TEXT_BUFFER(pEditData->pTxtBuff), pEditData->pStartIter);
+	}
+	
+	g_free(pEndIter);
+	
+	return gFind;
 }
 
 gboolean simpledit_content_reset(SimpleditContent * pEditData) {

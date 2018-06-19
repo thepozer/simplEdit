@@ -7,8 +7,6 @@ struct _SimpleditAppWindow {
 
 	SimpleditContent * pEditData;
 	
-	GtkNotebook * bookEditors;
-
 	GtkMenuItem * menuFileSave;
 	GtkMenuItem * menuFileSaveAs;
 	GtkMenuItem * menuFileReturnToSaved;
@@ -25,7 +23,11 @@ struct _SimpleditAppWindow {
 	GtkMenuItem * menuLanguage;
 	
 	GtkMenuItem * menuSearchFind;
+	GtkMenuItem * menuSearchFindNext;
+	GtkMenuItem * menuSearchFindPrevious;
 	GtkMenuItem * menuSearchReplace;
+	GtkMenuItem * menuSearchJumpTo;
+
 
 	GtkWidget   * tlbrBtnNew;
 	GtkWidget   * tlbrBtnOpen;
@@ -36,6 +38,12 @@ struct _SimpleditAppWindow {
 	GtkWidget   * tlbrBtnReplace;
 	GtkWidget   * tlbrBtnJumpTo;
 	
+	GtkSearchEntry * tlbrTxtSearch;
+	GtkEntry       * tlbrTxtReplace;
+	GtkEntry       * tlbrTxtJumpTo;
+	
+	GtkNotebook * bookEditors;
+
 	GtkLabel    * sttsbrLabel;
 	GtkButton   * sttsbrBtnTab;
 	GtkButton   * sttsbrBtnLanguage;
@@ -46,6 +54,8 @@ struct _SimpleditAppWindow {
 	GtkMenu    * menuListLanguages;
 	GtkWidget  * menuSelectedLanguage;
 	GHashTable * pHashLanguage;
+
+	GtkSourceSearchSettings * pSearchSettings;
 
 	SimpleditSearchDialog * pSearchDlg;
 };
@@ -68,17 +78,18 @@ static void simpledit_app_window_init (SimpleditAppWindow *pWindow) {
 	gtk_menu_item_set_submenu(GTK_MENU_ITEM(pWindow->menuLanguage), GTK_WIDGET(pWindow->menuListLanguages));
 	pWindow->menuSelectedLanguage = NULL;
 	
+	pWindow->pSearchSettings = gtk_source_search_settings_new();
+	gtk_source_search_settings_set_at_word_boundaries (pWindow->pSearchSettings, FALSE);
+	gtk_source_search_settings_set_case_sensitive(pWindow->pSearchSettings, FALSE);
+	gtk_source_search_settings_set_regex_enabled (pWindow->pSearchSettings, FALSE);
+	gtk_source_search_settings_set_wrap_around(pWindow->pSearchSettings, FALSE);
+
+
 	pWindow->pSearchDlg = NULL;
 }
 
 static void simpledit_app_window_class_init (SimpleditAppWindowClass *pClass) {
 	gtk_widget_class_set_template_from_resource(GTK_WIDGET_CLASS(pClass), "/net/thepozer/simpledit/simplEdit.SimpleditAppWindow.glade");
-	
-	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, bookEditors);
-
-	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, sttsbrLabel);
-	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, sttsbrBtnLanguage);
-	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, sttsbrBtnInsOwr);
 	
 	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, menuFileSave);
 	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, menuFileSaveAs);
@@ -96,7 +107,10 @@ static void simpledit_app_window_class_init (SimpleditAppWindowClass *pClass) {
 	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, menuLanguage);
 	
 	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, menuSearchFind);
+	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, menuSearchFindNext);
+	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, menuSearchFindPrevious);
 	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, menuSearchReplace);
+	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, menuSearchJumpTo);
 
 	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, tlbrBtnNew);
 	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, tlbrBtnOpen);
@@ -107,6 +121,12 @@ static void simpledit_app_window_class_init (SimpleditAppWindowClass *pClass) {
 	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, tlbrBtnReplace);
 	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, tlbrBtnJumpTo);
 	
+	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, tlbrTxtSearch);
+	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, tlbrTxtReplace);
+	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, tlbrTxtJumpTo);
+
+	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, bookEditors);
+
 	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, sttsbrLabel);
 	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, sttsbrBtnTab);
 	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, sttsbrBtnLanguage);
@@ -576,6 +596,31 @@ void smpldt_clbk_menu_search_replace (GtkMenuItem *menuitem, gpointer user_data)
 		pWindow->pSearchDlg = simpledit_search_dialog_new(pWindow, TRUE);
 		gtk_window_present(GTK_WINDOW(pWindow->pSearchDlg));
 	}
+}
+
+void smpldt_clbk_tlbr_search (GtkMenuItem *menuitem, gpointer user_data) {
+	SimpleditAppWindow * pWindow = SIMPLEDIT_APP_WINDOW(user_data);
+	
+	gtk_source_search_settings_set_search_text(pWindow->pSearchSettings, gtk_entry_get_text(GTK_ENTRY(pWindow->tlbrTxtSearch)));
+	
+	if (pWindow->pEditData) {
+		simpledit_content_search(pWindow->pEditData, pWindow->pSearchSettings);
+	}
+}
+
+void smpldt_clbk_tlbr_search_menu (GtkMenuItem *menuitem, gpointer user_data) {
+	SimpleditAppWindow * pWindow = SIMPLEDIT_APP_WINDOW(user_data);
+	
+}
+
+void smpldt_clbk_tlbr_replace (GtkMenuItem *menuitem, gpointer user_data) {
+	SimpleditAppWindow * pWindow = SIMPLEDIT_APP_WINDOW(user_data);
+	
+}
+
+void smpldt_clbk_tlbr_jumpto (GtkMenuItem *menuitem, gpointer user_data) {
+	SimpleditAppWindow * pWindow = SIMPLEDIT_APP_WINDOW(user_data);
+	
 }
 
 
