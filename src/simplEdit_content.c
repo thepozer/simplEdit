@@ -8,6 +8,7 @@ struct _SimpleditContent {
 	/* Read/Write Data */
 	GtkWindow     * pWindow;
 	GtkInfoBar    * pInfoBar;
+	GtkWidget     * pInfoBarLabel;
 	GtkSourceView * pSrcView;
 	GtkTextBuffer * pTxtBuff;
 	GtkNotebook   * pNotebook;
@@ -245,7 +246,12 @@ void simpledit_content_add_to_stack (SimpleditContent * pEditData, GtkNotebook *
 	gtk_info_bar_set_show_close_button(pEditData->pInfoBar, TRUE);
 	gtk_widget_hide(GTK_WIDGET(pEditData->pInfoBar));
 	gtk_box_pack_start(GTK_BOX(pVBox), GTK_WIDGET(pEditData->pInfoBar), FALSE, FALSE, 0);
-		
+	
+	pChild = gtk_info_bar_get_content_area(pEditData->pInfoBar);
+	pEditData->pInfoBarLabel = gtk_label_new("");
+	gtk_widget_show(pEditData->pInfoBarLabel);
+	gtk_container_add(GTK_CONTAINER(pChild), pEditData->pInfoBarLabel);
+	
 	pScrolled = gtk_scrolled_window_new(NULL, NULL);
 	gtk_widget_show(pScrolled);
 	gtk_widget_set_hexpand(pScrolled, TRUE);
@@ -311,14 +317,9 @@ void simpledit_content_add_to_stack (SimpleditContent * pEditData, GtkNotebook *
 }
 
 void simpledit_content_show_message(SimpleditContent * pEditData, GtkMessageType vMsgType, gchar * pcMessage) {
-	GtkWidget * pChild, * pLabel;
 	
 	gtk_info_bar_set_message_type(pEditData->pInfoBar, vMsgType);
-	
-	pChild = gtk_info_bar_get_content_area(pEditData->pInfoBar);
-	pLabel = gtk_label_new(pcMessage);
-	gtk_widget_show(pLabel);
-	gtk_container_add(GTK_CONTAINER(pChild), pLabel);
+	gtk_label_set_text(GTK_LABEL(pEditData->pInfoBarLabel), pcMessage);
 	
 	gtk_widget_show(GTK_WIDGET(pEditData->pInfoBar));
 }
