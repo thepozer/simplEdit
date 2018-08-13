@@ -7,12 +7,13 @@ struct _SimpleditContent {
 
 	/* Read/Write Data */
 	GtkWindow     * pWindow;
+	GtkNotebook   * pNotebook;
+	GtkWidget     * pPageChild;
+        GtkWidget     * pTabLabel;
 	GtkInfoBar    * pInfoBar;
 	GtkWidget     * pInfoBarLabel;
 	GtkSourceView * pSrcView;
 	GtkTextBuffer * pTxtBuff;
-	GtkNotebook   * pNotebook;
-	GtkWidget     * pPageChild;
 	
 	GtkSourceFile * pSrcFile;
 	GFile * pFile;
@@ -172,7 +173,7 @@ static void simpledit_content_init (SimpleditContent *pEditData) {
 	gtk_source_file_set_location(pEditData->pSrcFile, NULL);
 	
 	pEditData->pTxtBuff = NULL;
-    pEditData->pSrcLang = NULL;
+        pEditData->pSrcLang = NULL;
 
 	pEditData->pEncod = gtk_source_encoding_get_utf8();
 	pEditData->eTypeEOL = GTK_SOURCE_NEWLINE_TYPE_DEFAULT;
@@ -183,7 +184,7 @@ static void simpledit_content_init (SimpleditContent *pEditData) {
 SimpleditContent * simpledit_content_new (GtkWindow * pWindow) {
 	SimpleditContent *pEditData = SIMPLEDIT_CONTENT(g_object_new (SIMPLEDIT_TYPE_CONTENT, "window", pWindow, NULL));
 
-    return pEditData;
+        return pEditData;
 }
 
 gboolean simpledit_content_close (SimpleditContent * pEditData) {
@@ -194,7 +195,8 @@ gboolean simpledit_content_close (SimpleditContent * pEditData) {
 	if (iPos >=0) {
 		if (simpledit_content_is_modified(pEditData)) {
 			pDlgMsg = gtk_message_dialog_new(pEditData->pWindow, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_QUESTION, 
-						GTK_BUTTONS_NONE, _("This file '%s' is modified.\nDo you wan't to save it ?"), pEditData->pcFiletitle);
+						GTK_BUTTONS_NONE, _("This file '%s' is modified.\nDo you wan't to save it ?"), 
+                                                (pEditData->pcFiletitle == NULL ? _("New file") : pEditData->pcFiletitle));
 			gtk_dialog_add_buttons(GTK_DIALOG(pDlgMsg), _("_Abort"), GTK_RESPONSE_REJECT, _("_Yes"), GTK_RESPONSE_YES, 
 						_("_No"), GTK_RESPONSE_NO, NULL);
 			iResult = gtk_dialog_run(GTK_DIALOG(pDlgMsg));
@@ -267,10 +269,9 @@ void simpledit_content_add_to_stack (SimpleditContent * pEditData, GtkNotebook *
 	pHBox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 	gtk_widget_show(pHBox);
 	
-//g_print("simpledit_content_new_add - pcTitle : '%s'\n", pEditData->pcFiletitle);
-	pLabel = gtk_label_new((pEditData->pcFiletitle != NULL) ? pEditData->pcFiletitle : _("New file"));
-	gtk_widget_show(pLabel);
-	gtk_box_pack_start(GTK_BOX(pHBox), pLabel, TRUE, TRUE, 0);
+	pEditData->pTabLabel = gtk_label_new((pEditData->pcFiletitle != NULL) ? pEditData->pcFiletitle : _("New file"));
+	gtk_widget_show(pEditData->pTabLabel);
+	gtk_box_pack_start(GTK_BOX(pHBox), pEditData->pTabLabel, TRUE, TRUE, 0);
 	
 	pBtnClose = gtk_button_new_from_icon_name("window-close", GTK_ICON_SIZE_BUTTON);
 	gtk_button_set_relief(GTK_BUTTON(pBtnClose), GTK_RELIEF_NONE);
@@ -285,10 +286,10 @@ void simpledit_content_add_to_stack (SimpleditContent * pEditData, GtkNotebook *
 	
 	g_signal_connect(pBtnClose, "clicked", G_CALLBACK(smpldt_clbk_content_close), pEditData);
 	g_signal_connect(pEditData->pInfoBar, "response", G_CALLBACK(gtk_widget_hide), NULL);
-
+        
 	
-    pEditData->pTxtBuff = gtk_text_view_get_buffer(GTK_TEXT_VIEW(pEditData->pSrcView));
-    pEditData->pSrcLang = NULL;
+        pEditData->pTxtBuff = gtk_text_view_get_buffer(GTK_TEXT_VIEW(pEditData->pSrcView));
+        pEditData->pSrcLang = NULL;
 	
 	gtk_text_buffer_set_text(pEditData->pTxtBuff, "", 0);
 	gtk_text_buffer_set_modified(pEditData->pTxtBuff, FALSE);
@@ -326,15 +327,22 @@ void simpledit_content_show_message(SimpleditContent * pEditData, GtkMessageType
 
 gboolean simpledit_content_update_title(SimpleditContent * pEditData) {
 	GString * pStrTitle = NULL;
+	GString * pStrTab   = NULL;
 	
 	pStrTitle = g_string_new("");
+	pStrTab = g_string_new("");
 	
 	if (pEditData->pcFiletitle != NULL) {
 		g_string_append(pStrTitle, pEditData->pcFiletitle);
-	}	
+		g_string_append(pStrTab,   pEditData->pcFiletitle);
+	} else {
+		g_string_append(pStrTitle, _("New file"));
+		g_string_append(pStrTab,   _("New file"));
+        }
 	
 	if (gtk_text_buffer_get_modified(GTK_TEXT_BUFFER(pEditData->pTxtBuff))) {
 		g_string_append(pStrTitle, " *");
+		g_string_append(pStrTab,   " *");
 	}
 	
 	if (pStrTitle->len > 0) {
@@ -345,6 +353,11 @@ gboolean simpledit_content_update_title(SimpleditContent * pEditData) {
 	
 	gtk_window_set_title(GTK_WINDOW(pEditData->pWindow), pStrTitle->str);
 	g_string_free(pStrTitle, TRUE);
+	
+        if (GTK_IS_LABEL(pEditData->pTabLabel)) {
+                gtk_label_set_text(GTK_LABEL(pEditData->pTabLabel), pStrTab->str);
+        }
+	g_string_free(pStrTab, TRUE);
 	
 	return TRUE;
 }
@@ -406,6 +419,10 @@ gboolean simpledit_content_reset(SimpleditContent * pEditData) {
 
 	g_free(pEditData->pcFiletitle);
 	pEditData->pcFiletitle = NULL;
+
+        if (GTK_IS_LABEL(pEditData->pTabLabel)) {
+                gtk_label_set_text(GTK_LABEL(pEditData->pTabLabel), _("New file"));
+        }
 	
 	return TRUE;
 }
@@ -430,6 +447,10 @@ gboolean simpledit_content_set_filename(SimpleditContent * pEditData, const gcha
 
 		g_free(pEditData->pcFiletitle);
 		pEditData->pcFiletitle = g_file_get_basename(pEditData->pFile);
+                
+                if (GTK_IS_LABEL(pEditData->pTabLabel)) {
+                        gtk_label_set_text(GTK_LABEL(pEditData->pTabLabel), pEditData->pcFiletitle);
+                }
 
 		return TRUE;
 	}
