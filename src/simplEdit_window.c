@@ -37,8 +37,11 @@ struct _SimpleditAppWindow {
 	GtkWidget   * tlbrBtnJumpTo;
 	
 	GtkLabel    * sttsbrLabel;
+	GtkButton   * sttsbrBtnTab;
 	GtkButton   * sttsbrBtnLanguage;
 	GtkButton   * sttsbrBtnInsOwr;
+
+	GtkMenu    * menuTabRoot;
 	
 	GtkMenu    * menuListLanguages;
 	GtkWidget  * menuSelectedLanguage;
@@ -105,8 +108,11 @@ static void simpledit_app_window_class_init (SimpleditAppWindowClass *pClass) {
 	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, tlbrBtnJumpTo);
 	
 	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, sttsbrLabel);
+	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, sttsbrBtnTab);
 	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, sttsbrBtnLanguage);
 	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, sttsbrBtnInsOwr);
+        
+        gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, menuTabRoot);
 }
 
 gboolean smpldt_clbk_delete_event (GtkWidget * widget, GdkEvent * event, gpointer user_data) {
@@ -320,6 +326,15 @@ void smpldt_clbk_mark_set (GtkTextBuffer * textbuffer, GtkTextIter * location, G
 	SimpleditAppWindow * pWindow = SIMPLEDIT_APP_WINDOW(user_data);
 	
 	simpledit_app_window_update_status(pWindow);
+}
+
+void smpldt_clbk_btn_sttsbr_btn_tab (GtkButton * button, gpointer user_data) {
+	SimpleditAppWindow * pWindow = SIMPLEDIT_APP_WINDOW(user_data);
+	
+	if (pWindow->pEditData) {
+		gtk_menu_popup_at_widget(pWindow->menuTabRoot, GTK_WIDGET(pWindow->sttsbrBtnTab),
+			GDK_GRAVITY_NORTH_WEST, GDK_GRAVITY_SOUTH_EAST, NULL);
+	}
 }
 
 void smpldt_clbk_btn_sttsbr_btn_language (GtkButton * button, gpointer user_data) {

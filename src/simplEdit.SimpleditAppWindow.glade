@@ -615,6 +615,21 @@
               </packing>
             </child>
             <child>
+              <object class="GtkButton" id="sttsbrBtnTab">
+                <property name="label" translatable="yes">Tab : (tab)</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="relief">none</property>
+                <signal name="clicked" handler="smpldt_clbk_btn_sttsbr_btn_tab" object="SimpleditAppWindow" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
               <object class="GtkButton" id="sttsbrBtnLanguage">
                 <property name="label" translatable="yes">File type : -</property>
                 <property name="visible">True</property>
@@ -626,7 +641,7 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">1</property>
+                <property name="position">2</property>
               </packing>
             </child>
             <child>
@@ -641,7 +656,7 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">2</property>
+                <property name="position">3</property>
               </packing>
             </child>
           </object>
@@ -654,4 +669,61 @@
       </object>
     </child>
   </template>
+  <object class="GtkMenu" id="menuTabRoot">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkCheckMenuItem" id="menuTabSpace">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Use space for tabulation</property>
+        <property name="use_underline">True</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkSeparatorMenuItem">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkRadioMenuItem" id="menuTabSize2">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Tabulation size : 2</property>
+        <property name="use_underline">True</property>
+        <property name="draw_as_radio">True</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkRadioMenuItem" id="menuTabSize3">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Tabulation size : 3</property>
+        <property name="use_underline">True</property>
+        <property name="draw_as_radio">True</property>
+        <property name="group">menuTabSize2</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkRadioMenuItem" id="menuTabSize4">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Tabulation size : 4</property>
+        <property name="use_underline">True</property>
+        <property name="draw_as_radio">True</property>
+        <property name="group">menuTabSize2</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkRadioMenuItem" id="menuTabSize8">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Tabulation size : 8</property>
+        <property name="use_underline">True</property>
+        <property name="draw_as_radio">True</property>
+        <property name="group">menuTabSize2</property>
+      </object>
+    </child>
+  </object>
 </interface>
