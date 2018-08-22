@@ -635,7 +635,11 @@ gboolean simpledit_content_select_name(SimpleditContent * pEditData, GtkFileChoo
     
     if (pDlgFile) {
         if (pEditData->pcFilename) {
-            gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(pDlgFile), pEditData->pcFilename);
+            if (action == GTK_FILE_CHOOSER_ACTION_SAVE) {
+                gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(pDlgFile), pEditData->pcFilename);
+            } else {
+                gtk_file_chooser_select_filename(GTK_FILE_CHOOSER(pDlgFile), pEditData->pcFilename);
+            }
         } else if (action == GTK_FILE_CHOOSER_ACTION_SAVE) {
             gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(pDlgFile), _("New file"));
         }
