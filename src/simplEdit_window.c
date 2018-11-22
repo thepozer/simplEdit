@@ -32,6 +32,7 @@ struct _SimpleditAppWindow {
 	GtkWidget   * tlbrBtnNew;
 	GtkWidget   * tlbrBtnOpen;
 	GtkWidget   * tlbrBtnSave;
+	GtkWidget   * tlbrBtnPrint;
 	GtkWidget   * tlbrBtnUndo;
 	GtkWidget   * tlbrBtnRedo;
 	GtkWidget   * tlbrBtnSearch;
@@ -115,6 +116,7 @@ static void simpledit_app_window_class_init (SimpleditAppWindowClass *pClass) {
 	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, tlbrBtnNew);
 	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, tlbrBtnOpen);
 	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, tlbrBtnSave);
+	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, tlbrBtnPrint);
 	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, tlbrBtnUndo);
 	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, tlbrBtnRedo);
 	gtk_widget_class_bind_template_child(GTK_WIDGET_CLASS(pClass), SimpleditAppWindow, tlbrBtnSearch);
@@ -149,12 +151,12 @@ SimpleditAppWindow * simpledit_app_window_new (SimpleditApp *pApp) {
 	g_signal_connect(pWindow, "delete-event", G_CALLBACK(smpldt_clbk_delete_event), pWindow);
 	
 	
-	gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFileSave),     FALSE);
-	gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFileSaveAs),   FALSE);
-	gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFileReturnToSaved),FALSE);
-	gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFileClose),    FALSE);
-	gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFileCloseAll), FALSE);
-	gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFilePrint),    FALSE);
+	gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFileSave),      FALSE);
+	gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFileSaveAs),    FALSE);
+	gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFileReturnToSaved), FALSE);
+	gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFileClose),     FALSE);
+	gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFileCloseAll),  FALSE);
+	gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFilePrint),     FALSE);
 	
 	gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuEditUndo),  FALSE);
 	gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuEditRedo),  FALSE);
@@ -170,10 +172,15 @@ SimpleditAppWindow * simpledit_app_window_new (SimpleditApp *pApp) {
 	gtk_widget_set_sensitive(GTK_WIDGET(pWindow->tlbrBtnSave),    FALSE);
 	gtk_widget_set_sensitive(GTK_WIDGET(pWindow->tlbrBtnUndo),    FALSE);
 	gtk_widget_set_sensitive(GTK_WIDGET(pWindow->tlbrBtnRedo),    FALSE);
+	gtk_widget_set_sensitive(GTK_WIDGET(pWindow->tlbrBtnPrint),   FALSE);
 	gtk_widget_set_sensitive(GTK_WIDGET(pWindow->tlbrBtnSearch),  FALSE);
 	gtk_widget_set_sensitive(GTK_WIDGET(pWindow->tlbrBtnReplace), FALSE);
 	gtk_widget_set_sensitive(GTK_WIDGET(pWindow->tlbrBtnJumpTo),  FALSE);
 	
+	gtk_widget_set_sensitive(GTK_WIDGET(pWindow->tlbrTxtSearch),  FALSE);
+	gtk_widget_set_sensitive(GTK_WIDGET(pWindow->tlbrTxtReplace), FALSE);
+	gtk_widget_set_sensitive(GTK_WIDGET(pWindow->tlbrTxtJumpTo),  FALSE);
+
 	return pWindow;
 }
 
@@ -252,12 +259,12 @@ void simpledit_app_window_update_status (SimpleditAppWindow *pWindow) {
 		bOverwriteMode = simpledit_content_get_overwrite(pWindow->pEditData);
 		g_object_get(pWindow->pEditData, "textbuffer", &pTxtBuff, NULL);
 		
-		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFileSave),     bModified && bHaveFilename);
-		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFileSaveAs),   TRUE);
+		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFileSave),      bModified && bHaveFilename);
+		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFileSaveAs),    TRUE);
 		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFileReturnToSaved), bModified && bHaveFilename);
-		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFileClose),    TRUE);
-		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFileCloseAll), TRUE);
-		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFilePrint),    TRUE);
+		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFileClose),     TRUE);
+		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFileCloseAll),  TRUE);
+		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFilePrint),     TRUE);
 
 		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuEditUndo),  gtk_source_buffer_can_undo(GTK_SOURCE_BUFFER(pTxtBuff)));
 		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuEditRedo),  gtk_source_buffer_can_redo(GTK_SOURCE_BUFFER(pTxtBuff)));
@@ -271,12 +278,17 @@ void simpledit_app_window_update_status (SimpleditAppWindow *pWindow) {
 		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuSearchReplace), TRUE);
 		
 		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->tlbrBtnSave),    bModified && bHaveFilename);
+		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->tlbrBtnPrint),   TRUE);
 		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->tlbrBtnUndo),    gtk_source_buffer_can_undo(GTK_SOURCE_BUFFER(pTxtBuff)));
 		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->tlbrBtnRedo),    gtk_source_buffer_can_redo(GTK_SOURCE_BUFFER(pTxtBuff)));
 		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->tlbrBtnSearch),  TRUE);
-		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->tlbrBtnReplace), TRUE);
+		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->tlbrBtnReplace), FALSE);
 		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->tlbrBtnJumpTo),  TRUE);
 
+        gtk_widget_set_sensitive(GTK_WIDGET(pWindow->tlbrTxtSearch),  TRUE);
+        gtk_widget_set_sensitive(GTK_WIDGET(pWindow->tlbrTxtReplace), FALSE);
+        gtk_widget_set_sensitive(GTK_WIDGET(pWindow->tlbrTxtJumpTo),  TRUE);
+	
 		pcTypeFile = g_strdup_printf(_("File type : %s"), simpledit_content_get_language(pWindow->pEditData));
 		gtk_button_set_label(pWindow->sttsbrBtnLanguage, pcTypeFile);
 		g_free(pcTypeFile);
@@ -288,12 +300,12 @@ void simpledit_app_window_update_status (SimpleditAppWindow *pWindow) {
 		gtk_window_set_title(GTK_WINDOW(pWindow), "simplEdit");
 		gtk_label_set_label(pWindow->sttsbrLabel, "-");
 		
-		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFileSave),     FALSE);
-		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFileSaveAs),   FALSE);
+		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFileSave),      FALSE);
+		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFileSaveAs),    FALSE);
 		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFileReturnToSaved), FALSE);
-		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFileClose),    FALSE);
-		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFileCloseAll), FALSE);
-		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFilePrint),    FALSE);
+		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFileClose),     FALSE);
+		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFileCloseAll),  FALSE);
+		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuFilePrint),     FALSE);
 		
 		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuEditUndo),  FALSE);
 		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuEditRedo),  FALSE);
@@ -307,11 +319,17 @@ void simpledit_app_window_update_status (SimpleditAppWindow *pWindow) {
 		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->menuSearchReplace), FALSE);
 		
 		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->tlbrBtnSave),    FALSE);
+		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->tlbrBtnPrint),   FALSE);
 		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->tlbrBtnUndo),    FALSE);
 		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->tlbrBtnRedo),    FALSE);
 		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->tlbrBtnSearch),  FALSE);
 		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->tlbrBtnReplace), FALSE);
 		gtk_widget_set_sensitive(GTK_WIDGET(pWindow->tlbrBtnJumpTo),  FALSE);
+		
+        gtk_widget_set_sensitive(GTK_WIDGET(pWindow->tlbrTxtSearch),  FALSE);
+        gtk_widget_set_sensitive(GTK_WIDGET(pWindow->tlbrTxtReplace), FALSE);
+        gtk_widget_set_sensitive(GTK_WIDGET(pWindow->tlbrTxtJumpTo),  FALSE);
+	
 	}
 }
 
