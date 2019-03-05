@@ -622,7 +622,7 @@ void smpldt_clbk_tlbr_search (GtkMenuItem *menuitem, gpointer user_data) {
 	gtk_source_search_settings_set_search_text(pWindow->pSearchSettings, gtk_entry_get_text(GTK_ENTRY(pWindow->tlbrTxtSearch)));
 	
 	if (pWindow->pEditData) {
-		simpledit_content_search(pWindow->pEditData, pWindow->pSearchSettings);
+		simpledit_content_searchall(pWindow->pEditData, pWindow->pSearchSettings);
 	}
 }
 
