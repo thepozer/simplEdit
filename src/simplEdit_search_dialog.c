@@ -102,7 +102,7 @@ void smpldt_searchdlg_clbk_search (GtkMenuItem *menuitem, gpointer user_data) {
 	gtk_source_search_settings_set_search_text(pDialog->pSearchSettings,
 			gtk_entry_get_text(GTK_ENTRY(pDialog->txtSearchText)));
 			
-	if (gtk_source_search_context_forward2(pDialog->pSearchContext, pDialog->pStartIter, pDialog->pStartIter, pEndIter, NULL)) {
+	if (gtk_source_search_context_forward(pDialog->pSearchContext, pDialog->pStartIter, pDialog->pStartIter, pEndIter, NULL)) {
 		gtk_text_buffer_move_mark_by_name(GTK_TEXT_BUFFER(pSrcBuff), "selection_bound", pDialog->pStartIter);
 		gtk_text_buffer_move_mark_by_name(GTK_TEXT_BUFFER(pSrcBuff), "insert", pEndIter);
 		gtk_text_iter_assign(pDialog->pStartIter, pEndIter);
@@ -155,8 +155,8 @@ void smpldt_searchdlg_clbk_replace (GtkMenuItem *menuitem, gpointer user_data) {
 	
 	pcReplace = gtk_entry_get_text(GTK_ENTRY(pDialog->txtReplaceText));
 	
-	if (gtk_source_search_context_forward2(pDialog->pSearchContext, pDialog->pStartIter, pDialog->pStartIter, pEndIter, NULL)) {
-		if (gtk_source_search_context_replace2(pDialog->pSearchContext, pDialog->pStartIter, pEndIter, pcReplace, -1, &pErr)) {
+	if (gtk_source_search_context_forward(pDialog->pSearchContext, pDialog->pStartIter, pDialog->pStartIter, pEndIter, NULL)) {
+		if (gtk_source_search_context_replace(pDialog->pSearchContext, pDialog->pStartIter, pEndIter, pcReplace, -1, &pErr)) {
 			gtk_text_buffer_move_mark_by_name(GTK_TEXT_BUFFER(pSrcBuff), "selection_bound", pDialog->pStartIter);
 			gtk_text_buffer_move_mark_by_name(GTK_TEXT_BUFFER(pSrcBuff), "insert", pEndIter);
 			gtk_text_iter_assign(pDialog->pStartIter, pEndIter);
